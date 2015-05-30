@@ -49,7 +49,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'connectivipy'
+project = u'ConnectiviPy'
 copyright = u'2015, Dominik Krzeminski'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -107,13 +107,15 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'agogo'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
-
+html_theme_options = {
+    "headerbg": "#716cff",
+    #"footerbg": "#64bcff",
+}
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
 
@@ -126,7 +128,7 @@ html_theme = 'default'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = "connpy.jpg"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -265,9 +267,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'connectivipy', u'connectivipy Documentation',
-   u'Dominik Krzeminski', 'connectivipy', 'One line description of project.',
-   'Miscellaneous'),
+  ('index', 'ConnectiviPy', u'ConnectiviPy Documentation',
+   u'Dominik Krzeminski', 'connectivipy', 'MVAR signals connectivity \
+    estimators in Python.', 'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
