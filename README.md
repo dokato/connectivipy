@@ -11,9 +11,9 @@ Project blog is [here](http://dokato.github.io/connpy-blog/)!
 * Mvar fitting
 
 
-Changelog
-=========================
+##Changelog
 
-## 0.05
+
+### 0.05
 * project structure
 * basic fitting

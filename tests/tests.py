@@ -1,7 +1,13 @@
 import unittest
 import numpy as np 
 import connectivipy as cp
-from  connectivipy.mvar.fitting import mvar_gen, vieirmorf, nutallstrand
+from  connectivipy.mvar.fitting import mvar_gen, vieiramorf
+from  connectivipy.mvar.fitting import nutallstrand, yulewalker
+
+class DataTest(unittest.TestCase):
+    "test data class"
+    def test_load(self):
+        pass 
 
 class MvarTest(unittest.TestCase):
  
@@ -19,13 +25,16 @@ class MvarTest(unittest.TestCase):
         A[0, 4, 3] = -0.25 * (2)**0.5
         A[0, 4, 4] = 0.25 * (2)**0.5
         ys = mvar_gen(A,10**4)
-        avm = vieirmorf(ys,2)
+        avm = vieiramorf(ys,2)
         ans = nutallstrand(ys,2)
+        ayw = yulewalker(ys,2)
         #check dimesions
         self.assertEquals(A.shape,avm.shape)
         self.assertEquals(A.shape,ans.shape)
+        self.assertEquals(A.shape,ayw.shape)
         #check values
         self.assertTrue(np.allclose(A,avm,rtol=1e-01, atol=1e-01))
+        self.assertTrue(np.allclose(A,ayw,rtol=1e-01, atol=1e-01))
         self.assertTrue(np.allclose(A,ans,rtol=1e-01, atol=0.5))
  
 if __name__ == '__main__':

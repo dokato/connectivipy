@@ -19,17 +19,25 @@ def mvar_gen(A, n, omit=500):
 
 def ncov(x, y = [], p = 0, norm = True):
     C,N = x.shape
-    cov = np.zeros((C,C,p+1))
+    cov = np.zeros((C,C,abs(p)+1))
     if len(y)==0 : y = x
-    for r in range(p+1):
-        cov[:,:,r] = np.dot(x[:,r:],y[:,r:].T)
+    if p >= 0:
+        for r in range(p+1):
+            cov[:,:,r] = np.dot(x[:,:N-r],y[:,r:].T)
+    else:
+        for r in range(abs(p)+1):
+            idxs = np.arange(-r,x.shape[1]-r)
+            zy = y.take(idxs,axis=1, mode='wrap')
+            cov[:,:,r] = np.dot(x[:,:N-r],zy[:,:N-r].T)
     if norm:
         kv = cov/N
     else:
         kv = cov 
-    return np.squeeze(kv)
+    if p==0:
+        kv = np.squeeze(kv)
+    return kv
 
-def vieirmorf(y,pmax=1):
+def vieiramorf(y,pmax=1):
     assert pmax>0, "pmax > 0"
     M,N = y.shape 
     f,b = y.copy(),y.copy()
@@ -64,7 +72,7 @@ def nutallstrand(y,pmax=1):
     arf = np.zeros((pmax,M,M))
     arb = np.zeros((pmax,M,M))
     for k in range(0,pmax):
-        D = ncov(f[:,k+1:N],b[:,0:N-k-1],norm=False)#/N
+        D = ncov(f[:,k+1:N],b[:,0:N-k-1],norm=False)
         arf[k,:,:] = 2*np.dot(D,np.linalg.inv(peb + pef))
         arb[k,:,:] = 2*np.dot(D.T,np.linalg.inv(pef + peb))
         
@@ -77,6 +85,23 @@ def nutallstrand(y,pmax=1):
             arb[k-i-1,:,:] = arb[k-i-1,:,:] -np.dot(arb[k,:,:],arf[i,:,:])
             arf[i,:,:] = tmpp
 
-        peb = ncov(b[:,:N-k-1],norm=False)#/N
-        pef = ncov(f[:,k+1:],norm=False)#/N
+        peb = ncov(b[:,:N-k-1],norm=False)
+        pef = ncov(f[:,k+1:],norm=False)
     return arf 
+
+def yulewalker(y,pmax=1):
+    assert pmax>0, "pmax > 0"
+    chn,n = y.shape
+    rr_f = ncov(y, p = pmax)
+    rr_b = ncov(y, p = -1*pmax)
+    q = np.zeros((pmax*chn,pmax*chn))
+    acof = np.empty((pmax,chn,chn))
+    for p in range(pmax):
+        q[p*chn:(p+1)*chn,:] = np.hstack([ rr_f[:,:,x].T if x>=0 else rr_b[:,:,abs(x)].T for x in xrange(-1*p,pmax-p)])
+    req = np.vstack(rr_b[:,:,x].T for x in xrange(1,pmax+1))
+    a_solved = np.linalg.solve(q,req)
+    var = np.zeros((chn,chn))
+    for p in range(pmax):
+        acof[p] = a_solved[p*chn:(p+1)*chn,:].T
+        var += np.dot(acof[p],rr_f[:,:,p])
+    return acof, var

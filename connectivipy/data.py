@@ -2,6 +2,7 @@
 
 import numpy as np
 import scipy.io as si
+from loaders import signalml_loader
 
 class Data(object):
 
@@ -18,23 +19,19 @@ class Data(object):
       *chan_names*: list
           names of channels
     '''
-    def __init__(self, data, fs, chan_names=[], data_info=''):
-        dt_type = type(data)
-        if dt_type == np.ndarray:
-            self.data = data
-        elif dt_type == str:
-            self.data = self._load_file(data,data.split('.')[-1], data_info)
-        self.fs = fs
-        if self.data.shape[0]==len(chan_names):
-            self.channames = chan_names
+    def __init__(self, data, fs = 256., chan_names=[], data_info=''):
+        self.__data = self._load_file(data, data_info)
+        self.__fs = fs
+        if self.__data.shape[0]==len(chan_names):
+            self.__channames = chan_names
 
-    def _load_file(self, dt_name, dt_type, data_info):
+    def _load_file(self, data_what, data_info):
         '''
         Data loader.
 
         Args:
-          *dt_name* : str
-              path to file with appropieate format
+          *data_what* : str/numpy.array
+              path to file with appropieate format or numpy data array
           *dt_type* : str
               file extension (mat,)
           *dt_type* = '' : str
@@ -42,11 +39,22 @@ class Data(object):
         Returns:
           *data* : np.array
         '''
-
-        if dt_type == 'mat':
-            mat_dict = si.loadmat(dt_name)
-            data = [v for v in mat_dict.itervalues() if type(v) == np.ndarray][0]
-        
+        dt_type = type(data_what)
+        if dt_type == np.ndarray:
+            data = data_what
+        elif dt_type == str:
+            if dt_type == 'mat':
+                mat_dict = si.loadmat(data_what)
+                if data_info:
+                    key = data_info
+                else:
+                    key = data.split('.')[0]
+                data = mat_dict[key]
+            if data_info=='sml':
+                data, sml = signalml_loader(data_what.split('.')[0])
+                self.smldict = sml # here SignaML data is stored
+        else:
+            pass 
         return data
             
     def filter(self,ftype):
@@ -54,13 +62,10 @@ class Data(object):
 
     def resample(self, fs_new):
         '''
-        Signal resample.
+        Signal resampling.
         
         Args:
           *fs_new*  new sampling frequency
-        Returns:
-          *frame* : np.array
-             frame from camera
         '''
         pass 
     
@@ -69,13 +74,26 @@ class Data(object):
 
     def fit_mvar(self):
         pass
-        
-    def estimate(self):
-        pass
     
     def plot_data(self):
         pass
 
     def plot_conn(self):
         pass
+    
+    # accessors:
+    @property
+    def data(self):
+        return self.__data
 
+    @property
+    def fs(self):
+        return self.__fs
+
+    @property
+    def srate(self):
+        return self.__fs
+
+    @property
+    def channelnames(self):
+        return self.__channames
