@@ -4,6 +4,7 @@ import numpy as np
 import scipy.io as si
 import scipy.signal as ss
 from loaders import signalml_loader
+from mvarmodel import Mvar
 
 class Data(object):
 
@@ -86,8 +87,18 @@ class Data(object):
     def estimate(self):
         pass
 
-    def fit_mvar(self):
-        pass
+    def fit_mvar(self, p = None, method = 'yw'):
+        '''
+        Fitting MVAR coefficients.
+        
+        Args:
+          *p* = None : int
+            estimation order, default None
+          *method* = 'yw' : str {'yw', 'ns', 'vm'}
+            method of estimation, for full list please type:
+            connectivipy.mvar_methods
+        '''
+        mvar = Mvar()
     
     def plot_data(self):
         pass
