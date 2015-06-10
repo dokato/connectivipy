@@ -25,9 +25,9 @@ class MvarTest(unittest.TestCase):
         A[0, 4, 3] = -0.25 * (2)**0.5
         A[0, 4, 4] = 0.25 * (2)**0.5
         ys = mvar_gen(A,10**4)
-        avm = vieiramorf(ys,2)
-        ans = nutallstrand(ys,2)
-        ayw = yulewalker(ys,2)
+        avm,vvm = vieiramorf(ys,2)
+        ans,vns = nutallstrand(ys,2)
+        ayw,vyw = yulewalker(ys,2)
         #check dimesions
         self.assertEquals(A.shape,avm.shape)
         self.assertEquals(A.shape,ans.shape)

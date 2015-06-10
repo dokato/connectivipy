@@ -3,7 +3,7 @@
 import numpy as np
 import scipy.io as si
 import scipy.signal as ss
-from loaders import signalml_loader
+from load.loaders import signalml_loader
 from mvarmodel import Mvar
 
 class Data(object):

@@ -61,7 +61,7 @@ def vieiramorf(y,pmax=1):
 
         peb = ncov(b[:,:N-k-1],norm=False)
         pef = ncov(f[:,k+1:],norm=False)
-    return arf 
+    return arf, pef/N
 
 def nutallstrand(y,pmax=1):
     assert pmax>0, "pmax > 0"
@@ -87,7 +87,7 @@ def nutallstrand(y,pmax=1):
 
         peb = ncov(b[:,:N-k-1],norm=False)
         pef = ncov(f[:,k+1:],norm=False)
-    return arf 
+    return arf, pef/N
 
 def yulewalker(y,pmax=1):
     assert pmax>0, "pmax > 0"

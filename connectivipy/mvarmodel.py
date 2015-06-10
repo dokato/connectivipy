@@ -8,11 +8,12 @@ class Mvar(object):
     
     __coefficients = None
 
-    _fit_dict = { 'yw': self._fit_yw,
-                 'ns': self._fit_ns,
-                 'vm': self._fit_vm
-                 }
-    
+    def __init__(self):
+        self._fit_dict = { 'yw': self._fit_yw,
+                           'ns': self._fit_ns,
+                           'vm': self._fit_vm
+                         }
+
     def _fit_ns(self, data, order = 1):
         "Fit AR coef using Nuttall-Strand"
         return nutallstrand(data,order)
@@ -28,8 +29,7 @@ class Mvar(object):
     def fit(self, data, order = None, method = 'yw'):
         #if order == None
         #   fit order using akaike etc...
-        try:
-            __coefficients = _fit_dict[method](data,order)
+        __coefficients = self._fit_dict[method](data,order)
         return __coefficients
 
     def _order_akaike(self, data, p_max = None, method = 'yw'):
@@ -39,7 +39,7 @@ class Mvar(object):
             p_max = chn + 1
         crit = np.zeros(p_max)
         for p in range(p_max):
-            (a_coef,v_r) = mult_AR(dat,p+1,meth_num)
+            (a_coef,v_r) = self.fit(dat,p+1,method)
             crit[p]=np.log(np.linalg.det(v_r))+2.*(p+1)*chn**2/N
         return np.argmin(crit), crit 
 
@@ -50,7 +50,7 @@ class Mvar(object):
             p_max = chn + 1
         crit = np.zeros(p_max)
         for p in range(p_max):
-            (a_coef,v_r) = mult_AR(dat,p+1,meth_num)
+            (a_coef,v_r) = self.fit(dat,p+1,method)
             crit[p]= np.linalg.det(v_r)*((N+chn*(p+1))/(N-chn*(p+1)))**chn
         return np.argmin(crit), crit 
         
