@@ -100,8 +100,8 @@ def yulewalker(y,pmax=1):
         q[p*chn:(p+1)*chn,:] = np.hstack([ rr_f[:,:,x].T if x>=0 else rr_b[:,:,abs(x)].T for x in xrange(-1*p,pmax-p)])
     req = np.vstack(rr_b[:,:,x].T for x in xrange(1,pmax+1))
     a_solved = np.linalg.solve(q,req)
-    var = np.zeros((chn,chn))
+    var = np.copy(rr_f[:,:,0])
     for p in range(pmax):
         acof[p] = a_solved[p*chn:(p+1)*chn,:].T
-        var += np.dot(acof[p],rr_f[:,:,p])
+        var -= np.dot(acof[p],rr_f[:,:,p+1].T)
     return acof, var

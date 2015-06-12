@@ -7,6 +7,7 @@ from mvarmodel import Mvar
 
 # delete it later:
 import numpy as np 
+import pylab as py
 from mvar.fitting import mvar_gen, vieiramorf, nutallstrand
 
 __version__ = '0.05'
@@ -28,4 +29,6 @@ A[0, 4, 4] = 0.25 * (2)**0.5
 ys = mvar_gen(A,10**4)
 avm,vvm = vieiramorf(ys,2)
 
-print spectrum(avm,512)
+a,h,s = spectrum(avm,vvm,512)
+py.plot(np.abs(s[:,1,1]) )
+py.show()

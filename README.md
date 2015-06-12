@@ -13,6 +13,9 @@ Project blog is [here](http://dokato.github.io/connpy-blog/)!
 
 ##Changelog
 
+### 0.1
+* data class with simple preprocessing methods
+* mvar class almost done
 
 ### 0.05
 * project structure
