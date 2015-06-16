@@ -7,7 +7,6 @@ from load.loaders import signalml_loader
 from mvarmodel import Mvar
 
 class Data(object):
-
     '''
     Class governing the communication between data array and 
     connectivity estimators.
