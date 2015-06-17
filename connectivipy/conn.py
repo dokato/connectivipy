@@ -83,8 +83,45 @@ class DTF(ConnectAR):
     def calculate(self, Acoef = None, Vcoef = None, fs = None):
         A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = None) 
         res, k, k = A_z.shape
-        DTF = np.zeros(res,k,k)
+        DTF = np.zeros((res,k,k))
+        sigma = np.diag(Vcoef)
         for i in xrange(res):
-            mH = np.dot(H_z[i],H_z[i].T.conj())
-            DTF[i] = np.abs(H_z[i])/np.sqrt(mH)
+            mH = np.dot(H_z[i],H_z[i].T.conj()).real
+            DTF[i] = (np.abs(H_z[i]).T/np.sqrt(np.diag(mH))).T
         return DTF
+
+    def short_time(self):
+        pass
+
+    def significance(self):
+        pass
+
+class PartialCoh(ConnectAR):
+    """
+    partial coherency
+    """
+
+    def fit_ar(self, data, order = None, method = 'yw'):
+        pass
+    
+    def calculate(self, Acoef = None, Vcoef = None, fs = None):
+        import pdb
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = None) 
+        res, k, k = A_z.shape
+        PC = np.zeros((res,k,k))
+        before = np.ones((k,k))
+        before[1::2,:]*=-1
+        before[:,1::2]*=-1
+        for i in xrange(res):
+            dd = np.tile(np.diag(H_z[i]),(k,1))
+            mH = (dd*dd.T).real
+            #pdb.set_trace()
+            print np.sqrt(mH)
+            PC[i] = before*(np.abs(H_z[i]).T/np.sqrt(mH))
+        return PC
+
+    def short_time(self):
+        pass
+
+    def significance(self):
+        pass

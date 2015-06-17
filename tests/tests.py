@@ -44,7 +44,7 @@ class MvarTest(unittest.TestCase):
     def test_orders(self):
         m = Mvar()
         ys = mvar_gen(A,10**4)
-        crmin,critpl = m._order_akaike(ys, p_max = 20, method = 'yw')
+        crmin,critpl = m._order_schwartz(ys, p_max = 20, method = 'yw')
         print '****', crmin
         #py.plot(critpl)
         #py.show()

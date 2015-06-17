@@ -33,27 +33,47 @@ class Mvar(object):
         return __coefficients
 
     def _order_akaike(self, data, p_max = None, method = 'yw'):
-        "Order akaike"
+        """
+        Order akaike
+        following Practical Biomedical Signal Analysis Using MATLAB eq 3.19
+        """
         chn, N = data.shape 
         if p_max == None: 
-            p_max = chn + 1 # change to some criterion for max
+            p_max = 20 # change to some criterion for max
         crit = np.zeros(p_max)
         for p in range(p_max):
             (a_coef,v_r) = self.fit(data,p+1,method)
-            crit[p]=np.log(np.linalg.det(v_r))+2.*(p+1)*chn**2/N
+            crit[p] = np.log(np.linalg.det(v_r))+2.*(p+1)*chn**2/N
         return np.argmin(crit), crit 
 
-    def _order_fpc(self, data, ord_max = None, method = 'yw'):
-        "Order fpc"
+    def _order_hq(self, data, p_max = None, method = 'yw'):
+        """
+        Order Hannan-Quin
+        following Practical Biomedical Signal Analysis Using MATLAB eq 3.20
+        """
         chn, N = data.shape 
         if p_max == None:
-            p_max = chn + 1
+            p_max = 20
         crit = np.zeros(p_max)
         for p in range(p_max):
             (a_coef,v_r) = self.fit(data,p+1,method)
-            crit[p]= np.linalg.det(v_r)*((N+chn*(p+1))/(N-chn*(p+1)))**chn
+            crit[p] = np.log(np.linalg.det(v_r))+2.*np.log(np.log(N))*(p+1)*chn**2/N
         return np.argmin(crit), crit 
-        
+
+    def _order_schwartz(self, data, p_max = None, method = 'yw'):
+        """
+        Order Schwartz
+        following Practical Biomedical Signal Analysis Using MATLAB eq 3.21
+        """
+        chn, N = data.shape 
+        if p_max == None:
+            p_max = 20
+        crit = np.zeros(p_max)
+        for p in range(p_max):
+            (a_coef,v_r) = self.fit(data,p+1,method)
+            crit[p] = np.log(np.linalg.det(v_r))+np.log(N)*(p+1)*chn**2/N
+        return np.argmin(crit)+1, crit 
+
     @property
     def coefficients(self):
         return self.__coefficients

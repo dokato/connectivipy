@@ -103,5 +103,6 @@ def yulewalker(y,pmax=1):
     var = np.copy(rr_f[:,:,0])
     for p in range(pmax):
         acof[p] = a_solved[p*chn:(p+1)*chn,:].T
-        var -= np.dot(acof[p],rr_f[:,:,p+1].T)
+        var -= np.dot(acof[p],rr_b[:,:,p+1].T)
     return acof, var
+
