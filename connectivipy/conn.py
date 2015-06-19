@@ -50,7 +50,6 @@ class Connect(object):
     def calculate(self):
         pass
 
-    @abstractmethod
     def short_time(self):
         pass
 
@@ -90,9 +89,6 @@ class DTF(ConnectAR):
             DTF[i] = (np.abs(H_z[i]).T/np.sqrt(np.diag(mH))).T
         return DTF
 
-    def short_time(self):
-        pass
-
     def significance(self):
         pass
 
@@ -110,18 +106,35 @@ class PartialCoh(ConnectAR):
         res, k, k = A_z.shape
         PC = np.zeros((res,k,k))
         before = np.ones((k,k))
-        before[1::2,:]*=-1
-        before[:,1::2]*=-1
+        before[0::2,:]*=-1
+        before[:,0::2]*=-1
         for i in xrange(res):
-            dd = np.tile(np.diag(H_z[i]),(k,1))
-            mH = (dd*dd.T).real
-            #pdb.set_trace()
-            print np.sqrt(mH)
-            PC[i] = before*(np.abs(H_z[i]).T/np.sqrt(mH))
-        return PC
+            D_z = np.linalg.inv(S_z[i])
+            dd = np.tile(np.diag(D_z),(k,1))
+            mD = (dd*dd.T).real
+            PC[i] = -1*before*(np.abs(D_z)/np.sqrt(mD))
+        return np.abs(PC)
 
-    def short_time(self):
+    def significance(self):
         pass
+
+class PDC(ConnectAR):
+    """
+    PDC
+    """
+    # not too good
+    def fit_ar(self, data, order = None, method = 'yw'):
+        pass
+    
+    def calculate(self, Acoef = None, Vcoef = None, fs = None):
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = None) 
+        res, k, k = A_z.shape
+        PDC = np.zeros((res,k,k))
+        sigma = np.diag(Vcoef)
+        for i in xrange(res):
+            mA = np.dot(A_z[i].T.conj(),A_z[i]).real
+            PDC[i] = np.abs(A_z[i])/np.sqrt(np.diag(mA))
+        return PDC
 
     def significance(self):
         pass
