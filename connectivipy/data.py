@@ -97,7 +97,7 @@ class Data(object):
             method of estimation, for full list please type:
             connectivipy.mvar_methods
         '''
-        mvar = Mvar()
+        self.__Ar, self.__Vr = Mvar().fit(self.__data, p, method)
     
     def plot_data(self):
         pass
@@ -106,6 +106,17 @@ class Data(object):
         pass
     
     # accessors:
+    @property
+    def mvar_coefficients(self):
+        if hasattr(self,'Ar') and hasattr(self,'Vr'):
+            return (self.__Ar, self.__Vr)
+        else:
+            return None
+
+    @property
+    def mvarcoef(self):
+        return self.mvar_coefficients()
+
     @property
     def data(self):
         return self.__data

@@ -6,31 +6,16 @@ from mvar.fitting import *
  
 class Mvar(object):
     
-    __coefficients = None
+    _fit_dict = { 'yw': yulewalker,
+                  'ns': nutallstrand,
+                  'vm': vieiramorf }
 
-    def __init__(self):
-        self._fit_dict = { 'yw': self._fit_yw,
-                           'ns': self._fit_ns,
-                           'vm': self._fit_vm
-                         }
-
-    def _fit_ns(self, data, order = 1):
-        "Fit AR coef using Nuttall-Strand"
-        return nutallstrand(data,order)
-
-    def _fit_vm(self, data, order = 1):
-        "Fit AR coef using Vieira-Morf"
-        return vieiramorf(data,order)
-
-    def _fit_yw(self, data, order = 1):
-        "Fit AR coef using Yule-Walker"
-        return yulewalker(data,order)
-
-    def fit(self, data, order = None, method = 'yw'):
+    @classmethod
+    def fit(cls, data, order = None, method = 'yw'):
         #if order == None
         #   fit order using akaike etc...
-        __coefficients = self._fit_dict[method](data,order)
-        return __coefficients
+        
+        return cls._fit_dict[method](data,order)
 
     def _order_akaike(self, data, p_max = None, method = 'yw'):
         """
@@ -73,11 +58,3 @@ class Mvar(object):
             (a_coef,v_r) = self.fit(data,p+1,method)
             crit[p] = np.log(np.linalg.det(v_r))+np.log(N)*(p+1)*chn**2/N
         return np.argmin(crit)+1, crit 
-
-    @property
-    def coefficients(self):
-        return self.__coefficients
-
-    @property
-    def coef(self):
-        return self.__coefficients

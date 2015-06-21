@@ -13,6 +13,11 @@ Project blog is [here](http://dokato.github.io/connpy-blog/)!
 
 ##Changelog
 
+### 0.2
+* connectivity methods: DTF, PDC, Partial Coherence, iPDC
+* mvar estimation criterions
+* mvar class static
+
 ### 0.1
 * data class with simple preprocessing methods
 * mvar class almost done
