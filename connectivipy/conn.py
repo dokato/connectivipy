@@ -88,7 +88,6 @@ class Connect(object):
     def short_time(self):
         pass
 
-    @abstractmethod
     def significance(self):
         pass
 
@@ -121,11 +120,8 @@ class DTF(ConnectAR):
         sigma = np.diag(Vcoef)
         for i in xrange(res):
             mH = np.dot(H_z[i],H_z[i].T.conj()).real
-            DTF[i] = (np.abs(H_z[i]).T/np.sqrt(np.diag(mH))).T
+            DTF[i] = np.abs(H_z[i])/np.sqrt(np.diag(mH)).reshape((k,1))
         return DTF
-
-    def significance(self):
-        pass
 
 class PartialCoh(ConnectAR):
     """
@@ -149,9 +145,6 @@ class PartialCoh(ConnectAR):
             PC[i] = -1*before*(np.abs(D_z)/np.sqrt(mD))
         return np.abs(PC)
 
-    def significance(self):
-        pass
-
 class PDC(ConnectAR):
     """
     PDC
@@ -169,9 +162,6 @@ class PDC(ConnectAR):
             mA = np.dot(A_z[i].T.conj(),A_z[i]).real
             PDC[i] = np.abs(A_z[i])/np.sqrt(np.diag(mA))
         return PDC
-
-    def significance(self):
-        pass
 
 class dDTF(ConnectAR):
     """
@@ -191,8 +181,6 @@ class dDTF(ConnectAR):
         for i in xrange(res):
             mH[i] = np.abs(np.dot(H_z[i],H_z[i].T.conj()))
         mHsum = np.sum(mH, axis=0)
-        print '>'*8, mHsum
-        print mH[30]
         dDTF = np.zeros((res,k,k))
         before = np.ones((k,k))
         before[0::2,:]*=-1
@@ -202,15 +190,11 @@ class dDTF(ConnectAR):
             dd = np.tile(np.diag(D_z),(k,1))
             mD = (dd*dd.T).real
             PC = np.abs(-1*before*(np.abs(D_z)/np.sqrt(mD)))
-            dDTF[i] = (np.abs(H_z[i]).T/np.sqrt(np.diag(mHsum))).T
+            dDTF[i] = PC*(np.abs(H_z[i]).T/np.sqrt(np.diag(mHsum))).T
         return dDTF
-
-    def significance(self):
-        pass
 
 class iPDC(ConnectAR):
     """
-    !!! warning not tested !!!
     iPDC
     Erla, S. et all Multivariate Autoregressive Model with Instantaneous
     Effects to Improve Brain Connectivity Estimation. 
@@ -229,6 +213,3 @@ class iPDC(ConnectAR):
             mB = np.dot(B_z[i].T.conj(),B_z[i]).real
             PDC[i] = np.abs(B_z[i])/np.sqrt(np.diag(mB))
         return PDC
-
-    def significance(self):
-        pass

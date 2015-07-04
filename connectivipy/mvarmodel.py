@@ -5,6 +5,11 @@ import numpy as np
 from mvar.fitting import *
  
 class Mvar(object):
+    """
+    Static class Mvar to multivariete autoregressive model
+    fitting. Possible methods are in *_fit_dict* where key is
+    acronym of algorithm and value is a function from *mvar.fitting*.
+    """
     
     _fit_dict = { 'yw': yulewalker,
                   'ns': nutallstrand,
@@ -12,8 +17,24 @@ class Mvar(object):
 
     @classmethod
     def fit(cls, data, order = None, method = 'yw'):
-        #if order == None
-        #   fit order using akaike etc...
+        """
+        Mvar model fitting.
+        Args:
+          *data* : numpy.array
+              array with data (kXN, k - channels nr, N - data points)
+          *order*=None : int
+              model order, when default None it estimates order using
+              akaike order criteria. 
+          *method* = 'yw': str
+              name of mvar fitting algorithm, default Yule-Walker
+        Returns:
+          *Av* : np.array
+              model coefficients (kXkXorder)
+          *Vf* : np.array
+              reflection matrix (kXk)
+        """
+        if order == None:
+            cls._order_akaike(data, p_max = None, method = method)
         
         return cls._fit_dict[method](data,order)
 

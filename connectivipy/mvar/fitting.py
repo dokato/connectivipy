@@ -7,7 +7,7 @@ from numpy.linalg import inv
 def mvar_gen(A, n, omit=500):
     p, chn, chn = A.shape
     y = np.zeros((chn, n + omit))
-    sigma = np.diag(np.ones(5))
+    sigma = np.diag(np.ones(chn))
     mu = np.zeros(chn)
     for i in range(p,n+omit):
         eps = np.random.multivariate_normal(mu, sigma)
@@ -18,6 +18,24 @@ def mvar_gen(A, n, omit=500):
     return y[:,omit:]
 
 def ncov(x, y = [], p = 0, norm = True):
+    """
+    New covariance.
+    Args:
+      *x* : numpy.array
+          one dimensional data.
+      *y*=[] : numpy.array
+          one dimensional data. If not given the autocovariance of *x*
+          will be calculated.
+       *p*=0: int
+          window shift of input data. It can be negative as well.
+       *norm*=True: bool
+          normalization - if True the result is divided by length of *x*,
+          otherwise it is not. 
+    Returns:
+      *kv* : np.array
+          covariance matrix
+
+    """
     C,N = x.shape
     cov = np.zeros((C,C,abs(p)+1))
     if len(y)==0 : y = x

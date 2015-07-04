@@ -4,7 +4,7 @@ import connectivipy as cp
 from  connectivipy.mvar.fitting import mvar_gen, vieiramorf
 from  connectivipy.mvar.fitting import nutallstrand, yulewalker
 from  connectivipy.mvarmodel import Mvar
-from connectivipy.conn import ConnectAR, spectrum, spectrumft
+from connectivipy.conn import ConnectAR, spectrum, spectrumft, DTF, PDC
 import pylab as py
 
 #Parameters from Sameshima, Baccala (2001) Fig. 3a
@@ -57,6 +57,13 @@ class ConnTest(unittest.TestCase):
         s13 = np.abs(s[:,1,3])
         fq = np.linspace(0,512./2,s.shape[0])
         self.assertAlmostEqual(fq[np.argmax(s13)],64, places=0)
+
+    def test_dtf(self):
+        ys = mvar_gen(A,10**4)
+        ans,vns = nutallstrand(ys,2)
+        dt = DTF() 
+        dtf = dt.calculate(ans,vns, 128)
+        self.assertTrue(np.allclose(np.sum(np.abs(dtf)**2,axis=2),1))
 
 if __name__ == '__main__':
     unittest.main()

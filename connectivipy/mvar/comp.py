@@ -5,8 +5,14 @@ import numpy as np
 
 def ldl(A):
     """
-    LDL decomposition
-    implementation from en.wikipedia.org
+    LDL decomposition (implementation from *en.wikipedia.org/wiki/Cholesky_decomposition*)
+    Args:
+      *A* : numpy.array
+          matrix kXk
+    Returns:
+      *L*, *D*, *LT* : np.array
+          *L* is a lower unit triangular matrix, *D* is a diagonal matrix
+          and *LT* is a transpose of *L*.
     """
     n = A.shape[1]
     L = np.eye(n)
@@ -20,7 +26,7 @@ def ldl(A):
 
 
 if __name__=='__main__':
-    # test from wikipedia data
+    # test of wikipedia data
     A = np.array([[4,12,-16],[12,37,-43],[-16,-43,98]],dtype=float)
     l,d,lt = ldl(A)
     print l
