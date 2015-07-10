@@ -11,12 +11,12 @@ class Mvar(object):
     acronym of algorithm and value is a function from *mvar.fitting*.
     """
     
-    _fit_dict = { 'yw': yulewalker,
-                  'ns': nutallstrand,
-                  'vm': vieiramorf }
+    _fit_dict = {'yw': yulewalker,
+                 'ns': nutallstrand,
+                 'vm': vieiramorf}
 
     @classmethod
-    def fit(cls, data, order = None, method = 'yw'):
+    def fit(cls, data, order=None, method='yw'):
         """
         Mvar model fitting.
         Args:
@@ -24,7 +24,7 @@ class Mvar(object):
               array with data (kXN, k - channels nr, N - data points)
           *order*=None : int
               model order, when default None it estimates order using
-              akaike order criteria. 
+              akaike order criteria.
           *method* = 'yw': str
               name of mvar fitting algorithm, default Yule-Walker
         Returns:
@@ -34,11 +34,10 @@ class Mvar(object):
               reflection matrix (kXk)
         """
         if order == None:
-            cls._order_akaike(data, p_max = None, method = method)
-        
+            cls._order_akaike(data, p_max=None, method=method)        
         return cls._fit_dict[method](data,order)
 
-    def _order_akaike(self, data, p_max = None, method = 'yw'):
+    def _order_akaike(self, data, p_max=None, method='yw'):
         """
         Order akaike
         following Practical Biomedical Signal Analysis Using MATLAB eq 3.19
@@ -48,11 +47,11 @@ class Mvar(object):
             p_max = 20 # change to some criterion for max
         crit = np.zeros(p_max)
         for p in range(p_max):
-            (a_coef,v_r) = self.fit(data,p+1,method)
+            (a_coef, v_r) = self.fit(data, p+1, method)
             crit[p] = np.log(np.linalg.det(v_r))+2.*(p+1)*chn**2/N
         return np.argmin(crit), crit 
 
-    def _order_hq(self, data, p_max = None, method = 'yw'):
+    def _order_hq(self, data, p_max=None, method='yw'):
         """
         Order Hannan-Quin
         following Practical Biomedical Signal Analysis Using MATLAB eq 3.20
@@ -62,11 +61,11 @@ class Mvar(object):
             p_max = 20
         crit = np.zeros(p_max)
         for p in range(p_max):
-            (a_coef,v_r) = self.fit(data,p+1,method)
+            (a_coef, v_r) = self.fit(data, p+1, method)
             crit[p] = np.log(np.linalg.det(v_r))+2.*np.log(np.log(N))*(p+1)*chn**2/N
         return np.argmin(crit), crit 
 
-    def _order_schwartz(self, data, p_max = None, method = 'yw'):
+    def _order_schwartz(self, data, p_max=None, method='yw'):
         """
         Order Schwartz
         following Practical Biomedical Signal Analysis Using MATLAB eq 3.21
@@ -78,4 +77,4 @@ class Mvar(object):
         for p in range(p_max):
             (a_coef,v_r) = self.fit(data,p+1,method)
             crit[p] = np.log(np.linalg.det(v_r))+np.log(N)*(p+1)*chn**2/N
-        return np.argmin(crit)+1, crit 
+        return np.argmin(crit)+1, crit

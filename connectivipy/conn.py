@@ -85,7 +85,7 @@ class Connect(object):
     def calculate(self):
         pass
 
-    def short_time(self):
+    def short_time(self, winlen=64, no=16):
         pass
 
     def significance(self):
@@ -98,11 +98,8 @@ class ConnectAR(Connect):
     def fit_ar(self):
         pass
 
-class Coherency(Connect):
-    pass 
-
-class PSI(Connect):
-    pass 
+############################
+# MVAR based methods:
 
 class DTF(ConnectAR):
     """
@@ -163,6 +160,29 @@ class PDC(ConnectAR):
             PDC[i] = np.abs(A_z[i])/np.sqrt(np.diag(mA))
         return PDC
 
+class ffDTF(ConnectAR):
+    """
+    full frequency DTF
+    Korzeniewska, A.et. all. Determination of information flow direction 
+    among brain structures by a modified directed transfer function (dDTF) 
+    method. J. Neurosci. Methods 125, 195–207 (2003).
+    """
+
+    def fit_ar(self, data, order = None, method = 'yw'):
+        pass
+
+    def calculate(self, Acoef = None, Vcoef = None, fs = None):
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = None) 
+        res, k, k = A_z.shape
+        mH = np.zeros((res,k,k))
+        for i in xrange(res):
+            mH[i] = np.abs(np.dot(H_z[i],H_z[i].T.conj()))
+        mHsum = np.sum(mH, axis=0)
+        ffDTF = np.zeros((res,k,k))
+        for i in xrange(res):
+            ffDTF[i] = (np.abs(H_z[i]).T/np.sqrt(np.diag(mHsum))).T
+        return ffDTF
+
 class dDTF(ConnectAR):
     """
     dDTF
@@ -213,3 +233,25 @@ class iPDC(ConnectAR):
             mB = np.dot(B_z[i].T.conj(),B_z[i]).real
             PDC[i] = np.abs(B_z[i])/np.sqrt(np.diag(mB))
         return PDC
+
+############################
+# Fourier Transform based methods:
+
+class Coherency(Connect):
+    pass 
+
+class PSI(Connect):
+    def calculate():
+        fq, coh = magsqcoh(sig1,sig2,**params)
+        if freq:
+            indf1 = np.where(fq>=freq[0])[0][0]
+            indf2 = np.where(fq>=freq[1])[0][0]
+            if indf1==indf2:
+                raise Exception('Too narrow frequency bands')
+            coh = coh[indf1:indf2]
+        else:
+            # we take into account only positive frequencies
+            coh = coh[len(coh)//2:]
+        full_psi = np.imag(np.sum(coh[:-1].conj()*coh[1:]))
+        return full_psi
+

@@ -4,8 +4,20 @@
 import numpy as np
 from numpy.linalg import inv 
 
-def mvar_gen(A, n, omit=500):
-    p, chn, chn = A.shape
+def mvar_gen(Acf, n, omit=500):
+    """
+    Generating data point from matrix *A* with MVAR coefficients.
+    Args:
+      *Acf* : numpy.array
+          array of dimension kxkxp where *k* is number of channels and
+          *p* is a model order.
+      *n* : int
+          number of data points.
+    Returns:
+      *y* : np.array
+          kx(n-omit) data points
+    """
+    p, chn, chn = Acf.shape
     y = np.zeros((chn, n + omit))
     sigma = np.diag(np.ones(chn))
     mu = np.zeros(chn)
@@ -13,9 +25,37 @@ def mvar_gen(A, n, omit=500):
         eps = np.random.multivariate_normal(mu, sigma)
         for k in xrange(0,p):
             yt = y[:,i-k-1].reshape((chn,1))
-            y[:,i] += np.squeeze(np.dot(A[k],yt))
+            y[:,i] += np.squeeze(np.dot(Acf[k],yt))
         y[:,i] += eps
     return y[:,omit:]
+
+def mvar_gen_inst(Acf, n, omit=500):
+    """
+    Generating data point from matrix *A* with MVAR coefficients but it
+    takes into account also zerolag interactions. So here Acf[0] means
+    instantenous interaction not as in *mvar_gen* one data point lagged.
+    Args:
+      *Acf* : numpy.array
+          array of dimension kxkxp where *k* is number of channels and
+          *p* is a model order.
+      *n* : int
+          number of data points.
+    Returns:
+      *y* : np.array
+          kx(n-omit) data points
+    """
+    p, chn, chn = Acf.shape
+    y = np.zeros((chn, n + omit))
+    sigma = np.diag(np.ones(chn))
+    mu = np.zeros(chn)
+    for i in range(p,n+omit):
+        eps = np.random.multivariate_normal(mu, sigma)
+        for k in xrange(0,p):
+            yt = y[:,i-k].reshape((chn,1))
+            y[:,i] += np.squeeze(np.dot(Acf[k],yt))
+        y[:,i] += eps
+    return y[:,omit:]
+
 
 def ncov(x, y = [], p = 0, norm = True):
     """
