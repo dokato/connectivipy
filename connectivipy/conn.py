@@ -43,7 +43,6 @@ def spectrum(acoef, vcoef, fs, resolution = None):
         for k in xrange(1,p):
             epot[k] = epot[k-1]*ce
         A_z[e] = I - np.sum([epot[x]*acoef[x] for x in range(p)],axis=0)
-        #pdb.set_trace()
         H_z[e] = np.linalg.inv(A_z[e])
         S_z[e] = np.dot(np.dot(H_z[e],vcoef), H_z[e].T.conj())
     return A_z, H_z, S_z
@@ -88,7 +87,7 @@ class Connect(object):
     def short_time(self, winlen=64, no=16):
         pass
 
-    def significance(self):
+    def significance(self, Nrep = 10, **params):
         pass
 
 class ConnectAR(Connect):
@@ -238,7 +237,34 @@ class iPDC(ConnectAR):
 # Fourier Transform based methods:
 
 class Coherency(Connect):
-    pass 
+    def calculate(self, data, nfft=None, no=0, window=np.hanning):
+        k, N = data.shape 
+        if not nfft:
+            nfft = int(N/4)
+        if not no:
+            no = int(N/10)
+        winarr = window(nfft)
+        slices = xrange(0, N, int(nfft-no))
+        ftsliced = np.zeros((len(slices), k, int(nfft/2)+1), complex)
+        for e,i in enumerate(slices):
+            if i+nfft>=N:
+                datzer = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N))),axis=1)
+                ftsliced[e] = np.fft.rfft(datzer*winarr, axis=1)
+            else:
+                ftsliced[e] = np.fft.rfft(data[:,i:i+nfft]*winarr, axis=1)
+        coh = np.zeros((int(nfft/2)+1, k, k))
+        ctop = np.zeros((len(slices), k, k, int(nfft/2)+1), complex)
+        cdown = np.zeros((len(slices), k, int(nfft/2)+1))
+        for i in xrange(len(slices)):
+            c1 = ftsliced[i,:,:].reshape((k, 1, int(nfft/2)+1))
+            c2 = ftsliced[i,:,:].conj().reshape((1, k, int(nfft/2)+1))
+            ctop[i] = c1*c2
+            cdown[i] = np.abs(ftsliced[i,:,:])**2
+        cd1  = np.mean(cdown,axis=0).reshape((k, 1, int(nfft/2)+1))
+        cd2  = np.mean(cdown,axis=0).reshape((1, k, int(nfft/2)+1))
+        cdwn = cd1*cd2
+        coh  = np.mean(ctop,axis=0)/np.sqrt(cdwn)
+        return np.abs(coh.T)
 
 class PSI(Connect):
     def calculate():
@@ -255,3 +281,11 @@ class PSI(Connect):
         full_psi = np.imag(np.sum(coh[:-1].conj()*coh[1:]))
         return full_psi
 
+
+conn_estim_dc = { 'dtf'  : DTF,
+                  'pdc'  : PDC,
+                  'ipdc' : iPDC,
+                  'psi'  : PSI,
+                  'ffdtf': ffDTF,
+                  'ddtf' : dDTF,
+                }

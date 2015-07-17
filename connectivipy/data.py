@@ -5,6 +5,7 @@ import scipy.io as si
 import scipy.signal as ss
 from load.loaders import signalml_loader
 from mvarmodel import Mvar
+from conn import *
 
 class Data(object):
     '''
@@ -55,7 +56,11 @@ class Data(object):
                 data, sml = signalml_loader(data_what.split('.')[0])
                 self.smldict = sml # here SignalML data is stored
         else:
-            pass 
+            return False
+        if len(data.shape)>2:
+            self.__multitrial = True
+        else:
+            self.__multitrial = False
         return data
             
     def filter(self, b, a):
@@ -70,17 +75,17 @@ class Data(object):
         
         self.__data = ss.filtfilt(b,a,self.__data)
 
-    def resample(self, new_fs):
+    def resample(self, fs_new):
         '''
         Signal resampling to new sampling frequency *new_fs* using
         *resample* function from *scipy.signal* (basing on Fourier method).
         
         Args:
-          *new_fs* : int
+          *fs_new* : int
             new sampling frequency
         '''
         new_nr_samples = (len(self.__data[0])*1./self.__fs)*fs_new
-        self.__data = ss.resample(self.__data, new_nr_samples)
+        self.__data = ss.resample(self.__data, new_nr_samples, axis=1)
         self.__fs = fs_new
     
     def estimate(self):
@@ -97,7 +102,30 @@ class Data(object):
             method of estimation, for full list please type:
             connectivipy.mvar_methods
         '''
-        self.__Ar, self.__Vr = Mvar().fit(self.__data, p, method)
+        if not self.__multitrial:
+            self.__Ar, self.__Vr = Mvar().fit(self.__data, p, method)
+        else:
+            k, N, r = self.__data.shape
+            self.__Ar = np.zeros((r, p, k, k))
+            self.__Vr = np.zeros((r, k, k))
+            for tr in xrange(self.__data.shape[2]):
+                atmp, vtmp = Mvar().fit(self.__data, p, method)
+                self.__Ar[tr] = atmp
+                self.__Vr[tr] = vtmp
+
+    def conn(self, method = 'dtf'):
+        '''
+        Estimate connectivity pattern.
+        
+        Args:
+          *p* = None : int
+            estimation order, default None
+          *method* = 'yw' : str {'yw', 'ns', 'vm'}
+            method of estimation, for full list please type:
+            connectivipy.mvar_methods
+        '''
+        cobj = DTF()
+        
     
     def plot_data(self):
         pass
