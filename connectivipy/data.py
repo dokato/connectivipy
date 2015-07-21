@@ -105,15 +105,15 @@ class Data(object):
         if not self.__multitrial:
             self.__Ar, self.__Vr = Mvar().fit(self.__data, p, method)
         else:
-            k, N, r = self.__data.shape
-            self.__Ar = np.zeros((r, p, k, k))
-            self.__Vr = np.zeros((r, k, k))
-            for tr in xrange(self.__data.shape[2]):
-                atmp, vtmp = Mvar().fit(self.__data, p, method)
-                self.__Ar[tr] = atmp
-                self.__Vr[tr] = vtmp
+            k, N, tr = self.__data.shape
+            self.__Ar = np.zeros((tr, p, k, k))
+            self.__Vr = np.zeros((tr, k, k))
+            for r in xrange(self.__data.shape[2]):
+                atmp, vtmp = Mvar().fit(self.__data[:,:,r], p, method)
+                self.__Ar[r] = atmp
+                self.__Vr[r] = vtmp
 
-    def conn(self, method = 'dtf'):
+    def conn(self, method = 'dtf', **params):
         '''
         Estimate connectivity pattern.
         
@@ -124,8 +124,15 @@ class Data(object):
             method of estimation, for full list please type:
             connectivipy.mvar_methods
         '''
-        cobj = DTF()
-        
+        connobj = conn_estim_dc[method]()
+        if not self.__multitrial:
+            self.__estim = connobj.calculate(self.__data, **params)
+        else:
+            k, N, tr = self.__data.shape
+            for r in xrange(self.__data.shape[2]):
+                self.__estim += connobj.calculate(self.__data[:,:,r], **params)
+            self.__estim = self.__estim/tr
+        return self.__estim
     
     def plot_data(self):
         pass

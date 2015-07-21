@@ -48,7 +48,7 @@ def spectrum(acoef, vcoef, fs, resolution = None):
     return A_z, H_z, S_z
 
 
-def spectrum_b(acoef, vcoef, fs, resolution = None):
+def spectrum_inst(acoef, vcoef, fs, resolution = None):
     """
     ready to use (i hope)
     from ldlt decomposition
@@ -83,11 +83,43 @@ class Connect(object):
     @abstractmethod
     def calculate(self):
         pass
+    
+    def __calc_multitrial(data, **params):
+        trials = data.shape[2]
+        chosen = np.random.randint(trials,size=trials)
+        bc = np.bincount(chosen)
+        idxbc = np.nonzero(bc)[0]
+        # rescalc init
+        for num, occurence in zip(idxcs, chosen[idxbc]):
+            trdata = data[:,:,num]
+            rescalc += self.calculate(trdata, **params)
+        return rescalc/trials
 
     def short_time(self, winlen=64, no=16):
         pass
 
-    def significance(self, Nrep = 10, **params):
+    def significance(self, data, Nrep=10, alpha=0.05, **params):
+        if len(data.shape)>2:
+            self.bootstrap(data, Nrep=10, alpha=alpha, **params)
+        else:
+            self.surrogate(data, Nrep=10, alpha=alpha, **params)
+
+    def bootstrap(self, data, Nrep=10, alpha=0.05, **params):
+        for i in xrange(Nrep):
+            if i==0:
+                tmpsig = self.__calc_multitrial(data, **params)
+                fres, k = tmpsig.shape[0]
+                signi = np.zeros((Nrep, fres, k, k))
+                signi[i] = tmpsig
+            else:
+                signi[i] = self.__calc_multitrial(data, **params)
+        ficance = np.zeros((k,k))
+        for i in range(signi.shape[-1]):
+            for j in range(signi.shape[-1]):
+                ficance[i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], alpha*100, axis=1))
+        return ficance
+
+    def surrogate(self, data, Nrep = 10, alpha=0.05, **params):
         pass
 
 class ConnectAR(Connect):
@@ -100,25 +132,6 @@ class ConnectAR(Connect):
 ############################
 # MVAR based methods:
 
-class DTF(ConnectAR):
-    """
-    Directed transfer function
-    Kaminski, M.; Blinowska, K. J. (1991).
-    """
-    # not too good
-    def fit_ar(self, data, order = None, method = 'yw'):
-        pass
-    
-    def calculate(self, Acoef = None, Vcoef = None, fs = None):
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = None) 
-        res, k, k = A_z.shape
-        DTF = np.zeros((res,k,k))
-        sigma = np.diag(Vcoef)
-        for i in xrange(res):
-            mH = np.dot(H_z[i],H_z[i].T.conj()).real
-            DTF[i] = np.abs(H_z[i])/np.sqrt(np.diag(mH)).reshape((k,1))
-        return DTF
-
 class PartialCoh(ConnectAR):
     """
     partial coherency
@@ -127,8 +140,8 @@ class PartialCoh(ConnectAR):
     def fit_ar(self, data, order = None, method = 'yw'):
         pass
     
-    def calculate(self, Acoef = None, Vcoef = None, fs = None):
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = None) 
+    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
         res, k, k = A_z.shape
         PC = np.zeros((res,k,k))
         before = np.ones((k,k))
@@ -141,6 +154,24 @@ class PartialCoh(ConnectAR):
             PC[i] = -1*before*(np.abs(D_z)/np.sqrt(mD))
         return np.abs(PC)
 
+class DTF(ConnectAR):
+    """
+    Directed transfer function
+    Kaminski, M.; Blinowska, K. J. (1991).
+    """
+    # not too good
+    def fit_ar(self, data, order = None, method = 'yw'):
+        pass
+    
+    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
+        res, k, k = A_z.shape
+        DTF = np.zeros((res,k,k))
+        for i in xrange(res):
+            mH = np.dot(H_z[i],H_z[i].T.conj()).real
+            DTF[i] = np.abs(H_z[i])/np.sqrt(np.diag(mH)).reshape((k,1))
+        return DTF
+
 class PDC(ConnectAR):
     """
     PDC
@@ -149,15 +180,51 @@ class PDC(ConnectAR):
     def fit_ar(self, data, order = None, method = 'yw'):
         pass
     
-    def calculate(self, Acoef = None, Vcoef = None, fs = None):
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = None) 
+    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
         res, k, k = A_z.shape
         PDC = np.zeros((res,k,k))
-        sigma = np.diag(Vcoef)
         for i in xrange(res):
             mA = np.dot(A_z[i].T.conj(),A_z[i]).real
             PDC[i] = np.abs(A_z[i])/np.sqrt(np.diag(mA))
         return PDC
+
+class gPDC(ConnectAR):
+    """
+    generalized PDC
+    """
+    # not too good
+    def fit_ar(self, data, order = None, method = 'yw'):
+        pass
+    
+    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
+        res, k, k = A_z.shape
+        PDC = np.zeros((res,k,k))
+        sigma = np.diag(Vcoef)
+        for i in xrange(res):
+            mA = (1./sigma[:, None])*np.dot(A_z[i].T.conj(),A_z[i]).real
+            PDC[i] = np.abs(A_z[i] / np.sqrt(sigma))/np.sqrt(np.diag(mA))
+        return PDC
+
+class gDTF(ConnectAR):
+    """
+    Directed transfer function
+    Kaminski, M.; Blinowska, K. J. (1991).
+    """
+    # not too good
+    def fit_ar(self, data, order = None, method = 'yw'):
+        pass
+    
+    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
+        res, k, k = A_z.shape
+        DTF = np.zeros((res,k,k))
+        sigma = np.diag(Vcoef)
+        for i in xrange(res):
+            mH = sigma*np.dot(H_z[i],H_z[i].T.conj()).real
+            DTF[i] = (np.sqrt(sigma)* np.abs(H_z[i]))/np.sqrt(np.diag(mH)).reshape((k,1))
+        return DTF
 
 class ffDTF(ConnectAR):
     """
@@ -170,8 +237,8 @@ class ffDTF(ConnectAR):
     def fit_ar(self, data, order = None, method = 'yw'):
         pass
 
-    def calculate(self, Acoef = None, Vcoef = None, fs = None):
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = None) 
+    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
         res, k, k = A_z.shape
         mH = np.zeros((res,k,k))
         for i in xrange(res):
@@ -193,8 +260,8 @@ class dDTF(ConnectAR):
     def fit_ar(self, data, order = None, method = 'yw'):
         pass
 
-    def calculate(self, Acoef = None, Vcoef = None, fs = None):
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = None) 
+    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
         res, k, k = A_z.shape
         mH = np.zeros((res,k,k))
         for i in xrange(res):
@@ -223,8 +290,8 @@ class iPDC(ConnectAR):
     def fit_ar(self, data, order = None, method = 'yw'):
         pass
     
-    def calculate(self, Acoef = None, Vcoef = None, fs = None):
-        B_z = spectrum_b(Acoef, Vcoef, fs, resolution = None) 
+    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+        B_z = spectrum_inst(Acoef, Vcoef, fs, resolution = resolution) 
         res, k, k = B_z.shape
         PDC = np.zeros((res,k,k))
         sigma = np.diag(Vcoef)
@@ -233,11 +300,29 @@ class iPDC(ConnectAR):
             PDC[i] = np.abs(B_z[i])/np.sqrt(np.diag(mB))
         return PDC
 
+class iDTF(ConnectAR):
+    """
+        ????
+    """
+    # not too good
+    def fit_ar(self, data, order = None, method = 'yw'):
+        pass
+    
+    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+        B_z = spectrum_inst(Acoef, Vcoef, fs, resolution = resolution) 
+        res, k, k = B_z.shape
+        DTF = np.zeros((res,k,k))
+        for i in xrange(res):
+            Hb_z[e] = np.linalg.inv(B_z[e])
+            mH = np.dot(Hb_z[i],Hb_z[i].T.conj()).real
+            DTF[i] = np.abs(Hb_z[i])/np.sqrt(np.diag(mH)).reshape((k,1))
+        return DTF
+
 ############################
 # Fourier Transform based methods:
 
 class Coherency(Connect):
-    def calculate(self, data, nfft=None, no=0, window=np.hanning):
+    def calculate(self, data, nfft=None, no=0, window=np.hanning, im=False):
         k, N = data.shape 
         if not nfft:
             nfft = int(N/4)
@@ -252,7 +337,6 @@ class Coherency(Connect):
                 ftsliced[e] = np.fft.rfft(datzer*winarr, axis=1)
             else:
                 ftsliced[e] = np.fft.rfft(data[:,i:i+nfft]*winarr, axis=1)
-        coh = np.zeros((int(nfft/2)+1, k, k))
         ctop = np.zeros((len(slices), k, k, int(nfft/2)+1), complex)
         cdown = np.zeros((len(slices), k, int(nfft/2)+1))
         for i in xrange(len(slices)):
@@ -264,23 +348,23 @@ class Coherency(Connect):
         cd2  = np.mean(cdown,axis=0).reshape((1, k, int(nfft/2)+1))
         cdwn = cd1*cd2
         coh  = np.mean(ctop,axis=0)/np.sqrt(cdwn)
-        return np.abs(coh.T)
+        if not im:
+            coh = np.abs(coh)
+        return coh.T
 
 class PSI(Connect):
-    def calculate():
-        fq, coh = magsqcoh(sig1,sig2,**params)
-        if freq:
-            indf1 = np.where(fq>=freq[0])[0][0]
-            indf2 = np.where(fq>=freq[1])[0][0]
-            if indf1==indf2:
-                raise Exception('Too narrow frequency bands')
-            coh = coh[indf1:indf2]
-        else:
-            # we take into account only positive frequencies
-            coh = coh[len(coh)//2:]
-        full_psi = np.imag(np.sum(coh[:-1].conj()*coh[1:]))
-        return full_psi
-
+    
+    def calculate(self, data, band_width = 4, nfft=None, no=0, window=np.hanning):
+        k, N = data.shape 
+        coh = Coherency()
+        cohval = coh.calculate(data, nfft=nfft, no=no, window=window, im=True)
+        fq_bands = np.arange(0, int(nfft/2)+1, band_width)
+        psi = np.zeros((len(fq_bands)-1,k,k))
+        for f in xrange(len(fq_bands)-1):
+            ctmp = cohval[fq_bands[f]:fq_bands[f+1],:,:]
+            psi[f] = np.imag(np.sum(ctmp[:-1,:,:].conj()*ctmp[1:,:,:], axis=0))
+        #full_psi = np.imag(np.sum(cohval[:-1,:,:].conj()*cohval[1:,:,:]))
+        return psi
 
 conn_estim_dc = { 'dtf'  : DTF,
                   'pdc'  : PDC,
@@ -288,4 +372,8 @@ conn_estim_dc = { 'dtf'  : DTF,
                   'psi'  : PSI,
                   'ffdtf': ffDTF,
                   'ddtf' : dDTF,
+                  'gdtf' : gDTF,
+                  'gpdc' : gPDC,
+                  'pcoh' : PartialCoh,
+                  'coh'  : Coherency,
                 }
