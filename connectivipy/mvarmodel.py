@@ -42,8 +42,8 @@ class Mvar(object):
         Order akaike
         following Practical Biomedical Signal Analysis Using MATLAB eq 3.19
         """
-        chn, N = data.shape 
-        if p_max == None: 
+        chn, N = data.shape
+        if p_max == None:
             p_max = 20 # change to some criterion for max
         crit = np.zeros(p_max)
         for p in range(p_max):

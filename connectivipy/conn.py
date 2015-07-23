@@ -4,7 +4,9 @@
 import numpy as np
 from abc import ABCMeta, abstractmethod
 from mvar.comp import ldl
+from mvarmodel import Mvar
 import pdb
+import scipy.stats as st
 
 ########################################################################
 # Spectrum functions:
@@ -90,9 +92,15 @@ class Connect(object):
         bc = np.bincount(chosen)
         idxbc = np.nonzero(bc)[0]
         # rescalc init
-        for num, occurence in zip(idxcs, chosen[idxbc]):
-            trdata = data[:,:,num]
-            rescalc += self.calculate(trdata, **params)
+        flag = True
+        for num, occurence in zip(idxbc, bc[idxbc]):
+            if occurence>0:
+                if flag:
+                    rescalc = self.calculate(trdata, **params)*occurence                    
+                    flag = False
+                    continue
+                trdata = data[:,:,num]
+                rescalc += self.calculate(trdata, **params)*occurence
         return rescalc/trials
 
     def short_time(self, winlen=64, no=16):
@@ -114,8 +122,8 @@ class Connect(object):
             else:
                 signi[i] = self.__calc_multitrial(data, **params)
         ficance = np.zeros((k,k))
-        for i in range(signi.shape[-1]):
-            for j in range(signi.shape[-1]):
+        for i in range(k):
+            for j in range(k):
                 ficance[i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], alpha*100, axis=1))
         return ficance
 
@@ -128,6 +136,24 @@ class ConnectAR(Connect):
     @abstractmethod
     def fit_ar(self):
         pass
+
+    def surrogate(self, data, method, order, fs, resolution = None,\
+                                         Nrep = 10, alpha=0.05, **params):
+        k, N = data.shape
+        for i in xrange(Nrep):
+            map(np.random.shuffle, data)
+            ar, vr = Mvar().fit(data, order, method)
+            if i==0:
+                rtmp = self.calculate(ar, vr, fs, resolution)
+                reskeeper = np.zeros((Nrep, rtmp.shape[0], k, k))
+                reskeeper[i] = rtmp
+                continue
+            reskeeper[i] = self.calculate(ar, vr, fs, resolution)
+        ficance = np.zeros((k,k))
+        for i in range(k):
+            for j in range(k):
+                ficance[i][j] = np.max(st.scoreatpercentile(reskeeper[:,:,i,j], alpha*100, axis=1))
+        return ficance
 
 ############################
 # MVAR based methods:

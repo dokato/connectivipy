@@ -143,14 +143,14 @@ class Data(object):
     # accessors:
     @property
     def mvar_coefficients(self):
-        if hasattr(self,'Ar') and hasattr(self,'Vr'):
+        if hasattr(self,'_Data__Ar') and hasattr(self,'_Data__Vr'):
             return (self.__Ar, self.__Vr)
         else:
-            return None
+            return (None, None)
 
     @property
     def mvarcoef(self):
-        return self.mvar_coefficients()
+        return self.mvar_coefficients
 
     @property
     def data(self):
