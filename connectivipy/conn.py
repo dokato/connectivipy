@@ -86,7 +86,24 @@ class Connect(object):
     def calculate(self):
         pass
     
-    def __calc_multitrial(data, **params):
+    def short_time(self, winlen=64, no=16):
+        pass
+
+    def significance(self, data, Nrep=10, alpha=0.05, **params):
+        if len(data.shape)>2:
+            signific = self.bootstrap(data, Nrep=10, alpha=alpha, **params)
+        else:
+            signific = self.surrogate(data, Nrep=10, alpha=alpha, **params)
+        return signific
+
+    def levels(self, signi, alpha, k):
+        ficance = np.zeros((k,k))
+        for i in range(k):
+            for j in range(k):
+                ficance[i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], alpha*100, axis=1))
+        return ficance
+        
+    def __calc_multitrial(self, data, **params):
         trials = data.shape[2]
         chosen = np.random.randint(trials,size=trials)
         bc = np.bincount(chosen)
@@ -94,40 +111,41 @@ class Connect(object):
         flag = True
         for num, occurence in zip(idxbc, bc[idxbc]):
             if occurence>0:
+                trdata = data[:,:,num]
                 if flag:
                     rescalc = self.calculate(trdata, **params)*occurence                    
                     flag = False
                     continue
-                trdata = data[:,:,num]
                 rescalc += self.calculate(trdata, **params)*occurence
         return rescalc/trials
 
-    def short_time(self, winlen=64, no=16):
-        pass
-
-    def significance(self, data, Nrep=10, alpha=0.05, **params):
-        if len(data.shape)>2:
-            self.bootstrap(data, Nrep=10, alpha=alpha, **params)
-        else:
-            self.surrogate(data, Nrep=10, alpha=alpha, **params)
-
     def bootstrap(self, data, Nrep=10, alpha=0.05, **params):
         for i in xrange(Nrep):
+            print '.',
             if i==0:
                 tmpsig = self.__calc_multitrial(data, **params)
-                fres, k = tmpsig.shape[0]
+                fres, k, k = tmpsig.shape
                 signi = np.zeros((Nrep, fres, k, k))
                 signi[i] = tmpsig
             else:
                 signi[i] = self.__calc_multitrial(data, **params)
-        ficance = np.zeros((k,k))
-        for i in range(k):
-            for j in range(k):
-                ficance[i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], alpha*100, axis=1))
-        return ficance
+        print '|'
+        return self.levels(signi, alpha, k)
 
     def surrogate(self, data, Nrep = 10, alpha=0.05, **params):
-        pass
+        k, N = data.shape
+        shdata = data.copy()
+        for i in xrange(Nrep):
+            print '.',
+            map(np.random.shuffle, shdata)
+            if i==0:
+                rtmp = self.calculate(data, **params)
+                reskeeper = np.zeros((Nrep, rtmp.shape[0], k, k))
+                reskeeper[i] = rtmp
+                continue
+            reskeeper[i] = self.calculate(data, **params)
+        print '|'
+        return self.levels(reskeeper, alpha, k)
 
 class ConnectAR(Connect):
     __metaclass__ = ABCMeta
@@ -136,28 +154,81 @@ class ConnectAR(Connect):
     def fit_ar(self):
         pass
 
+    def __calc_multitrial(self, arrs, vrrs, fs, resolution):
+        trials = arrs.shape[0]
+        chosen = np.random.randint(trials,size=trials)
+        bc = np.bincount(chosen)
+        idxbc = np.nonzero(bc)[0]
+        flag = True
+        for num, occurence in zip(idxbc, bc[idxbc]):
+            if occurence>0:
+                if flag:
+                    rescalc = self.calculate(arrs[num], vrrs[num], fs, resolution)*occurence
+                    flag = False
+                    continue
+                rescalc += self.calculate(arrs[num], vrrs[num], fs, resolution)*occurence
+        return rescalc/trials
+
+    def bootstrap(self, arrs, vrrs, Nrep = 10, alpha=0.05, fs=1, **params):
+        resolution = None
+        if params.has_key('resolution') and params['resolution']:
+            resolution = params['resolution']
+        for i in xrange(Nrep):
+            print '.',
+            if i==0:
+                tmpsig = self.__calc_multitrial(arrs, vrrs, fs, resolution)
+                fres, k, k = tmpsig.shape
+                signi = np.zeros((Nrep, fres, k, k))
+                signi[i] = tmpsig
+            else:
+                signi[i] = self.__calc_multitrial(arrs, vrrs, fs, resolution)
+        print '|'
+        return self.levels(signi, alpha, k)
+
     def surrogate(self, data, method, Nrep = 10, alpha=0.05, order=None, fs=1, **params):
+        shdata = data.copy()
         k, N = data.shape
         resolution = None
         if params.has_key('resolution') and params['resolution']:
             resolution = params['resolution']
         for i in xrange(Nrep):
-            map(np.random.shuffle, data)
-            ar, vr = Mvar().fit(data, order, method)
+            print '.',
+            map(np.random.shuffle, shdata)
+            ar, vr = Mvar().fit(shdata, order, method)
             if i==0:
                 rtmp = self.calculate(ar, vr, fs, resolution)
                 reskeeper = np.zeros((Nrep, rtmp.shape[0], k, k))
                 reskeeper[i] = rtmp
                 continue
             reskeeper[i] = self.calculate(ar, vr, fs, resolution)
-        ficance = np.zeros((k,k))
-        for i in range(k):
-            for j in range(k):
-                ficance[i][j] = np.max(st.scoreatpercentile(reskeeper[:,:,i,j], alpha*100, axis=1))
-        return ficance
+        print '|'
+        return self.levels(signi, alpha, k)
 
 ############################
 # MVAR based methods:
+
+def dtf_fun(Acoef, Vcoef, fs, resolution, generalized=False):
+    A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
+    res, k, k = A_z.shape
+    DTF = np.zeros((res,k,k))
+    if generalized:
+        sigma = np.diag(Vcoef)
+    else:
+        sigma = np.ones(k)
+    for i in xrange(res):
+        mH = sigma*np.dot(H_z[i],H_z[i].T.conj()).real
+        DTF[i] = (np.sqrt(sigma)* np.abs(H_z[i]))/np.sqrt(np.diag(mH)).reshape((k,1))
+    return DTF
+
+def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
+    A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
+    res, k, k = A_z.shape
+    PDC = np.zeros((res,k,k))
+    sigma = np.diag(Vcoef)
+    for i in xrange(res):
+        mA = (1./sigma[:, None])*np.dot(A_z[i].T.conj(),A_z[i]).real
+        PDC[i] = np.abs(A_z[i] / np.sqrt(sigma))/np.sqrt(np.diag(mA))
+    return PDC
 
 class PartialCoh(ConnectAR):
     """
@@ -183,35 +254,17 @@ class DTF(ConnectAR):
     Directed transfer function
     Kaminski, M.; Blinowska, K. J. (1991).
     """
-    # not too good
-    def fit_ar(self, data, order = None, method = 'yw'):
-        pass
-    
+
     def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
-        res, k, k = A_z.shape
-        DTF = np.zeros((res,k,k))
-        for i in xrange(res):
-            mH = np.dot(H_z[i],H_z[i].T.conj()).real
-            DTF[i] = np.abs(H_z[i])/np.sqrt(np.diag(mH)).reshape((k,1))
-        return DTF
+        return dtf_fun(Acoef, Vcoef, fs, resolution)
 
 class PDC(ConnectAR):
     """
     PDC
     """
-    # not too good
-    def fit_ar(self, data, order = None, method = 'yw'):
-        pass
     
     def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
-        res, k, k = A_z.shape
-        PDC = np.zeros((res,k,k))
-        for i in xrange(res):
-            mA = np.dot(A_z[i].T.conj(),A_z[i]).real
-            PDC[i] = np.abs(A_z[i])/np.sqrt(np.diag(mA))
-        return PDC
+        return pdc_fun(Acoef, Vcoef, fs, resolution)
 
 class gPDC(ConnectAR):
     """
@@ -222,14 +275,7 @@ class gPDC(ConnectAR):
         pass
     
     def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
-        res, k, k = A_z.shape
-        PDC = np.zeros((res,k,k))
-        sigma = np.diag(Vcoef)
-        for i in xrange(res):
-            mA = (1./sigma[:, None])*np.dot(A_z[i].T.conj(),A_z[i]).real
-            PDC[i] = np.abs(A_z[i] / np.sqrt(sigma))/np.sqrt(np.diag(mA))
-        return PDC
+        return pdc_fun(Acoef, Vcoef, fs, resolution, generalized=True)
 
 class gDTF(ConnectAR):
     """
@@ -241,14 +287,7 @@ class gDTF(ConnectAR):
         pass
     
     def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
-        res, k, k = A_z.shape
-        DTF = np.zeros((res,k,k))
-        sigma = np.diag(Vcoef)
-        for i in xrange(res):
-            mH = sigma*np.dot(H_z[i],H_z[i].T.conj()).real
-            DTF[i] = (np.sqrt(sigma)* np.abs(H_z[i]))/np.sqrt(np.diag(mH)).reshape((k,1))
-        return DTF
+        return dtf_fun(Acoef, Vcoef, fs, resolution, generalized=True)
 
 class ffDTF(ConnectAR):
     """
@@ -411,4 +450,5 @@ conn_estim_dc = { 'dtf'  : DTF,
                   'gpdc' : gPDC,
                   'pcoh' : PartialCoh,
                   'coh'  : Coherency,
+                  'gc'   : GC,
                 }

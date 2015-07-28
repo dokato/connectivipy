@@ -135,30 +135,21 @@ class Data(object):
         connobj = conn_estim_dc[method]()
         if not self.__multitrial:
             if isinstance(connobj,ConnectAR):
-                if self._parameters["mvar"]:
-                    self.__estim = connobj.calculate(self.__Ar,self.__Vr, self.__fs, **params)
-                else:
-                    self.__estim = connobj.calculate(**params)
+                self.__estim = connobj.calculate(self.__Ar,self.__Vr, self.__fs, **params)
             else:
                 self.__estim = connobj.calculate(self.__data, **params)
         else:
             for r in xrange(self.__multitrial):
                 if r==0:
                     if isinstance(connobj,ConnectAR):
-                        if self._parameters["mvar"]:
-                            self.__estim = connobj.calculate(self.__Ar[r], self.__Vr[r], self.__fs, **params)
-                        else:
-                            self.__estim = connobj.calculate(**params)
+                        self.__estim = connobj.calculate(self.__Ar[r], self.__Vr[r], self.__fs, **params)
                     else:
                         self.__estim = connobj.calculate(self.__data[:,:,r], **params)
                     continue
                 if isinstance(connobj,ConnectAR):
-                    if self._parameters["mvar"]:
-                        self.__estim = connobj.calculate(self.__Ar[r], self.__Vr[r], self.__fs, **params)
-                    else:
-                        self.__estim = connobj.calculate(**params)
+                    self.__estim += connobj.calculate(self.__Ar[r], self.__Vr[r], self.__fs, **params)
                 else:
-                    self.__estim = connobj.calculate(self.__data[:,:,r], **params)
+                    self.__estim += connobj.calculate(self.__data[:,:,r], **params)
             self.__estim = self.__estim/self.__multitrial
 
         self._parameters["method"] = method
@@ -173,12 +164,15 @@ class Data(object):
                                                     method=self._parameters["mvarmethod"],\
                                                     fs=self.__fs, order=self._parameters["p"], **params)
             else:
-                self.__signific = connobj.surrogate(self.__data, mvarmethod,\
-                                                    fs = self.__fs, order=order, resolution=resolution,\
-                                                    Nrep=Nrep, alpha=alpha, **params)
+                self.__signific = connobj.surrogate(self.__data, Nrep=Nrep,\
+                                                    alpha=alpha, **params)
         else:
-            #bootstrap
-            pass
+            if isinstance(connobj,ConnectAR):
+                self.__signific = connobj.bootstrap(self.__Ar, self.__Vr, Nrep=Nrep,
+                                                    alpha=alpha, fs=self.__fs, **params)
+            else:
+                self.__signific = connobj.bootstrap(self.__data, Nrep=Nrep,\
+                                                    alpha=alpha, **params)
         return self.__signific
 
     def plot_data(self, trial=False, show=True):
