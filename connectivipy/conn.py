@@ -12,7 +12,7 @@ import scipy.stats as st
 # Spectrum functions:
 ########################################################################
 
-def spectrumft(acoef, vcoef, fs, resolution = None):
+def spectrumft(acoef, vcoef, fs=1, resolution=None):
     "not ready to use"
     p, k, k = acoef.shape 
     if resolution == None:
@@ -27,7 +27,7 @@ def spectrumft(acoef, vcoef, fs, resolution = None):
         S_z[i] = np.dot(np.dot(H_z[i],vcoef), H_z[i].T.conj())
     return A_z, H_z, S_z
 
-def spectrum(acoef, vcoef, fs, resolution = None):
+def spectrum(acoef, vcoef, fs=1, resolution=None):
     "ready to use"
     p, k, k = acoef.shape 
     if resolution == None:
@@ -50,7 +50,7 @@ def spectrum(acoef, vcoef, fs, resolution = None):
     return A_z, H_z, S_z
 
 
-def spectrum_inst(acoef, vcoef, fs, resolution = None):
+def spectrum_inst(acoef, vcoef, fs=1, resolution=None):
     """
     ready to use (i hope)
     from ldlt decomposition
@@ -91,7 +91,6 @@ class Connect(object):
         chosen = np.random.randint(trials,size=trials)
         bc = np.bincount(chosen)
         idxbc = np.nonzero(bc)[0]
-        # rescalc init
         flag = True
         for num, occurence in zip(idxbc, bc[idxbc]):
             if occurence>0:
@@ -137,9 +136,11 @@ class ConnectAR(Connect):
     def fit_ar(self):
         pass
 
-    def surrogate(self, data, method, order, fs, resolution = None,\
-                                         Nrep = 10, alpha=0.05, **params):
+    def surrogate(self, data, method, Nrep = 10, alpha=0.05, order=None, fs=1, **params):
         k, N = data.shape
+        resolution = None
+        if params.has_key('resolution') and params['resolution']:
+            resolution = params['resolution']
         for i in xrange(Nrep):
             map(np.random.shuffle, data)
             ar, vr = Mvar().fit(data, order, method)
@@ -162,12 +163,9 @@ class PartialCoh(ConnectAR):
     """
     partial coherency
     """
-
-    def fit_ar(self, data, order = None, method = 'yw'):
-        pass
     
-    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
+    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=None):
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution=resolution) 
         res, k, k = A_z.shape
         PC = np.zeros((res,k,k))
         before = np.ones((k,k))
@@ -379,7 +377,6 @@ class Coherency(Connect):
         return coh.T
 
 class PSI(Connect):
-    
     def calculate(self, data, band_width = 4, nfft=None, no=0, window=np.hanning):
         k, N = data.shape 
         coh = Coherency()
@@ -391,6 +388,18 @@ class PSI(Connect):
             psi[f] = np.imag(np.sum(ctmp[:-1,:,:].conj()*ctmp[1:,:,:], axis=0))
         #full_psi = np.imag(np.sum(cohval[:-1,:,:].conj()*cohval[1:,:,:]))
         return psi
+
+class GC(Connect):
+    def calculate(self, data, order, method):
+        k, N = data.shape
+        arfull, vrfull = Mvar().fit(data, order, method)
+        gcval = np.zeros((k, k))
+        for i in xrange(k):
+            arix = [j for j in xrange(k) if i!=j]
+            ar_i, vr_i = Mvar().fit(data[arix,:], order, method)
+            tmpv = np.abs(vrfull)**2/np.abs(vr_i)**2
+            gcval[i, :] = np.log(tmpv[i, :])
+        return gcval
 
 conn_estim_dc = { 'dtf'  : DTF,
                   'pdc'  : PDC,

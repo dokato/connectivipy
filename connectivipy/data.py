@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import matplotlib.pyplot as plt
 import scipy.io as si
 import scipy.signal as ss
 from load.loaders import signalml_loader
 from mvarmodel import Mvar
 from conn import *
+
 
 class Data(object):
     '''
@@ -21,11 +23,15 @@ class Data(object):
       *chan_names*: list
           names of channels
     '''
-    def __init__(self, data, fs = 256., chan_names=[], data_info=''):
+    def __init__(self, data, fs=1., chan_names=[], data_info=''):
         self.__data = self._load_file(data, data_info)
         self.__fs = fs
         if self.__data.shape[0]==len(chan_names):
             self.__channames = chan_names
+        else:
+            self.__channames = []
+        self._parameters = {}
+        self._parameters["mvar"] = False
 
     def _load_file(self, data_what, data_info):
         '''
@@ -58,9 +64,11 @@ class Data(object):
         else:
             return False
         if len(data.shape)>2:
-            self.__multitrial = True
+            self.__multitrial = data.shape[2]
         else:
             self.__multitrial = False
+        self.__chans = data.shape[0]
+        self.__length = data.shape[1]
         return data
             
     def filter(self, b, a):
@@ -88,9 +96,6 @@ class Data(object):
         self.__data = ss.resample(self.__data, new_nr_samples, axis=1)
         self.__fs = fs_new
     
-    def estimate(self):
-        pass
-
     def fit_mvar(self, p = None, method = 'yw'):
         '''
         Fitting MVAR coefficients.
@@ -105,15 +110,18 @@ class Data(object):
         if not self.__multitrial:
             self.__Ar, self.__Vr = Mvar().fit(self.__data, p, method)
         else:
-            k, N, tr = self.__data.shape
-            self.__Ar = np.zeros((tr, p, k, k))
-            self.__Vr = np.zeros((tr, k, k))
+            k = self.__chans
+            self.__Ar = np.zeros((self.__multitrial, p, k, k))
+            self.__Vr = np.zeros((self.__multitrial, k, k))
             for r in xrange(self.__data.shape[2]):
                 atmp, vtmp = Mvar().fit(self.__data[:,:,r], p, method)
                 self.__Ar[r] = atmp
                 self.__Vr[r] = vtmp
+        self._parameters["mvar"] = True
+        self._parameters["p"] = p
+        self._parameters["mvarmethod"] = method
 
-    def conn(self, method = 'dtf', **params):
+    def conn(self, method, **params):
         '''
         Estimate connectivity pattern.
         
@@ -126,19 +134,94 @@ class Data(object):
         '''
         connobj = conn_estim_dc[method]()
         if not self.__multitrial:
-            self.__estim = connobj.calculate(self.__data, **params)
+            if isinstance(connobj,ConnectAR):
+                if self._parameters["mvar"]:
+                    self.__estim = connobj.calculate(self.__Ar,self.__Vr, self.__fs, **params)
+                else:
+                    self.__estim = connobj.calculate(**params)
+            else:
+                self.__estim = connobj.calculate(self.__data, **params)
         else:
-            k, N, tr = self.__data.shape
-            for r in xrange(self.__data.shape[2]):
-                self.__estim += connobj.calculate(self.__data[:,:,r], **params)
-            self.__estim = self.__estim/tr
-        return self.__estim
-    
-    def plot_data(self):
-        pass
+            for r in xrange(self.__multitrial):
+                if r==0:
+                    if isinstance(connobj,ConnectAR):
+                        if self._parameters["mvar"]:
+                            self.__estim = connobj.calculate(self.__Ar[r], self.__Vr[r], self.__fs, **params)
+                        else:
+                            self.__estim = connobj.calculate(**params)
+                    else:
+                        self.__estim = connobj.calculate(self.__data[:,:,r], **params)
+                    continue
+                if isinstance(connobj,ConnectAR):
+                    if self._parameters["mvar"]:
+                        self.__estim = connobj.calculate(self.__Ar[r], self.__Vr[r], self.__fs, **params)
+                    else:
+                        self.__estim = connobj.calculate(**params)
+                else:
+                    self.__estim = connobj.calculate(self.__data[:,:,r], **params)
+            self.__estim = self.__estim/self.__multitrial
 
-    def plot_conn(self):
-        pass
+        self._parameters["method"] = method
+        self._parameters.update(params)
+        return self.__estim
+
+    def significance(self, Nrep=100, alpha=0.05, **params):
+        connobj = conn_estim_dc[self._parameters["method"]]()
+        if not self.__multitrial:
+            if isinstance(connobj,ConnectAR):
+                self.__signific = connobj.surrogate(self.__data, Nrep=Nrep, alpha=alpha, 
+                                                    method=self._parameters["mvarmethod"],\
+                                                    fs=self.__fs, order=self._parameters["p"], **params)
+            else:
+                self.__signific = connobj.surrogate(self.__data, mvarmethod,\
+                                                    fs = self.__fs, order=order, resolution=resolution,\
+                                                    Nrep=Nrep, alpha=alpha, **params)
+        else:
+            #bootstrap
+            pass
+        return self.__signific
+
+    def plot_data(self, trial=False, show=True):
+        time = np.arange(0,self.__length)*1./self.__fs
+        if self.__multitrial and not trial:
+            plotdata = np.mean(self.__data, axis=2)
+        elif self.__multitrial and trial:
+            plotdata = self.__data[:,:,trial]
+        else:
+            plotdata = self.__data
+        fig, axes = plt.subplots(self.__chans, 1)
+        for i in xrange(self.__chans):
+            axes[i].plot(time, plotdata[i,:], 'g')
+            if self.__channames:
+                axes[i].set_title(self.__channames[i])
+        if show:
+            plt.show()
+
+    def plot_conn(self, name='', ylim=[0,1], xlim=None, signi=True, show=True):
+        assert hasattr(self,'_Data__estim')==True, "No valid estimation data!"
+        fig, axes = plt.subplots(self.__chans, self.__chans)
+        freqs = np.linspace(0, self.__fs//2, self.__estim.shape[0])
+        if not xlim:
+            xlim = [0, np.max(freqs)]
+        if signi and hasattr(self,'_Data__signific'):
+            flag_sig = True
+        else:
+            flag_sig = False
+        for i in xrange(self.__chans):
+            for j in xrange(self.__chans):
+                if self.__channames and i==0:
+                    axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
+                if self.__channames and j==0:
+                    axes[i, j].set_ylabel(self.__channames[i])
+                axes[i, j].fill_between(freqs, self.__estim[:, i, j], 0)
+                if flag_sig:
+                    l = axes[i, j].axhline(y=self.__signific[i,j], color='r')
+                axes[i, j].set_xlim(xlim)
+                axes[i, j].set_ylim(ylim)
+        plt.suptitle(name)
+        plt.tight_layout()
+        if show:
+            plt.show()
     
     # accessors:
     @property
