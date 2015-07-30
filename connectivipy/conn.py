@@ -154,6 +154,31 @@ class ConnectAR(Connect):
     def fit_ar(self):
         pass
 
+    def short_time(self, data, nfft=None, no=None, method='yw',\
+                                          order=None, resol=None, fs=1):
+        if len(data.shape)>2:
+            k, N, trls = data.shape
+        else:
+            k, N = data.shape
+        if not nfft:
+            nfft = int(N/5)
+        if not no:
+            no = int(N/10)
+        slices = xrange(0, N, int(nfft-no))
+        for e,i in enumerate(slices):
+            if i+nfft>=N:
+                datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N))),axis=1)
+            else:
+                datcut = data[:,i:i+nfft]
+            ar, vr = Mvar().fit(datcut, order, method)
+            if e==0:
+                rescalc = self.calculate(ar, vr, fs, resol)
+                stvalues = np.zeros((len(slices), rescalc.shape[0], k, k))
+                stvalues[e] = rescalc
+                continue
+            stvalues[e] = self.calculate(ar, vr, fs, resol)
+        return stvalues 
+
     def __calc_multitrial(self, arrs, vrrs, fs, resolution):
         trials = arrs.shape[0]
         chosen = np.random.randint(trials,size=trials)
@@ -428,17 +453,20 @@ class PSI(Connect):
         #full_psi = np.imag(np.sum(cohval[:-1,:,:].conj()*cohval[1:,:,:]))
         return psi
 
-class GC(Connect):
-    def calculate(self, data, order, method):
+class GCI(Connect):
+    def calculate(self, data, method='yw', order=None):
         k, N = data.shape
         arfull, vrfull = Mvar().fit(data, order, method)
         gcval = np.zeros((k, k))
         for i in xrange(k):
             arix = [j for j in xrange(k) if i!=j]
             ar_i, vr_i = Mvar().fit(data[arix,:], order, method)
-            tmpv = np.abs(vrfull)**2/np.abs(vr_i)**2
-            gcval[i, :] = np.log(tmpv[i, :])
-        return gcval
+            print i, arix
+            print vrfull.shape
+            print vr_i.shape 
+            tmpv = np.abs(vrfull[i,arix])**2/np.abs(vr_i[i])**2
+            gcval[i,arix] = np.log(tmpv)
+        return np.tile(gcval,(3,1,1))
 
 conn_estim_dc = { 'dtf'  : DTF,
                   'pdc'  : PDC,
@@ -450,5 +478,5 @@ conn_estim_dc = { 'dtf'  : DTF,
                   'gpdc' : gPDC,
                   'pcoh' : PartialCoh,
                   'coh'  : Coherency,
-                  'gc'   : GC,
+                  'gci'   : GCI,
                 }

@@ -34,10 +34,11 @@ class Mvar(object):
               reflection matrix (kXk)
         """
         if order == None:
-            cls._order_akaike(data, p_max=None, method=method)        
+            order, crit_val = cls._order_hq(data, p_max=None, method=method)        
         return cls._fit_dict[method](data,order)
-
-    def _order_akaike(self, data, p_max=None, method='yw'):
+    
+    @classmethod
+    def _order_akaike(cls, data, p_max=None, method='yw'):
         """
         Order akaike
         following Practical Biomedical Signal Analysis Using MATLAB eq 3.19
@@ -50,8 +51,8 @@ class Mvar(object):
             (a_coef, v_r) = self.fit(data, p+1, method)
             crit[p] = np.log(np.linalg.det(v_r))+2.*(p+1)*chn**2/N
         return np.argmin(crit), crit 
-
-    def _order_hq(self, data, p_max=None, method='yw'):
+    @classmethod
+    def _order_hq(cls, data, p_max=None, method='yw'):
         """
         Order Hannan-Quin
         following Practical Biomedical Signal Analysis Using MATLAB eq 3.20
@@ -61,10 +62,10 @@ class Mvar(object):
             p_max = 20
         crit = np.zeros(p_max)
         for p in range(p_max):
-            (a_coef, v_r) = self.fit(data, p+1, method)
+            (a_coef, v_r) = cls.fit(data, p+1, method)
             crit[p] = np.log(np.linalg.det(v_r))+2.*np.log(np.log(N))*(p+1)*chn**2/N
         return np.argmin(crit), crit 
-
+    @classmethod
     def _order_schwartz(self, data, p_max=None, method='yw'):
         """
         Order Schwartz
@@ -75,6 +76,6 @@ class Mvar(object):
             p_max = 20
         crit = np.zeros(p_max)
         for p in range(p_max):
-            (a_coef,v_r) = self.fit(data,p+1,method)
+            (a_coef,v_r) = cls.fit(data,p+1,method)
             crit[p] = np.log(np.linalg.det(v_r))+np.log(N)*(p+1)*chn**2/N
         return np.argmin(crit)+1, crit

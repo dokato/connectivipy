@@ -56,15 +56,46 @@ def mvar_gen_inst(Acf, n, omit=500):
         y[:,i] += eps
     return y[:,omit:]
 
+def meanncov(x, y=[], p=0, norm=True):
+    """
+    Wrapper to multichannel case of new covariance *ncov*.
+    Args:
+      *x* : numpy.array
+          multidimensional data (channels, data points, trials).
+      *y*=[] : numpy.array
+          multidimensional data. If not given the autocovariance of *x*
+          will be calculated.
+       *p*=0: int
+          window shift of input data. It can be negative as well.
+       *norm*=True: bool
+          normalization - if True the result is divided by length of *x*,
+          otherwise it is not. 
+    Returns:
+      *mcov* : np.array
+          covariance matrix
+    """
+    chn, N, trls = x.shape
+    for tr in xrange(trls):
+        if tr==0:
+            if not len(y):
+                mcov = ncov(x[:,:,tr], p=p, norm=norm)
+            else:
+                mcov = ncov(x[:,:,tr], y[:,:,tr], p=p, norm=norm)
+            continue
+        if not len(y):
+            mcov += ncov(x[:,:,tr], p=p, norm=norm)
+        else:
+            mcov += ncov(x[:,:,tr], y[:,:,tr], p=p, norm=norm)
+    return mcov/trls
 
-def ncov(x, y = [], p = 0, norm = True):
+def ncov(x, y=[], p=0, norm=True):
     """
     New covariance.
     Args:
       *x* : numpy.array
-          one dimensional data.
+          onedimensional data.
       *y*=[] : numpy.array
-          one dimensional data. If not given the autocovariance of *x*
+          onedimensional data. If not given the autocovariance of *x*
           will be calculated.
        *p*=0: int
           window shift of input data. It can be negative as well.
@@ -149,9 +180,14 @@ def nutallstrand(y,pmax=1):
 
 def yulewalker(y,pmax=1):
     assert pmax>0, "pmax > 0"
-    chn,n = y.shape
-    rr_f = ncov(y, p = pmax)
-    rr_b = ncov(y, p = -1*pmax)
+    if len(y.shape)>2:
+        chn, n, trls = y.shape
+        rr_f = meanncov(y, p = pmax)
+        rr_b = meanncov(y, p = -1*pmax)        
+    else:
+        chn, n = y.shape
+        rr_f = ncov(y, p = pmax)
+        rr_b = ncov(y, p = -1*pmax)
     q = np.zeros((pmax*chn,pmax*chn))
     acof = np.empty((pmax,chn,chn))
     for p in range(pmax):
@@ -163,4 +199,3 @@ def yulewalker(y,pmax=1):
         acof[p] = a_solved[p*chn:(p+1)*chn,:].T
         var -= np.dot(acof[p],rr_b[:,:,p+1].T)
     return acof, var
-
