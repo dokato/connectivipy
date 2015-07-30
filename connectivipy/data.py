@@ -156,6 +156,30 @@ class Data(object):
         self._parameters.update(params)
         return self.__estim
 
+    def short_time_conn(self, method, nfft=None, no=None,**params):
+        '''
+        SHort-time connectivity.
+        
+        Args:
+          *p* = None : int
+            estimation order, default None
+          *method* = 'yw' : str {'yw', 'ns', 'vm'}
+            method of estimation, for full list please type:
+            connectivipy.mvar_methods
+        '''
+        connobj = conn_estim_dc[method]()
+        if not self._parameters.has_key("resolution"):
+            self._parameters["resolution"] = None
+        if isinstance(connobj,ConnectAR):
+            self.__shtimest = connobj.short_time(self.__data, nfft=None, no=None,\
+                                                 fs=self.__fs, order=self._parameters["p"],\
+                                                 resol=self._parameters["resolution"])
+        else:
+            self.__shtimest = connobj.short_time(self.__data, **params)
+
+        self._parameters["shorttime"] = method
+        return self.__shtimest
+
     def significance(self, Nrep=100, alpha=0.05, **params):
         connobj = conn_estim_dc[self._parameters["method"]]()
         if not self.__multitrial:
@@ -192,7 +216,7 @@ class Data(object):
             plt.show()
 
     def plot_conn(self, name='', ylim=[0,1], xlim=None, signi=True, show=True):
-        assert hasattr(self,'_Data__estim')==True, "No valid estimation data!"
+        assert hasattr(self,'_Data__estim')==True, "No valid data!, Use calculation method first."
         fig, axes = plt.subplots(self.__chans, self.__chans)
         freqs = np.linspace(0, self.__fs//2, self.__estim.shape[0])
         if not xlim:
@@ -212,6 +236,31 @@ class Data(object):
                     l = axes[i, j].axhline(y=self.__signific[i,j], color='r')
                 axes[i, j].set_xlim(xlim)
                 axes[i, j].set_ylim(ylim)
+        plt.suptitle(name)
+        plt.tight_layout()
+        if show:
+            plt.show()
+
+    def plot_short_time_conn(self, name='',show=True):
+        assert hasattr(self,'_Data__shtimest')==True, "No valid data! Use calculation method first."
+        fig, axes = plt.subplots(self.__chans, self.__chans)
+        freqs = np.linspace(0, self.__fs//2, self.__shtimest.shape[1])
+        time = np.linspace(0, self.__length/self.__fs, self.__shtimest.shape[0])
+        ticks_time = [0, self.__fs//2]
+        ticks_freqs = [0, self.__length//self.__fs]
+        dtmax = np.max(self.__shtimest)
+        dtmin = np.min(self.__shtimest)
+        plt.autoscale(False)
+        for i in xrange(self.__chans):
+            for j in xrange(self.__chans):
+                if self.__channames and i==0:
+                    axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
+                if self.__channames and j==0:
+                    axes[i, j].set_ylabel(self.__channames[i])
+                axes[i, j].imshow(self.__shtimest[:,:,i,j].T, aspect='auto',\
+                                  interpolation='none', origin='lower', vmin=dtmin, vmax=dtmax)
+               # axes[i, j].set_yticks(ticks_time)
+               # axes[i, j].set_xticks(ticks_freqs)
         plt.suptitle(name)
         plt.tight_layout()
         if show:

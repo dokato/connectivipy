@@ -150,16 +150,13 @@ class Connect(object):
 class ConnectAR(Connect):
     __metaclass__ = ABCMeta
 
-    @abstractmethod
-    def fit_ar(self):
-        pass
-
-    def short_time(self, data, nfft=None, no=None, method='yw',\
+    def short_time(self, data, nfft=None, no=None, mvarmethod='yw',\
                                           order=None, resol=None, fs=1):
         if len(data.shape)>2:
             k, N, trls = data.shape
         else:
             k, N = data.shape
+            trls = 0
         if not nfft:
             nfft = int(N/5)
         if not no:
@@ -167,10 +164,13 @@ class ConnectAR(Connect):
         slices = xrange(0, N, int(nfft-no))
         for e,i in enumerate(slices):
             if i+nfft>=N:
-                datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N))),axis=1)
+                if trls:
+                    datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N,trls))),axis=1)
+                else:
+                    datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N))),axis=1)
             else:
                 datcut = data[:,i:i+nfft]
-            ar, vr = Mvar().fit(datcut, order, method)
+            ar, vr = Mvar().fit(datcut, order, mvarmethod)
             if e==0:
                 rescalc = self.calculate(ar, vr, fs, resol)
                 stvalues = np.zeros((len(slices), rescalc.shape[0], k, k))
