@@ -106,11 +106,11 @@ class Connect(object):
             else:
                 datcut = data[:,i:i+nfft]
             if e==0:
-                rescalc = self.calculate(data, **params)
+                rescalc = self.calculate(datcut, **params)
                 stvalues = np.zeros((len(slices), rescalc.shape[0], k, k))
                 stvalues[e] = rescalc
                 continue
-            stvalues[e] = self.calculate(data, **params)
+            stvalues[e] = self.calculate(datcut, **params)
         return stvalues 
 
     def significance(self, data, Nrep=10, alpha=0.05, **params):
@@ -464,7 +464,6 @@ class PSI(Connect):
         for f in xrange(len(fq_bands)-1):
             ctmp = cohval[fq_bands[f]:fq_bands[f+1],:,:]
             psi[f] = np.imag(np.sum(ctmp[:-1,:,:].conj()*ctmp[1:,:,:], axis=0))
-        #full_psi = np.imag(np.sum(cohval[:-1,:,:].conj()*cohval[1:,:,:]))
         return psi
 
 class GCI(Connect):

@@ -45,12 +45,12 @@ class Mvar(object):
         """
         chn, N = data.shape
         if p_max == None:
-            p_max = 20 # change to some criterion for max
+            p_max = 5 # change to some criterion for max
         crit = np.zeros(p_max)
         for p in range(p_max):
-            (a_coef, v_r) = self.fit(data, p+1, method)
-            crit[p] = np.log(np.linalg.det(v_r))+2.*(p+1)*chn**2/N
-        return np.argmin(crit), crit 
+            (a_coef, v_r) = cls.fit(data, p+1, method)
+            crit[p] = N*np.log(np.linalg.det(v_r))+2.*((p+1)*chn*(1+chn))
+        return np.argmin(crit)+1, crit 
     @classmethod
     def _order_hq(cls, data, p_max=None, method='yw'):
         """
@@ -59,23 +59,37 @@ class Mvar(object):
         """
         chn, N = data.shape 
         if p_max == None:
-            p_max = 20
+            p_max = 5
         crit = np.zeros(p_max)
         for p in range(p_max):
             (a_coef, v_r) = cls.fit(data, p+1, method)
             crit[p] = np.log(np.linalg.det(v_r))+2.*np.log(np.log(N))*(p+1)*chn**2/N
-        return np.argmin(crit), crit 
+        return np.argmin(crit)+1, crit 
     @classmethod
-    def _order_schwartz(self, data, p_max=None, method='yw'):
+    def _order_schwartz(cls, data, p_max=None, method='yw'):
         """
         Order Schwartz
         following Practical Biomedical Signal Analysis Using MATLAB eq 3.21
         """
         chn, N = data.shape 
         if p_max == None:
-            p_max = 20
+            p_max = 5
         crit = np.zeros(p_max)
         for p in range(p_max):
             (a_coef,v_r) = cls.fit(data,p+1,method)
             crit[p] = np.log(np.linalg.det(v_r))+np.log(N)*(p+1)*chn**2/N
+        return np.argmin(crit)+1, crit
+    @classmethod
+    def _order_fpe(cls, data, p_max=None, method='yw'):
+        """
+        Order FPE
+        following Practical Biomedical Signal Analysis Using MATLAB eq 3.21
+        """
+        chn, N = data.shape 
+        if p_max == None:
+            p_max = 5
+        crit = np.zeros(p_max)
+        for p in range(p_max):
+            (a_coef,v_r) = cls.fit(data,p+1,method)
+            crit[p] = np.linalg.det(v_r) + chn*np.log((N+chn*(p+1)+1)/(N-chn*(p+1)-1))
         return np.argmin(crit)+1, crit

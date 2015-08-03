@@ -16,7 +16,8 @@ class Data(object):
 
     Args:
       *data* : numpy.array or str
-          * array with data (kXN, k - channels nr, N - data points)
+          * array with data (kXNxR, k - channels nr, N - data points,
+                             R - nr of trials)
           * str - path to file with appropieate format
       *fs* : int
           sampling frequency
@@ -80,8 +81,11 @@ class Data(object):
           *b,a* : np.array 
             Numerator *b*  / denominator *a* polynomials of the IIR filter.
         '''
-        
-        self.__data = ss.filtfilt(b,a,self.__data)
+        if self.__multitrial:
+            for r in xrange(self.__multitrial):
+                self.__data[:,:,r] = ss.filtfilt(b,a,self.__data[:,:,r])
+        else:
+            self.__data = ss.filtfilt(b,a,self.__data)
 
     def resample(self, fs_new):
         '''
@@ -168,6 +172,11 @@ class Data(object):
             connectivipy.mvar_methods
         '''
         connobj = conn_estim_dc[method]()
+        if not self._parameters.has_key("p"):
+            if params.has_key("order"):
+                self._parameters["p"] = params["order"]
+            else:
+                self._parameters["p"] = None
         if not self._parameters.has_key("resolution"):
             self._parameters["resolution"] = None
         if isinstance(connobj,ConnectAR):
@@ -175,7 +184,7 @@ class Data(object):
                                                  fs=self.__fs, order=self._parameters["p"],\
                                                  resol=self._parameters["resolution"])
         else:
-            self.__shtimest = connobj.short_time(self.__data, **params)
+            self.__shtimest = connobj.short_time(self.__data, nfft=None, no=None, **params)
 
         self._parameters["shorttime"] = method
         return self.__shtimest
@@ -259,6 +268,8 @@ class Data(object):
                     axes[i, j].set_ylabel(self.__channames[i])
                 axes[i, j].imshow(self.__shtimest[:,:,i,j].T, aspect='auto',\
                                   interpolation='none', origin='lower', vmin=dtmin, vmax=dtmax)
+                axes[i,j].get_xaxis().set_visible(False)
+                axes[i,j].get_yaxis().set_visible(False)
                # axes[i, j].set_yticks(ticks_time)
                # axes[i, j].set_xticks(ticks_freqs)
         plt.suptitle(name)
