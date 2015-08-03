@@ -128,14 +128,19 @@ def ncov(x, y=[], p=0, norm=True):
 
 def vieiramorf(y,pmax=1):
     assert pmax>0, "pmax > 0"
-    M,N = y.shape 
+    if len(y.shape)>2:
+        M, N, trls = y.shape
+        cov_func = meanncov
+    else:
+        M, N = y.shape 
+        cov_func = ncov
     f,b = y.copy(),y.copy()
-    pef = ncov(y,norm=False)
+    pef = cov_func(y,norm=False)
     peb = pef.copy()
     arf = np.zeros((pmax,M,M))
     arb = np.zeros((pmax,M,M))
     for k in range(0,pmax):
-        D = ncov(f[:,k+1:N],b[:,0:N-k-1],norm=False)
+        D = cov_func(f[:,k+1:N],b[:,0:N-k-1],norm=False)
         arf[k,:,:] = np.dot(D,np.linalg.inv(peb))
         arb[k,:,:] = np.dot(D.T,np.linalg.inv(pef))
         
@@ -148,20 +153,25 @@ def vieiramorf(y,pmax=1):
             arb[k-i-1,:,:] = arb[k-i-1,:,:] -np.dot(arb[k,:,:],arf[i,:,:])
             arf[i,:,:] = tmpp
 
-        peb = ncov(b[:,:N-k-1],norm=False)
-        pef = ncov(f[:,k+1:],norm=False)
+        peb = cov_func(b[:,:N-k-1],norm=False)
+        pef = cov_func(f[:,k+1:],norm=False)
     return arf, pef/N
 
 def nutallstrand(y,pmax=1):
     assert pmax>0, "pmax > 0"
-    M,N = y.shape 
+    if len(y.shape)>2:
+        M, N, trls = y.shape
+        cov_func = meanncov
+    else:
+        M, N = y.shape 
+        cov_func = ncov
     f,b = y.copy(),y.copy()
-    pef = ncov(y,norm=False)
+    pef = cov_func(y,norm=False)
     peb = pef.copy()
     arf = np.zeros((pmax,M,M))
     arb = np.zeros((pmax,M,M))
     for k in range(0,pmax):
-        D = ncov(f[:,k+1:N],b[:,0:N-k-1],norm=False)
+        D = cov_func(f[:,k+1:N],b[:,0:N-k-1],norm=False)
         arf[k,:,:] = 2*np.dot(D,np.linalg.inv(peb + pef))
         arb[k,:,:] = 2*np.dot(D.T,np.linalg.inv(pef + peb))
         
@@ -174,8 +184,8 @@ def nutallstrand(y,pmax=1):
             arb[k-i-1,:,:] = arb[k-i-1,:,:] -np.dot(arb[k,:,:],arf[i,:,:])
             arf[i,:,:] = tmpp
 
-        peb = ncov(b[:,:N-k-1],norm=False)
-        pef = ncov(f[:,k+1:],norm=False)
+        peb = cov_func(b[:,:N-k-1],norm=False)
+        pef = cov_func(f[:,k+1:],norm=False)
     return arf, pef/N
 
 def yulewalker(y,pmax=1):

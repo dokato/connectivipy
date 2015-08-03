@@ -86,8 +86,32 @@ class Connect(object):
     def calculate(self):
         pass
     
-    def short_time(self, winlen=64, no=16):
-        pass
+    def short_time(self, data, nfft=None, no=None, **params):
+        if len(data.shape)>2:
+            k, N, trls = data.shape
+        else:
+            k, N = data.shape
+            trls = 0
+        if not nfft:
+            nfft = int(N/5)
+        if not no:
+            no = int(N/10)
+        slices = xrange(0, N, int(nfft-no))
+        for e,i in enumerate(slices):
+            if i+nfft>=N:
+                if trls:
+                    datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N,trls))),axis=1)
+                else:
+                    datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N))),axis=1)
+            else:
+                datcut = data[:,i:i+nfft]
+            if e==0:
+                rescalc = self.calculate(data, **params)
+                stvalues = np.zeros((len(slices), rescalc.shape[0], k, k))
+                stvalues[e] = rescalc
+                continue
+            stvalues[e] = self.calculate(data, **params)
+        return stvalues 
 
     def significance(self, data, Nrep=10, alpha=0.05, **params):
         if len(data.shape)>2:
@@ -257,9 +281,8 @@ def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
 
 class PartialCoh(ConnectAR):
     """
-    partial coherency
+    partial coherency 
     """
-    
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=None):
         A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution=resolution) 
         res, k, k = A_z.shape
@@ -295,9 +318,6 @@ class gPDC(ConnectAR):
     """
     generalized PDC
     """
-    # not too good
-    def fit_ar(self, data, order = None, method = 'yw'):
-        pass
     
     def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
         return pdc_fun(Acoef, Vcoef, fs, resolution, generalized=True)
@@ -308,9 +328,6 @@ class gDTF(ConnectAR):
     Kaminski, M.; Blinowska, K. J. (1991).
     """
     # not too good
-    def fit_ar(self, data, order = None, method = 'yw'):
-        pass
-    
     def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
         return dtf_fun(Acoef, Vcoef, fs, resolution, generalized=True)
 
@@ -392,9 +409,6 @@ class iDTF(ConnectAR):
     """
         ????
     """
-    # not too good
-    def fit_ar(self, data, order = None, method = 'yw'):
-        pass
     
     def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
         B_z = spectrum_inst(Acoef, Vcoef, fs, resolution = resolution) 
@@ -461,12 +475,9 @@ class GCI(Connect):
         for i in xrange(k):
             arix = [j for j in xrange(k) if i!=j]
             ar_i, vr_i = Mvar().fit(data[arix,:], order, method)
-            print i, arix
-            print vrfull.shape
-            print vr_i.shape 
-            tmpv = np.abs(vrfull[i,arix])**2/np.abs(vr_i[i])**2
-            gcval[i,arix] = np.log(tmpv)
-        return np.tile(gcval,(3,1,1))
+            for e,c in enumerate(arix):
+                gcval[i,c] = np.log(vrfull[i,i]/vr_i[e,e])
+        return np.tile(gcval,(2,1,1))
 
 conn_estim_dc = { 'dtf'  : DTF,
                   'pdc'  : PDC,
@@ -478,5 +489,5 @@ conn_estim_dc = { 'dtf'  : DTF,
                   'gpdc' : gPDC,
                   'pcoh' : PartialCoh,
                   'coh'  : Coherency,
-                  'gci'   : GCI,
+                  'gci'  : GCI,
                 }
