@@ -86,6 +86,13 @@ class ConnTest(unittest.TestCase):
         dtf = dt.calculate(ans,vns, 128)
         self.assertTrue(np.allclose(np.sum(np.abs(dtf)**2,axis=2),1))
 
+    def test_gdtf(self):
+        ys = mvar_gen(A,10**4)
+        ans,vns = nutallstrand(ys,2)
+        dt = gDTF() 
+        dtf = dt.calculate(ans,vns, 128)
+        self.assertTrue(np.allclose(np.sum(np.abs(dtf)**2,axis=2),1))
+
     def test_pdc(self):
         ys = mvar_gen(A,10**4)
         ans,vns = vieiramorf(ys,2)
@@ -93,9 +100,16 @@ class ConnTest(unittest.TestCase):
         pdc = dt.calculate(ans,vns, 128)
         self.assertTrue(np.allclose(np.sum(np.abs(pdc)**2,axis=1),1))
 
+    def test_gpdc(self):
+        ys = mvar_gen(A,10**4)
+        ans,vns = vieiramorf(ys,2)
+        dt = gPDC() 
+        pdc = dt.calculate(ans,vns, 128)
+        self.assertTrue(np.allclose(np.sum(np.abs(pdc)**2,axis=1),1))
+
     def test_ipdc(self):
         ys = mvar_gen_inst(Ains,10**4)
-        ans, vns = vieiramorf(ys,4)
+        ans, vns = yulewalker(ys,4)
         dt = iPDC() 
         ipdc = dt.calculate(ans,vns, 128)
         self.assertTrue(np.allclose(np.sum(np.abs(ipdc)**2,axis=1),1))

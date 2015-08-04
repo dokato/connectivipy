@@ -14,8 +14,8 @@ def mvar_gen(Acf, n, omit=500):
       *n* : int
           number of data points.
     Returns:
-      *y* : np.array
-          kx(n-omit) data points
+      *y* : numpy.array
+          (k, n-omit) data points
     """
     p, chn, chn = Acf.shape
     y = np.zeros((chn, n + omit))
@@ -105,7 +105,6 @@ def ncov(x, y=[], p=0, norm=True):
     Returns:
       *kv* : np.array
           covariance matrix
-
     """
     C,N = x.shape
     cov = np.zeros((C,C,abs(p)+1))
@@ -127,6 +126,26 @@ def ncov(x, y=[], p=0, norm=True):
     return kv
 
 def vieiramorf(y,pmax=1):
+    """
+    Compute multichannel autoregresive model coefficients using
+    Vieira-Morf algorithm.
+    Args:
+      *y* : numpy.array
+          multichannel data in shape (k, n) for one trial case and
+          (k, n, tr) for multitrial
+          k - nr of channels, n -data points, tr - nr of trials
+      *pmax*: int >0
+          maximal model order
+    Returns:
+      *Ar* : np.array
+          matrix with parameters matrix (p, k, k) where p - model order,
+          k - nr of channels
+      *Vr* : np.array
+          prediction error matrix (k,k)
+    References:
+    .. [1] Marple, Jr S. L., *Digital Spectral Analysis with Applications*, 
+           Prentice-Hall Signal Processing Series, 1987
+    """
     assert pmax>0, "pmax > 0"
     if len(y.shape)>2:
         M, N, trls = y.shape
@@ -158,6 +177,26 @@ def vieiramorf(y,pmax=1):
     return arf, pef/N
 
 def nutallstrand(y,pmax=1):
+    """
+    Compute multichannel autoregresive model coefficients using
+    Nutall-Strand algorithm.
+    Args:
+      *y* : numpy.array
+          multichannel data in shape (k, n) for one trial case and
+          (k, n, tr) for multitrial
+          k - nr of channels, n -data points, tr - nr of trials
+      *pmax*: int >0
+          maximal model order
+    Returns:
+      *Ar* : np.array
+          matrix with parameters matrix (p, k, k) where p - model order,
+          k - nr of channels
+      *Vr* : np.array
+          prediction error matrix (k,k)
+    References:
+    .. [1] Marple, Jr S. L., *Digital Spectral Analysis with Applications*, 
+           Prentice-Hall Signal Processing Series, 1987
+    """
     assert pmax>0, "pmax > 0"
     if len(y.shape)>2:
         M, N, trls = y.shape
@@ -189,6 +228,26 @@ def nutallstrand(y,pmax=1):
     return arf, pef/N
 
 def yulewalker(y,pmax=1):
+    """
+    Compute multichannel autoregresive model coefficients using
+    Yule-Walker algorithm.
+    Args:
+      *y* : numpy.array
+          multichannel data in shape (k, n) for one trial case and
+          (k, n, tr) for multitrial
+          k - nr of channels, n -data points, tr - nr of trials
+      *pmax*: int >0
+          maximal model order
+    Returns:
+      *Ar* : np.array
+          matrix with parameters matrix (p, k, k) where p - model order,
+          k - nr of channels
+      *Vr* : np.array
+          prediction error matrix (k,k)
+    References:
+    .. [1] Marple, Jr S. L., *Digital Spectral Analysis with Applications*, 
+           Prentice-Hall Signal Processing Series, 1987
+    """
     assert pmax>0, "pmax > 0"
     if len(y.shape)>2:
         chn, n, trls = y.shape

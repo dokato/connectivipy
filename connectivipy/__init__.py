@@ -5,4 +5,4 @@ from data import Data
 from conn import ConnectAR, spectrum, spectrumft, DTF
 from mvarmodel import Mvar
 
-__version__ = '0.2'
+__version__ = '0.31'

@@ -27,11 +27,33 @@ def spectrumft(acoef, vcoef, fs=1, resolution=None):
         S_z[i] = np.dot(np.dot(H_z[i],vcoef), H_z[i].T.conj())
     return A_z, H_z, S_z
 
-def spectrum(acoef, vcoef, fs=1, resolution=None):
-    "ready to use"
+def spectrum(acoef, vcoef, fs=1, resolution=100):
+    """
+    Generating data point from matrix *A* with MVAR coefficients.
+    Args:
+      *Acf* : numpy.array
+          array of shape (k, k, p) where *k* is number of channels and
+          *p* is a model order.
+      *Vcf* : numpy.array
+          prediction error matrix (k, k)
+      *fs*=1 : int
+          sampling rate
+      *resolution*=100 : int
+          number of spectrum data points
+    Returns:
+      *A_z* : numpy.array
+          z-transformed A(f) complex matrix in shape (*resolution*, k, k)
+      *H_z* : numpy.array
+          inversion of *A_z*
+      *S_z* : numpy.array
+          spectrum matrix (*resolution*, k, k)
+    References:
+    .. [1] K. J. Blinowska, R. Kus, M. Kaminski (2004) “Granger causality
+           and information flow in multivariate processes”
+           Physical Review E 70, 050902.
+    """
     p, k, k = acoef.shape 
-    if resolution == None:
-        freqs=np.linspace(0,fs/2,512)
+    freqs=np.linspace(0,fs*0.5,resolution)
     A_z=np.zeros((len(freqs),k,k),complex)
     H_z=np.zeros((len(freqs),k,k),complex)
     S_z=np.zeros((len(freqs),k,k),complex)
@@ -52,8 +74,30 @@ def spectrum(acoef, vcoef, fs=1, resolution=None):
 
 def spectrum_inst(acoef, vcoef, fs=1, resolution=None):
     """
-    ready to use (i hope)
-    from ldlt decomposition
+    Generating data point from matrix *A* with MVAR coefficients taking
+    into account zero-lag effects.
+    Args:
+      *Acf* : numpy.array
+          array of shape (k, k, p+1) where *k* is number of channels and
+          *p* is a model order. Acf[0] - is (k, k) matrix for zero lag,
+          Acf[1] for one data point lag and so on.
+      *Vcf* : numpy.array
+          prediction error matrix (k, k)
+      *fs*=1 : int
+          sampling rate
+      *resolution*=100 : int
+          number of spectrum data points
+    Returns:
+      *A_z* : numpy.array
+          z-transformed A(f) complex matrix in shape (*resolution*, k, k)
+      *H_z* : numpy.array
+          inversion of *A_z*
+      *S_z* : numpy.array
+          spectrum matrix (*resolution*, k, k)
+    References:
+    .. [1] Erla S. et all, Multivariate Autoregressive Model with 
+           Instantaneous Effects to Improve Brain Connectivity Estimation, 
+           Int. J. Bioelectromagn. 11, 74–79 (2009).
     """
     p, k, k = acoef.shape 
     if resolution == None:
@@ -80,6 +124,11 @@ def spectrum_inst(acoef, vcoef, fs=1, resolution=None):
 ########################################################################
 
 class Connect(object):
+    """
+    Abstract class governing calculation of various connectivity estimators
+    with concrete methods: *short_time*, *significance* and
+    abstract *calculate*.
+    """
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -172,6 +221,12 @@ class Connect(object):
         return self.levels(reskeeper, alpha, k)
 
 class ConnectAR(Connect):
+    """
+    Inherits from *Connect* class and governs calculation of various
+    connectivity estimators basing on MVAR model methods. It overloads
+    *short_time*, *significance* methods but *calculate* remains abstract.
+    """
+
     __metaclass__ = ABCMeta
 
     def short_time(self, data, nfft=None, no=None, mvarmethod='yw',\
@@ -257,6 +312,27 @@ class ConnectAR(Connect):
 # MVAR based methods:
 
 def dtf_fun(Acoef, Vcoef, fs, resolution, generalized=False):
+    """
+    Directed Transfer Function estimation from MVAR parameters.
+    Args:
+      *Acf* : numpy.array
+          array of shape (k, k, p) where *k* is number of channels and
+          *p* is a model order.
+      *Vcf* : numpy.array
+          prediction error matrix (k, k)
+      *fs*=1 : int
+          sampling rate
+      *resolution*=100 : int
+          number of spectrum data points
+      *generalized*=False : bool
+          generalized version or not
+    Returns:
+      *DTF* : numpy.array
+          matrix with estimation results (*resolution*, k, k)
+    References:
+    .. [1] M. Kaminski, K.J. Blinowska. A new method of the description
+           of the information flow. Biol.Cybern. 65:203-210, (1991).
+    """
     A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
     res, k, k = A_z.shape
     DTF = np.zeros((res,k,k))
@@ -270,6 +346,28 @@ def dtf_fun(Acoef, Vcoef, fs, resolution, generalized=False):
     return DTF
 
 def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
+    """
+    Partial Directed Coherence estimation from MVAR parameters.
+    Args:
+      *Acf* : numpy.array
+          array of shape (k, k, p) where *k* is number of channels and
+          *p* is a model order.
+      *Vcf* : numpy.array
+          prediction error matrix (k, k)
+      *fs*=1 : int
+          sampling rate
+      *resolution*=100 : int
+          number of spectrum data points
+      *generalized*=False : bool
+          generalized version or not
+    Returns:
+      *PDC* : numpy.array
+          matrix with estimation results (*resolution*, k, k)
+    References:
+    .. [1] Sameshima, K., Baccala, L. A., Partial directed 
+           coherence: a new concept in neural structure determination.,
+           2001, Biol. Cybern. 84, 463–474.
+    """
     A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
     res, k, k = A_z.shape
     PDC = np.zeros((res,k,k))
@@ -333,10 +431,27 @@ class gDTF(ConnectAR):
 
 class ffDTF(ConnectAR):
     """
-    full frequency DTF
-    Korzeniewska, A.et. all. Determination of information flow direction 
-    among brain structures by a modified directed transfer function (dDTF) 
-    method. J. Neurosci. Methods 125, 195–207 (2003).
+    full-frequency Directed Transfer Function estimation from MVAR
+    parameters.
+    Args:
+      *Acf* : numpy.array
+          array of shape (k, k, p) where *k* is number of channels and
+          *p* is a model order.
+      *Vcf* : numpy.array
+          prediction error matrix (k, k)
+      *fs*=1 : int
+          sampling rate
+      *resolution*=100 : int
+          number of spectrum data points
+      *generalized*=False : bool
+          generalized version or not
+    Returns:
+      *ffDTF* : numpy.array
+          matrix with estimation results (*resolution*, k, k)
+    References:
+    .. [1] Korzeniewska, A.et. all. Determination of information flow direction 
+           among brain structures by a modified directed transfer function (dDTF) 
+           method. J. Neurosci. Methods 125, 195–207 (2003).
     """
 
     def fit_ar(self, data, order = None, method = 'yw'):
@@ -356,12 +471,28 @@ class ffDTF(ConnectAR):
 
 class dDTF(ConnectAR):
     """
-    dDTF
-    Korzeniewska, A.et. all. Determination of information flow direction 
-    among brain structures by a modified directed transfer function (dDTF) 
-    method. J. Neurosci. Methods 125, 195–207 (2003).
+    direct Directed Transfer Function estimation from MVAR
+    parameters.
+    Args:
+      *Acf* : numpy.array
+          array of shape (k, k, p) where *k* is number of channels and
+          *p* is a model order.
+      *Vcf* : numpy.array
+          prediction error matrix (k, k)
+      *fs*=1 : int
+          sampling rate
+      *resolution*=100 : int
+          number of spectrum data points
+      *generalized*=False : bool
+          generalized version or not
+    Returns:
+      *dDTF* : numpy.array
+          matrix with estimation results (*resolution*, k, k)
+    References:
+    .. [1] Korzeniewska, A.et. all. Determination of information flow direction 
+           among brain structures by a modified directed transfer function (dDTF) 
+           method. J. Neurosci. Methods 125, 195–207 (2003).
     """
-
     def fit_ar(self, data, order = None, method = 'yw'):
         pass
 
@@ -386,15 +517,28 @@ class dDTF(ConnectAR):
 
 class iPDC(ConnectAR):
     """
-    iPDC
-    Erla, S. et all Multivariate Autoregressive Model with Instantaneous
-    Effects to Improve Brain Connectivity Estimation. 
-    Int. J. Bioelectromagn. 11, 74–79 (2009).
+    instantaneous Partial Directed Coherence  from MVAR
+    parameters.
+    Args:
+      *Acf* : numpy.array
+          array of shape (k, k, p+1) where *k* is number of channels and
+          *p* is a model order. It's zero lag case.
+      *Vcf* : numpy.array
+          prediction error matrix (k, k)
+      *fs*=1 : int
+          sampling rate
+      *resolution*=100 : int
+          number of spectrum data points
+      *generalized*=False : bool
+          generalized version or not
+    Returns:
+      *iPDC* : numpy.array
+          matrix with estimation results (*resolution*, k, k)
+    References:
+    .. [1] Erla, S. et all Multivariate Autoregressive Model with Instantaneous
+           Effects to Improve Brain Connectivity Estimation. 
+           Int. J. Bioelectromagn. 11, 74–79 (2009).
     """
-
-    def fit_ar(self, data, order = None, method = 'yw'):
-        pass
-    
     def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
         B_z = spectrum_inst(Acoef, Vcoef, fs, resolution = resolution) 
         res, k, k = B_z.shape
@@ -407,7 +551,27 @@ class iPDC(ConnectAR):
 
 class iDTF(ConnectAR):
     """
-        ????
+    instantaneous Partial Directed Coherence  from MVAR
+    parameters.
+    Args:
+      *Acf* : numpy.array
+          array of shape (k, k, p+1) where *k* is number of channels and
+          *p* is a model order. It's zero lag case.
+      *Vcf* : numpy.array
+          prediction error matrix (k, k)
+      *fs*=1 : int
+          sampling rate
+      *resolution*=100 : int
+          number of spectrum data points
+      *generalized*=False : bool
+          generalized version or not
+    Returns:
+      *iPDC* : numpy.array
+          matrix with estimation results (*resolution*, k, k)
+    References:
+    .. [1] Erla, S. et all Multivariate Autoregressive Model with Instantaneous
+           Effects to Improve Brain Connectivity Estimation. 
+           Int. J. Bioelectromagn. 11, 74–79 (2009).
     """
     
     def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):

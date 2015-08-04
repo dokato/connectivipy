@@ -177,15 +177,18 @@ class Data(object):
                 self._parameters["p"] = params["order"]
             else:
                 self._parameters["p"] = None
+        if not params.has_key("nfft"):
+            params["nfft"] = None
+        if not params.has_key("no"):
+            params["no"] = None
         if not self._parameters.has_key("resolution"):
             self._parameters["resolution"] = None
         if isinstance(connobj,ConnectAR):
-            self.__shtimest = connobj.short_time(self.__data, nfft=None, no=None,\
+            self.__shtimest = connobj.short_time(self.__data, nfft=params["nfft"], no=params["no"],\
                                                  fs=self.__fs, order=self._parameters["p"],\
                                                  resol=self._parameters["resolution"])
         else:
-            self.__shtimest = connobj.short_time(self.__data, nfft=None, no=None, **params)
-
+            self.__shtimest = connobj.short_time(self.__data, nfft=params["nfft"], no=params["no"], **params)
         self._parameters["shorttime"] = method
         return self.__shtimest
 
