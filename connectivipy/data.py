@@ -162,7 +162,7 @@ class Data(object):
 
     def short_time_conn(self, method, nfft=None, no=None,**params):
         '''
-        SHort-time connectivity.
+        Short-time connectivity.
         
         Args:
           *p* = None : int
@@ -193,6 +193,19 @@ class Data(object):
         return self.__shtimest
 
     def significance(self, Nrep=100, alpha=0.05, **params):
+        '''
+        Statistical significance values of connectivity estimation method.
+        
+        Args:
+          *Nrep* = 100 : int
+            number of resamples
+          *alpha* = 0.05 : float
+            type I error rate (significance level)
+        Returns:
+          *signi*: numpy.array
+            matrix in shape of (k, k) with values for each pair of
+            channels
+        '''
         connobj = conn_estim_dc[self._parameters["method"]]()
         if not self.__multitrial:
             if isinstance(connobj,ConnectAR):
@@ -212,6 +225,17 @@ class Data(object):
         return self.__signific
 
     def plot_data(self, trial=False, show=True):
+        '''
+        Plot data in a subplot for each channel.
+        
+        Args:
+          *trial* = False : int
+            if there is multichannel data it should be a number of trial
+            you want to plot, if False data is averaged over trials
+          *show* = True : boolean
+            show the plot or not
+        '''
+
         time = np.arange(0,self.__length)*1./self.__fs
         if self.__multitrial and not trial:
             plotdata = np.mean(self.__data, axis=2)
@@ -228,6 +252,21 @@ class Data(object):
             plt.show()
 
     def plot_conn(self, name='', ylim=[0,1], xlim=None, signi=True, show=True):
+        '''
+        Plot connectivity estimation results.
+        
+        Args:
+          *name*='' : str
+            title of the plot
+          *ylim*=[0,1] : list
+            range of y-axis values shown
+          *xlim*=None : list [from (int), to (int)]
+            range of y-axis values shown, if None it is from 0 to Nyquist frequency
+          *signi*=True : boolean
+            if significance levels are calculated they are shown in the plot
+          *show* = True : boolean
+            show the plot or not            
+        '''
         assert hasattr(self,'_Data__estim')==True, "No valid data!, Use calculation method first."
         fig, axes = plt.subplots(self.__chans, self.__chans)
         freqs = np.linspace(0, self.__fs//2, self.__estim.shape[0])
@@ -254,6 +293,15 @@ class Data(object):
             plt.show()
 
     def plot_short_time_conn(self, name='',show=True):
+        '''
+        Plot short-time version of estimation results.
+        
+        Args:
+          *name*='' : str
+            title of the plot
+          *show* = True : boolean
+            show the plot or not            
+        '''
         assert hasattr(self,'_Data__shtimest')==True, "No valid data! Use calculation method first."
         fig, axes = plt.subplots(self.__chans, self.__chans)
         freqs = np.linspace(0, self.__fs//2, self.__shtimest.shape[1])
@@ -283,6 +331,7 @@ class Data(object):
     # accessors:
     @property
     def mvar_coefficients(self):
+        "Returns mvar coefficients if calculated"
         if hasattr(self,'_Data__Ar') and hasattr(self,'_Data__Vr'):
             return (self.__Ar, self.__Vr)
         else:
@@ -290,6 +339,7 @@ class Data(object):
 
     @property
     def mvarcoef(self):
+        "Returns mvar coefficients if calculated"
         return self.mvar_coefficients
 
     @property

@@ -10,8 +10,16 @@ Project blog is [here](http://dokato.github.io/connpy-blog/)!
 * Connectivity
 * Mvar fitting
 
-
 ##Changelog
+
+### 0.31
+* connectivity methods: gDTF, gPDC, Coherency, PSI, GC
+* new mvar estimation criterion: FPE
+* statistics for multitrial (bootstrap) and normal case (surrogate data)
+* fitting mvar for multitrial
+* short-time versions of estimation
+* data plotting
+* working example
 
 ### 0.2
 * connectivity methods: DTF, PDC, Partial Coherence, iPDC
