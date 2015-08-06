@@ -46,7 +46,6 @@ class DataTest(unittest.TestCase):
         pass 
 
 class MvarTest(unittest.TestCase):
- 
     def test_fitting(self):
         "test mvar fitting"
         ys = mvar_gen(A,10**4)

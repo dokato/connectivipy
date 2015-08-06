@@ -71,7 +71,6 @@ def spectrum(acoef, vcoef, fs=1, resolution=100):
         S_z[e] = np.dot(np.dot(H_z[e],vcoef), H_z[e].T.conj())
     return A_z, H_z, S_z
 
-
 def spectrum_inst(acoef, vcoef, fs=1, resolution=None):
     """
     Generating data point from matrix *A* with MVAR coefficients taking
@@ -648,7 +647,7 @@ class GCI(Connect):
             arix = [j for j in xrange(k) if i!=j]
             ar_i, vr_i = Mvar().fit(data[arix,:], order, method)
             for e,c in enumerate(arix):
-                gcval[i,c] = np.log(vrfull[i,i]/vr_i[e,e])
+                gcval[c,i] = np.log(vrfull[i,i]/vr_i[e,e])
         return np.tile(gcval,(2,1,1))
 
 conn_estim_dc = { 'dtf'  : DTF,

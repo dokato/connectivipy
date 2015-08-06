@@ -118,7 +118,7 @@ def ncov(x, y=[], p=0, norm=True):
             zy = y.take(idxs,axis=1, mode='wrap')
             cov[:,:,r] = np.dot(x[:,:N-r],zy[:,:N-r].T)
     if norm:
-        kv = cov/N
+        kv = cov/(N-1)
     else:
         kv = cov 
     if p==0:
@@ -162,16 +162,13 @@ def vieiramorf(y,pmax=1):
         D = cov_func(f[:,k+1:N],b[:,0:N-k-1],norm=False)
         arf[k,:,:] = np.dot(D,np.linalg.inv(peb))
         arb[k,:,:] = np.dot(D.T,np.linalg.inv(pef))
-        
         tmp = f[:,k+1:] - np.dot(b[:,:N-k-1].T,arf[k,:,:].T).T
         b[:,:N-k-1] = b[:,:N-k-1] - np.dot(f[:,k+1:].T,arb[k,:,:].T).T
         f[:,k+1:] = tmp
-
         for i in range(k):
             tmpp = arf[i]-np.dot(arf[k],arb[k-i-1])
             arb[k-i-1,:,:] = arb[k-i-1,:,:] -np.dot(arb[k,:,:],arf[i,:,:])
             arf[i,:,:] = tmpp
-
         peb = cov_func(b[:,:N-k-1],norm=False)
         pef = cov_func(f[:,k+1:],norm=False)
     return arf, pef/N
@@ -213,16 +210,13 @@ def nutallstrand(y,pmax=1):
         D = cov_func(f[:,k+1:N],b[:,0:N-k-1],norm=False)
         arf[k,:,:] = 2*np.dot(D,np.linalg.inv(peb + pef))
         arb[k,:,:] = 2*np.dot(D.T,np.linalg.inv(pef + peb))
-        
         tmp = f[:,k+1:] - np.dot(b[:,:N-k-1].T,arf[k,:,:].T).T
         b[:,:N-k-1] = b[:,:N-k-1] - np.dot(f[:,k+1:].T,arb[k,:,:].T).T
         f[:,k+1:] = tmp
-
         for i in range(k):
             tmpp = arf[i]-np.dot(arf[k],arb[k-i-1])
             arb[k-i-1,:,:] = arb[k-i-1,:,:] -np.dot(arb[k,:,:],arf[i,:,:])
             arf[i,:,:] = tmpp
-
         peb = cov_func(b[:,:N-k-1],norm=False)
         pef = cov_func(f[:,k+1:],norm=False)
     return arf, pef/N
@@ -238,7 +232,7 @@ def yulewalker(y,pmax=1):
           k - nr of channels, n -data points, tr - nr of trials
       *pmax*: int >0
           model order
-    Returns:
+'    Returns:
       *Ar* : np.array
           matrix with parameters matrix (p, k, k) where p - model order,
           k - nr of channels

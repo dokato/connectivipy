@@ -99,7 +99,8 @@ class Mvar(object):
         for p in range(p_max):
             (a_coef, v_r) = cls.fit(data, p+1, method)
             crit[p] = np.log(np.linalg.det(v_r))+2.*np.log(np.log(N))*(p+1)*chn**2/N
-        return np.argmin(crit)+1, crit 
+        return np.argmin(crit)+1, crit
+
     @classmethod
     def _order_schwartz(cls, data, p_max=None, method='yw'):
         """
@@ -131,6 +132,7 @@ class Mvar(object):
             (a_coef,v_r) = cls.fit(data,p+1,method)
             crit[p] = np.log(np.linalg.det(v_r))+np.log(N)*(p+1)*chn**2/N
         return np.argmin(crit)+1, crit
+
     @classmethod
     def _order_fpe(cls, data, p_max=None, method='yw'):
         """
