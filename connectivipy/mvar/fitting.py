@@ -6,7 +6,7 @@ from numpy.linalg import inv
 
 def mvar_gen(Acf, n, omit=500):
     """
-    Generating data point from matrix *A* with MVAR coefficients.
+    Generating data point from MVAR coefficiencs matrix *Acf*.
     Args:
       *Acf* : numpy.array
           array of dimension kxkxp where *k* is number of channels and
@@ -135,7 +135,7 @@ def vieiramorf(y,pmax=1):
           (k, n, tr) for multitrial
           k - nr of channels, n -data points, tr - nr of trials
       *pmax*: int >0
-          maximal model order
+          model order
     Returns:
       *Ar* : np.array
           matrix with parameters matrix (p, k, k) where p - model order,
@@ -186,7 +186,7 @@ def nutallstrand(y,pmax=1):
           (k, n, tr) for multitrial
           k - nr of channels, n -data points, tr - nr of trials
       *pmax*: int >0
-          maximal model order
+          model order
     Returns:
       *Ar* : np.array
           matrix with parameters matrix (p, k, k) where p - model order,
@@ -237,7 +237,7 @@ def yulewalker(y,pmax=1):
           (k, n, tr) for multitrial
           k - nr of channels, n -data points, tr - nr of trials
       *pmax*: int >0
-          maximal model order
+          model order
     Returns:
       *Ar* : np.array
           matrix with parameters matrix (p, k, k) where p - model order,

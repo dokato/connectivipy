@@ -157,6 +157,7 @@ class Data(object):
             self.__estim = self.__estim/self.__multitrial
 
         self._parameters["method"] = method
+        self._parameters["y_lim"] = connobj.values_range
         self._parameters.update(params)
         return self.__estim
 
@@ -182,7 +183,7 @@ class Data(object):
         if not params.has_key("no"):
             params["no"] = None
         if not self._parameters.has_key("resolution"):
-            self._parameters["resolution"] = None
+            self._parameters["resolution"] = 100
         if isinstance(connobj,ConnectAR):
             self.__shtimest = connobj.short_time(self.__data, nfft=params["nfft"], no=params["no"],\
                                                  fs=self.__fs, order=self._parameters["p"],\
@@ -251,15 +252,17 @@ class Data(object):
         if show:
             plt.show()
 
-    def plot_conn(self, name='', ylim=[0,1], xlim=None, signi=True, show=True):
+    def plot_conn(self, name='', ylim=None, xlim=None, signi=True, show=True):
         '''
         Plot connectivity estimation results.
         
         Args:
           *name*='' : str
             title of the plot
-          *ylim*=[0,1] : list
-            range of y-axis values shown
+          *ylim*=None : list
+            range of y-axis values shown, e.g. [0,1]
+            *None* means that default values of given estimator are taken
+            into account
           *xlim*=None : list [from (int), to (int)]
             range of y-axis values shown, if None it is from 0 to Nyquist frequency
           *signi*=True : boolean
@@ -272,6 +275,8 @@ class Data(object):
         freqs = np.linspace(0, self.__fs//2, self.__estim.shape[0])
         if not xlim:
             xlim = [0, np.max(freqs)]
+        if not ylim:
+            ylim = self._parameters["y_lim"]
         if signi and hasattr(self,'_Data__signific'):
             flag_sig = True
         else:

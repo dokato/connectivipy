@@ -6,7 +6,7 @@ from mvar.fitting import *
  
 class Mvar(object):
     """
-    Static class Mvar to multivariete autoregressive model
+    Static class *Mvar* to multivariete autoregressive model
     fitting. Possible methods are in *_fit_dict* where key is
     acronym of algorithm and value is a function from *mvar.fitting*.
     """
@@ -28,9 +28,9 @@ class Mvar(object):
           *method* = 'yw': str
               name of mvar fitting algorithm, default Yule-Walker
         Returns:
-          *Av* : np.array
+          *Av* : numpy.array
               model coefficients (kXkXorder)
-          *Vf* : np.array
+          *Vf* : numpy.array
               reflection matrix (kXk)
         """
         if order == None:
@@ -40,8 +40,25 @@ class Mvar(object):
     @classmethod
     def _order_akaike(cls, data, p_max=None, method='yw'):
         """
-        Order akaike
-        following Practical Biomedical Signal Analysis Using MATLAB eq 3.19
+        Akaike criterion of MVAR order estimation.
+
+        Args:
+          *data* : numpy.array
+              multichannel data in shape (k, n) for one trial case and
+              (k, n, tr) for multitrial
+              k - nr of channels, n -data points, tr - nr of trials
+          *p_max*=5 : int 
+              maximal model order
+          *method*='yw' : str
+              name of the mvar calculation method
+        Returns:
+          *best_order* : int
+              minimum of *crit* array
+          *crit* : numpy.array
+              order criterion values for each value of order *p* starting from 1
+        References:
+        .. [1] Blinowska K. J., Zygierewicz J., (2012) Practical biomedical
+               signal analysis using MATLAB. Boca Raton: Taylor & Francis.
         """
         chn, N = data.shape
         if p_max == None:
@@ -51,11 +68,29 @@ class Mvar(object):
             (a_coef, v_r) = cls.fit(data, p+1, method)
             crit[p] = N*np.log(np.linalg.det(v_r))+2.*((p+1)*chn*(1+chn))
         return np.argmin(crit)+1, crit 
+
     @classmethod
     def _order_hq(cls, data, p_max=None, method='yw'):
         """
-        Order Hannan-Quin
-        following Practical Biomedical Signal Analysis Using MATLAB eq 3.20
+        Hannan-Quin criterion of MVAR order estimation.
+
+        Args:
+          *data* : numpy.array
+              multichannel data in shape (k, n) for one trial case and
+              (k, n, tr) for multitrial
+              k - nr of channels, n -data points, tr - nr of trials
+          *p_max*=5 : int 
+              maximal model order
+          *method*='yw' : str
+              name of the mvar calculation method
+        Returns:
+          *best_order* : int
+              minimum of *crit* array
+          *crit* : numpy.array
+              order criterion values for each value of order *p* starting from 1
+        References:
+        .. [1] Blinowska K. J., Zygierewicz J., (2012) Practical biomedical
+               signal analysis using MATLAB. Boca Raton: Taylor & Francis.
         """
         chn, N = data.shape 
         if p_max == None:
@@ -68,8 +103,25 @@ class Mvar(object):
     @classmethod
     def _order_schwartz(cls, data, p_max=None, method='yw'):
         """
-        Order Schwartz
-        following Practical Biomedical Signal Analysis Using MATLAB eq 3.21
+        Schwartz criterion of MVAR order estimation.
+
+        Args:
+          *data* : numpy.array
+              multichannel data in shape (k, n) for one trial case and
+              (k, n, tr) for multitrial
+              k - nr of channels, n -data points, tr - nr of trials
+          *p_max*=5 : int 
+              maximal model order
+          *method*='yw' : str
+              name of the mvar calculation method
+        Returns:
+          *best_order* : int
+              minimum of *crit* array
+          *crit* : numpy.array
+              order criterion values for each value of order *p* starting from 1
+        References:
+        .. [1] Blinowska K. J., Zygierewicz J., (2012) Practical biomedical
+               signal analysis using MATLAB. Boca Raton: Taylor & Francis.
         """
         chn, N = data.shape 
         if p_max == None:
@@ -82,8 +134,25 @@ class Mvar(object):
     @classmethod
     def _order_fpe(cls, data, p_max=None, method='yw'):
         """
-        Order FPE
-        following Practical Biomedical Signal Analysis Using MATLAB eq 3.21
+        Final Prediction Error criterion of MVAR order estimation.
+        (not recommended)
+        Args:
+          *data* : numpy.array
+              multichannel data in shape (k, n) for one trial case and
+              (k, n, tr) for multitrial
+              k - nr of channels, n -data points, tr - nr of trials
+          *p_max*=5 : int 
+              maximal model order
+          *method*='yw' : str
+              name of the mvar calculation method
+        Returns:
+          *best_order* : int
+              minimum of *crit* array
+          *crit* : numpy.array
+              order criterion values for each value of order *p* starting from 1
+        References:
+        .. [1] Akaike H, (1970), Statistical predictor identification,
+               Ann. Inst. Statist. Math., 22 203–217.
         """
         chn, N = data.shape 
         if p_max == None:

@@ -131,6 +131,9 @@ class Connect(object):
     """
     __metaclass__ = ABCMeta
 
+    def __init__(self):
+        self.values_range = [None, None]
+    
     @abstractmethod
     def calculate(self):
         pass
@@ -228,7 +231,10 @@ class ConnectAR(Connect):
     """
 
     __metaclass__ = ABCMeta
-
+    
+    def __init__(self):
+        self.values_range = [0, 1]
+        
     def short_time(self, data, nfft=None, no=None, mvarmethod='yw',\
                                           order=None, resol=None, fs=1):
         if len(data.shape)>2:
@@ -274,7 +280,7 @@ class ConnectAR(Connect):
         return rescalc/trials
 
     def bootstrap(self, arrs, vrrs, Nrep = 10, alpha=0.05, fs=1, **params):
-        resolution = None
+        resolution = 100
         if params.has_key('resolution') and params['resolution']:
             resolution = params['resolution']
         for i in xrange(Nrep):
@@ -292,7 +298,7 @@ class ConnectAR(Connect):
     def surrogate(self, data, method, Nrep = 10, alpha=0.05, order=None, fs=1, **params):
         shdata = data.copy()
         k, N = data.shape
-        resolution = None
+        resolution = 100
         if params.has_key('resolution') and params['resolution']:
             resolution = params['resolution']
         for i in xrange(Nrep):
@@ -401,7 +407,7 @@ class DTF(ConnectAR):
     Kaminski, M.; Blinowska, K. J. (1991).
     """
 
-    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         return dtf_fun(Acoef, Vcoef, fs, resolution)
 
 class PDC(ConnectAR):
@@ -409,7 +415,7 @@ class PDC(ConnectAR):
     PDC
     """
     
-    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         return pdc_fun(Acoef, Vcoef, fs, resolution)
 
 class gPDC(ConnectAR):
@@ -417,7 +423,7 @@ class gPDC(ConnectAR):
     generalized PDC
     """
     
-    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         return pdc_fun(Acoef, Vcoef, fs, resolution, generalized=True)
 
 class gDTF(ConnectAR):
@@ -426,7 +432,7 @@ class gDTF(ConnectAR):
     Kaminski, M.; Blinowska, K. J. (1991).
     """
     # not too good
-    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         return dtf_fun(Acoef, Vcoef, fs, resolution, generalized=True)
 
 class ffDTF(ConnectAR):
@@ -457,7 +463,7 @@ class ffDTF(ConnectAR):
     def fit_ar(self, data, order = None, method = 'yw'):
         pass
 
-    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
         res, k, k = A_z.shape
         mH = np.zeros((res,k,k))
@@ -496,7 +502,7 @@ class dDTF(ConnectAR):
     def fit_ar(self, data, order = None, method = 'yw'):
         pass
 
-    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
         res, k, k = A_z.shape
         mH = np.zeros((res,k,k))
@@ -539,7 +545,7 @@ class iPDC(ConnectAR):
            Effects to Improve Brain Connectivity Estimation. 
            Int. J. Bioelectromagn. 11, 74–79 (2009).
     """
-    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         B_z = spectrum_inst(Acoef, Vcoef, fs, resolution = resolution) 
         res, k, k = B_z.shape
         PDC = np.zeros((res,k,k))
@@ -569,12 +575,12 @@ class iDTF(ConnectAR):
       *iPDC* : numpy.array
           matrix with estimation results (*resolution*, k, k)
     References:
-    .. [1] Erla, S. et all Multivariate Autoregressive Model with Instantaneous
+    .. [1] Erla, S. et all, Multivariate Autoregressive Model with Instantaneous
            Effects to Improve Brain Connectivity Estimation. 
            Int. J. Bioelectromagn. 11, 74–79 (2009).
     """
     
-    def calculate(self, Acoef = None, Vcoef = None, fs = None, resolution = None):
+    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         B_z = spectrum_inst(Acoef, Vcoef, fs, resolution = resolution) 
         res, k, k = B_z.shape
         DTF = np.zeros((res,k,k))
@@ -588,6 +594,9 @@ class iDTF(ConnectAR):
 # Fourier Transform based methods:
 
 class Coherency(Connect):
+    def __init__(self):
+        self.values_range = [0, 1]
+
     def calculate(self, data, nfft=None, no=0, window=np.hanning, im=False):
         k, N = data.shape 
         if not nfft:
@@ -619,7 +628,7 @@ class Coherency(Connect):
         return coh.T
 
 class PSI(Connect):
-    def calculate(self, data, band_width = 4, nfft=None, no=0, window=np.hanning):
+    def calculate(self, data, band_width=4, nfft=None, no=0, window=np.hanning):
         k, N = data.shape 
         coh = Coherency()
         cohval = coh.calculate(data, nfft=nfft, no=no, window=window, im=True)
