@@ -8,7 +8,6 @@ from load.loaders import signalml_loader
 from mvarmodel import Mvar
 from conn import *
 
-
 class Data(object):
     '''
     Class governing the communication between data array and 
@@ -225,22 +224,20 @@ class Data(object):
                                                     alpha=alpha, **params)
         return self.__signific
 
-    def plot_data(self, trial=False, show=True):
+    def plot_data(self, trial=0, show=True):
         '''
         Plot data in a subplot for each channel.
         
         Args:
-          *trial* = False : int
+          *trial* = 0 : int
             if there is multichannel data it should be a number of trial
-            you want to plot, if False data is averaged over trials
+            you want to plot.
           *show* = True : boolean
             show the plot or not
         '''
 
         time = np.arange(0,self.__length)*1./self.__fs
-        if self.__multitrial and not trial:
-            plotdata = np.mean(self.__data, axis=2)
-        elif self.__multitrial and trial:
+        if self.__multitrial:
             plotdata = self.__data[:,:,trial]
         else:
             plotdata = self.__data
@@ -277,6 +274,10 @@ class Data(object):
             xlim = [0, np.max(freqs)]
         if not ylim:
             ylim = self._parameters["y_lim"]
+            if ylim[0] == None:
+                ylim[0] = np.min(self.__estim)
+            if ylim[1] == None:
+                ylim[1] = np.max(self.__estim)
         if signi and hasattr(self,'_Data__signific'):
             flag_sig = True
         else:
@@ -324,14 +325,30 @@ class Data(object):
                     axes[i, j].set_ylabel(self.__channames[i])
                 axes[i, j].imshow(self.__shtimest[:,:,i,j].T, aspect='auto',\
                                   interpolation='none', origin='lower', vmin=dtmin, vmax=dtmax)
-                axes[i,j].get_xaxis().set_visible(False)
-                axes[i,j].get_yaxis().set_visible(False)
+                if i!=self.__chans-1:
+                    axes[i,j].get_xaxis().set_visible(False)
+                if j!=0:
+                    axes[i,j].get_yaxis().set_visible(False)
                # axes[i, j].set_yticks(ticks_time)
                # axes[i, j].set_xticks(ticks_freqs)
         plt.suptitle(name)
         plt.tight_layout()
         if show:
             plt.show()
+
+    def export_trans3d(self, filename='conn_trnas3d.dat', freq_band=[]):
+        '''
+        Export connectivity data to trans3D data file in order to make
+        3D arrow plots.
+        Args:
+          *filename*='conn_trnas3d.dat' : str
+            title of the plot
+          *freq_band*=[] : list
+            frequency range [from_value, to_value] in Hz.            
+        '''
+        
+        with open(filename,'wb') as file:
+            file.write()
     
     # accessors:
     @property
