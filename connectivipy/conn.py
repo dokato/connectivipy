@@ -181,6 +181,9 @@ class Connect(object):
             stvalues[e] = self.calculate(datcut, **params)
         return stvalues 
 
+    def short_time_signi(self, data, nfft=None, no=None, **params):
+        pass 
+        
     def significance(self, data, Nrep=10, alpha=0.05, **params):
         if len(data.shape)>2:
             signific = self.bootstrap(data, Nrep=10, alpha=alpha, **params)
