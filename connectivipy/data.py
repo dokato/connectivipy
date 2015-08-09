@@ -269,8 +269,6 @@ class Data(object):
         '''
         assert hasattr(self,'_Data__estim')==True, "No valid data!, Use calculation method first."
         fig, axes = plt.subplots(self.__chans, self.__chans)
-        fig.subplots_adjust(top=0.5)
-
         freqs = np.linspace(0, self.__fs//2, self.__estim.shape[0])
         if not xlim:
             xlim = [0, np.max(freqs)]
@@ -295,8 +293,9 @@ class Data(object):
                     l = axes[i, j].axhline(y=self.__signific[i,j], color='r')
                 axes[i, j].set_xlim(xlim)
                 axes[i, j].set_ylim(ylim)
-        plt.suptitle(name,y=0.99)
+        plt.suptitle(name,y=0.98)
         plt.tight_layout()
+        plt.subplots_adjust(top=0.92)
         if show:
             plt.show()
 
@@ -338,8 +337,9 @@ class Data(object):
                     axes[i,j].get_yaxis().set_visible(False)
                # axes[i, j].set_yticks(ticks_time)
                # axes[i, j].set_xticks(ticks_freqs)
-        plt.suptitle(name)
+        plt.suptitle(name,y=0.98)
         plt.tight_layout()
+        plt.subplots_adjust(top=0.92)
         if show:
             plt.show()
 
