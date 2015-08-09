@@ -316,8 +316,13 @@ class Data(object):
         time = np.linspace(0, self.__length/self.__fs, self.__shtimest.shape[0])
         ticks_time = [0, self.__fs//2]
         ticks_freqs = [0, self.__length//self.__fs]
-        dtmax = np.max(self.__shtimest)
-        dtmin = np.min(self.__shtimest)
+        # mask diagonal values to not contaminate the plot
+        mask = np.zeros(self.__shtimest.shape)
+        for i in xrange(self.__chans):
+            mask[:,:,i,i] = 1
+        masked_shtimest = np.ma.array(self.__shtimest, mask=mask)
+        dtmax = np.max(masked_shtimest)
+        dtmin = np.min(masked_shtimest)
         plt.autoscale(False)
         for i in xrange(self.__chans):
             for j in xrange(self.__chans):
