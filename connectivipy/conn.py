@@ -179,10 +179,31 @@ class Connect(object):
                 stvalues[e] = rescalc
                 continue
             stvalues[e] = self.calculate(datcut, **params)
-        return stvalues 
+        return stvalues
 
-    def short_time_signi(self, data, nfft=None, no=None, **params):
-        pass 
+    def short_time_signi(self, data, Nrep=10, alpha=0.05, nfft=None,\
+                                                 no=None, **params):
+        if len(data.shape)>2:
+            k, N, trls = data.shape
+        else:
+            k, N = data.shape
+            trls = 0
+        if not nfft:
+            nfft = int(N/5)
+        if not no:
+            no = int(N/10)
+        slices = xrange(0, N, int(nfft-no))
+        signi_st = np.zeros((len(slices, k, k)))
+        for e,i in enumerate(slices):
+            if i+nfft>=N:
+                if trls:
+                    datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N,trls))),axis=1)
+                else:
+                    datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N))),axis=1)
+            else:
+                datcut = data[:,i:i+nfft]
+            signi_st[e] = self.significance(datcut, Nrep=Nrep, alpha=alpha, **params)
+        return signi_st
         
     def significance(self, data, Nrep=10, alpha=0.05, **params):
         if len(data.shape)>2:
@@ -281,7 +302,7 @@ class ConnectAR(Connect):
                 stvalues[e] = rescalc
                 continue
             stvalues[e] = self.calculate(ar, vr, fs, resol)
-        return stvalues 
+        return stvalues
 
     def __calc_multitrial(self, arrs, vrrs, fs, resolution):
         trials = arrs.shape[0]

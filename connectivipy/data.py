@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import scipy.io as si
 import scipy.signal as ss
 from load.loaders import signalml_loader
@@ -311,8 +312,8 @@ class Data(object):
         '''
         assert hasattr(self,'_Data__shtimest')==True, "No valid data! Use calculation method first."
         fig, axes = plt.subplots(self.__chans, self.__chans)
-        freqs = np.linspace(0, self.__fs//2, self.__shtimest.shape[1])
-        time = np.linspace(0, self.__length/self.__fs, self.__shtimest.shape[0])
+        freqs = np.linspace(0, self.__fs//2, 4)
+        time = np.linspace(0, self.__length/self.__fs, 5)
         ticks_time = [0, self.__fs//2]
         ticks_freqs = [0, self.__length//self.__fs]
         # mask diagonal values to not contaminate the plot
@@ -322,7 +323,6 @@ class Data(object):
         masked_shtimest = np.ma.array(self.__shtimest, mask=mask)
         dtmax = np.max(masked_shtimest)
         dtmin = np.min(masked_shtimest)
-        plt.autoscale(False)
         for i in xrange(self.__chans):
             for j in xrange(self.__chans):
                 if self.__channames and i==0:
@@ -330,13 +330,17 @@ class Data(object):
                 if self.__channames and j==0:
                     axes[i, j].set_ylabel(self.__channames[i])
                 axes[i, j].imshow(self.__shtimest[:,:,i,j].T, aspect='auto',\
+                                  extent=[0,self.__length/self.__fs,0,self.__fs//2], \
                                   interpolation='none', origin='lower', vmin=dtmin, vmax=dtmax)
                 if i!=self.__chans-1:
                     axes[i,j].get_xaxis().set_visible(False)
                 if j!=0:
                     axes[i,j].get_yaxis().set_visible(False)
-               # axes[i, j].set_yticks(ticks_time)
-               # axes[i, j].set_xticks(ticks_freqs)
+                xt  = np.array(axes[i,j].get_xticks())/self.__fs
+                #axes[i, j].set_yticks(ticks_time)
+                #axes[i, j].xaxis.set_major_formatter(ticker.FormatStrFormatter('%0.1f'))
+                #axes[i, j].set_xticklabels(xt)
+                #axes[i, j].set_xticks(axes[i,j].get_xticks(),['a']*len(axes[i,j].get_xticks()))
         plt.suptitle(name,y=0.98)
         plt.tight_layout()
         plt.subplots_adjust(top=0.92)
