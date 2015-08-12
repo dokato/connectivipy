@@ -181,8 +181,8 @@ class Connect(object):
             stvalues[e] = self.calculate(datcut, **params)
         return stvalues
 
-    def short_time_signi(self, data, Nrep=10, alpha=0.05, nfft=None,\
-                                                 no=None, **params):
+    def short_time_significance(self, data, Nrep=10, alpha=0.05,\
+                                        nfft=None, no=None, **params):
         if len(data.shape)>2:
             k, N, trls = data.shape
         else:
@@ -304,34 +304,59 @@ class ConnectAR(Connect):
             stvalues[e] = self.calculate(ar, vr, fs, resol)
         return stvalues
 
-    def __calc_multitrial(self, arrs, vrrs, fs, resolution):
-        trials = arrs.shape[0]
-        chosen = np.random.randint(trials,size=trials)
-        bc = np.bincount(chosen)
-        idxbc = np.nonzero(bc)[0]
-        flag = True
-        for num, occurence in zip(idxbc, bc[idxbc]):
-            if occurence>0:
-                if flag:
-                    rescalc = self.calculate(arrs[num], vrrs[num], fs, resolution)*occurence
-                    flag = False
-                    continue
-                rescalc += self.calculate(arrs[num], vrrs[num], fs, resolution)*occurence
-        return rescalc/trials
+    def short_time_significance(self, data, Nrep=10, alpha=0.05, method='yw',\
+                                order=None, fs=1, resolution=None,\
+                                nfft=None, no=None, **params):
+        if len(data.shape)>2:
+            k, N, trls = data.shape
+        else:
+            k, N = data.shape
+            trls = 0
+        if not nfft:
+            nfft = int(N/5)
+        if not no:
+            no = int(N/10)
+        slices = xrange(0, N, int(nfft-no))
+        signi_st = np.zeros((len(slices), k, k))
+        for e,i in enumerate(slices):
+            if i+nfft>=N:
+                if trls:
+                    datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N,trls))),axis=1)
+                else:
+                    datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N))),axis=1)
+            else:
+                datcut = data[:,i:i+nfft]
+            signi_st[e] = self.significance(datcut, method, order=order, resolution=resolution,\
+                                            Nrep=Nrep, alpha=alpha, **params)
+        return signi_st
 
-    def bootstrap(self, arrs, vrrs, Nrep = 10, alpha=0.05, fs=1, **params):
+    def __calc_multitrial(self, data, method='yw', order=None, fs=1, resolution=None, **params):
+        trials = data.shape[0]
+        chosen = np.random.randint(trials,size=trials)
+        ar, vr = Mvar().fit(data[:,:,chosen], order, method)
+        rescalc = self.calculate(ar, vr, fs, resolution)
+        return rescalc
+
+    def significance(self, data, method, order=None, resolution=None, Nrep=10, alpha=0.05, **params):
+        if len(data.shape)>2:
+            signific = self.bootstrap(data, method, order=order, resolution=resolution, Nrep=10, alpha=alpha, **params)
+        else:
+            signific = self.surrogate(data, method, order=order, resolution=resolution, Nrep=10, alpha=alpha, **params)
+        return signific
+
+    def bootstrap(self, data, method, order=None, Nrep=10, alpha=0.05, fs=1, **params):
         resolution = 100
         if params.has_key('resolution') and params['resolution']:
             resolution = params['resolution']
         for i in xrange(Nrep):
             print '.',
             if i==0:
-                tmpsig = self.__calc_multitrial(arrs, vrrs, fs, resolution)
+                tmpsig = self.__calc_multitrial(data, method, order, fs, resolution)
                 fres, k, k = tmpsig.shape
                 signi = np.zeros((Nrep, fres, k, k))
                 signi[i] = tmpsig
             else:
-                signi[i] = self.__calc_multitrial(arrs, vrrs, fs, resolution)
+                signi[i] = self.__calc_multitrial(data, method, order, fs, resolution)
         print '|'
         return self.levels(signi, alpha, k)
 
@@ -352,7 +377,7 @@ class ConnectAR(Connect):
                 continue
             reskeeper[i] = self.calculate(ar, vr, fs, resolution)
         print '|'
-        return self.levels(signi, alpha, k)
+        return self.levels(reskeeper, alpha, k)
 
 ############################
 # MVAR based methods:

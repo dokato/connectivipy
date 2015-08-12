@@ -60,7 +60,10 @@ class Mvar(object):
         .. [1] Blinowska K. J., Zygierewicz J., (2012) Practical biomedical
                signal analysis using MATLAB. Boca Raton: Taylor & Francis.
         """
-        chn, N = data.shape
+        if len(data.shape)>2:
+            chn, N,_ = data.shape
+        else:
+            chn, N = data.shape
         if p_max == None:
             p_max = 5 # change to some criterion for max
         crit = np.zeros(p_max)
@@ -92,7 +95,10 @@ class Mvar(object):
         .. [1] Blinowska K. J., Zygierewicz J., (2012) Practical biomedical
                signal analysis using MATLAB. Boca Raton: Taylor & Francis.
         """
-        chn, N = data.shape 
+        if len(data.shape)>2:
+            chn, N,_ = data.shape
+        else:
+            chn, N = data.shape
         if p_max == None:
             p_max = 5
         crit = np.zeros(p_max)
@@ -124,7 +130,10 @@ class Mvar(object):
         .. [1] Blinowska K. J., Zygierewicz J., (2012) Practical biomedical
                signal analysis using MATLAB. Boca Raton: Taylor & Francis.
         """
-        chn, N = data.shape 
+        if len(data.shape)>2:
+            chn, N,_ = data.shape
+        else:
+            chn, N = data.shape
         if p_max == None:
             p_max = 5
         crit = np.zeros(p_max)
@@ -156,7 +165,10 @@ class Mvar(object):
         .. [1] Akaike H, (1970), Statistical predictor identification,
                Ann. Inst. Statist. Math., 22 203–217.
         """
-        chn, N = data.shape 
+        if len(data.shape)>2:
+            chn, N,_ = data.shape
+        else:
+            chn, N = data.shape
         if p_max == None:
             p_max = 5
         crit = np.zeros(p_max)

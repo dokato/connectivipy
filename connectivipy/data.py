@@ -111,16 +111,7 @@ class Data(object):
             method of estimation, for full list please type:
             connectivipy.mvar_methods
         '''
-        if not self.__multitrial:
-            self.__Ar, self.__Vr = Mvar().fit(self.__data, p, method)
-        else:
-            k = self.__chans
-            self.__Ar = np.zeros((self.__multitrial, p, k, k))
-            self.__Vr = np.zeros((self.__multitrial, k, k))
-            for r in xrange(self.__data.shape[2]):
-                atmp, vtmp = Mvar().fit(self.__data[:,:,r], p, method)
-                self.__Ar[r] = atmp
-                self.__Vr[r] = vtmp
+        self.__Ar, self.__Vr = Mvar().fit(self.__data, p, method)
         self._parameters["mvar"] = True
         self._parameters["p"] = p
         self._parameters["mvarmethod"] = method
@@ -137,25 +128,18 @@ class Data(object):
             connectivipy.mvar_methods
         '''
         connobj = conn_estim_dc[method]()
-        if not self.__multitrial:
-            if isinstance(connobj,ConnectAR):
-                self.__estim = connobj.calculate(self.__Ar,self.__Vr, self.__fs, **params)
-            else:
-                self.__estim = connobj.calculate(self.__data, **params)
+        if isinstance(connobj,ConnectAR):
+            self.__estim = connobj.calculate(self.__Ar,self.__Vr, self.__fs, **params)
         else:
-            for r in xrange(self.__multitrial):
-                if r==0:
-                    if isinstance(connobj,ConnectAR):
-                        self.__estim = connobj.calculate(self.__Ar[r], self.__Vr[r], self.__fs, **params)
-                    else:
+            if not self.__multitrial:
+                self.__estim = connobj.calculate(self.__data, **params)
+            else:
+                for r in xrange(self.__multitrial):
+                    if r==0:
                         self.__estim = connobj.calculate(self.__data[:,:,r], **params)
-                    continue
-                if isinstance(connobj,ConnectAR):
-                    self.__estim += connobj.calculate(self.__Ar[r], self.__Vr[r], self.__fs, **params)
-                else:
+                        continue
                     self.__estim += connobj.calculate(self.__data[:,:,r], **params)
-            self.__estim = self.__estim/self.__multitrial
-
+                self.__estim = self.__estim/self.__multitrial
         self._parameters["method"] = method
         self._parameters["y_lim"] = connobj.values_range
         self._parameters.update(params)
@@ -337,10 +321,6 @@ class Data(object):
                 if j!=0:
                     axes[i,j].get_yaxis().set_visible(False)
                 xt  = np.array(axes[i,j].get_xticks())/self.__fs
-                #axes[i, j].set_yticks(ticks_time)
-                #axes[i, j].xaxis.set_major_formatter(ticker.FormatStrFormatter('%0.1f'))
-                #axes[i, j].set_xticklabels(xt)
-                #axes[i, j].set_xticks(axes[i,j].get_xticks(),['a']*len(axes[i,j].get_xticks()))
         plt.suptitle(name,y=0.98)
         plt.tight_layout()
         plt.subplots_adjust(top=0.92)
@@ -362,8 +342,8 @@ class Data(object):
         content = ";electrodes = " + " ".join(self.__channames)
         content += "\r\n;start = -0.500000\r\n"
         content += ";samplerate = 12\r\n"
-        content += ";transform_default = " + " ".join(trdef_str[:self.__chans]) + "\r\n"
-        content += ";transform = " + " ".join(tr_str[:self.__chans]) + "\r\n"
+        content += ";transform_default = " + " ".join([ str(x) for x in trdef_str[:self.__chans]]) + "\r\n"
+        content += ";transform = " + " ".join([ str(x) for x in tr_str[:self.__chans]]) + "\r\n"
         content += "\r\n"
         # integrate value of estimator in given frequency band
         freqs = np.linspace(0, int(self.__fs/2), self.__estim.shape[0])
@@ -375,7 +355,7 @@ class Data(object):
             ind2 = np.where(freqs>=freq_band[1])[0][0]
         cnest = np.mean(self.__estim[ind1:ind2,:,:], axis=0)
         for i in xrange(self.__chans):
-            content+= "  " + "\t".join(cnest[i]) + "\r\n" 
+            content+= "  " + "\t".join([ str(x) for x in cnest[i]]) + "\r\n" 
         with open(filename,'wb') as fl:
             fl.write(content)
     
