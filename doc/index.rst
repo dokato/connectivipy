@@ -11,9 +11,12 @@ You can find it and download from `GitHub
 <https://github.com/dokato/connectivipy>`_.
 
 *Connectivity estimation is one of the most important problem in EEG/MEG 
-studies. Many estimators work correctly in different applications and
-this is python tool which allows to have them in one place. ConnectiviPy 
-is light and  extendable module open for many data formats.*
+studies. Many estimators work correctly in different applications, so it's
+convenient to have them all in one tool. ConnectiviPy 
+is light and  extendable python module open for many data formats. In
+opposite to other packages it allows you to work with all types of data,
+not only biomedical. Calculations base on numpy and scipy what provides
+good efficiency.*
 
 
 Contents:
