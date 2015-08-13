@@ -1,0 +1,460 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Data &mdash; ConnectiviPy 0.32a documentation</title>
+    
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.32a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ConnectiviPy 0.32a documentation" href="index.html" />
+    <link rel="next" title="Connectvity" href="conn.html" />
+    <link rel="prev" title="ConnectiviPy documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+          <p class="logo"><a href="index.html">
+            <img class="logo" src="_static/connpy.png" alt="Logo"/>
+          </a></p>
+        <div class="headertitle"><a
+          href="index.html">ConnectiviPy 0.32a documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="index.html" title="ConnectiviPy documentation"
+             accesskey="P">previous</a> |
+          <a href="conn.html" title="Connectvity"
+             accesskey="N">next</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="data">
+<span id="id1"></span><h1>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
+<p>Data module - main class governing your data and wrapper for all other
+<strong>ConnectiviPy</strong> functions.</p>
+<span class="target" id="module-data"></span><dl class="class">
+<dt id="data.Data">
+<em class="property">class </em><code class="descclassname">data.</code><code class="descname">Data</code><span class="sig-paren">(</span><em>data</em>, <em>fs=1.0</em>, <em>chan_names=[]</em>, <em>data_info=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class governing the communication between data array and 
+connectivity estimators.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array or str</span></dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>array with data (kXNxR, k - channels nr, N - data points,</dt>
+<dd><p class="first last">R - nr of trials)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">str - path to file with appropieate format</p>
+</li>
+</ul>
+</dd>
+<dt><em>fs</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>sampling frequency</dd>
+<dt><em>chan_names</em>: list</dt>
+<dd>names of channels</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="data.Data.conn">
+<code class="descname">conn</code><span class="sig-paren">(</span><em>method</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.conn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate connectivity pattern.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>p</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>estimation order, default None</dd>
+<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str {&#8216;yw&#8217;, &#8216;ns&#8217;, &#8216;vm&#8217;}</span></dt>
+<dd>method of estimation, for full list please type:
+connectivipy.mvar_methods</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.export_trans3d">
+<code class="descname">export_trans3d</code><span class="sig-paren">(</span><em>filename='conn_trnas3d.dat'</em>, <em>freq_band=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.export_trans3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.export_trans3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export connectivity data to trans3D data file in order to make
+3D arrow plots.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>filename</em> = &#8216;conn_trnas3d.dat&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>title of the plot</dd>
+<dt><em>freq_band</em> = [] <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>frequency range [from_value, to_value] in Hz.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.fill_nans">
+<code class="descname">fill_nans</code><span class="sig-paren">(</span><em>values</em>, <em>borders</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.fill_nans"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.fill_nans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill nans where <em>values</em> &lt; <em>borders</em> (independent of frequency).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>values</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (time, freqs, channels, channels) to fill nans</dd>
+<dt><em>borders</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (time, channels, channels) with limes
+values</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>values_nans</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (time, freq, channels, channels) with nans
+where values were less than appropieate value from <em>borders</em></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.filter">
+<code class="descname">filter</code><span class="sig-paren">(</span><em>b</em>, <em>a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter each channel of data using forward-backward  filter 
+<em>filtfilt</em> from <em>scipy.signal</em>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>b,a</em> <span class="classifier-delimiter">:</span> <span class="classifier">np.array </span></dt>
+<dd>Numerator <em>b</em>  / denominator <em>a</em> polynomials of the IIR filter.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.fit_mvar">
+<code class="descname">fit_mvar</code><span class="sig-paren">(</span><em>p=None</em>, <em>method='yw'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.fit_mvar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.fit_mvar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fitting MVAR coefficients.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>p</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>estimation order, default None</dd>
+<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str {&#8216;yw&#8217;, &#8216;ns&#8217;, &#8216;vm&#8217;}</span></dt>
+<dd>method of estimation, for full list please type:
+connectivipy.mvar_methods</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="data.Data.mvar_coefficients">
+<code class="descname">mvar_coefficients</code><a class="headerlink" href="#data.Data.mvar_coefficients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns mvar coefficients if calculated</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="data.Data.mvarcoef">
+<code class="descname">mvarcoef</code><a class="headerlink" href="#data.Data.mvarcoef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns mvar coefficients if calculated</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.plot_conn">
+<code class="descname">plot_conn</code><span class="sig-paren">(</span><em>name=''</em>, <em>ylim=None</em>, <em>xlim=None</em>, <em>signi=True</em>, <em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.plot_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.plot_conn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot connectivity estimation results.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>name</em> = &#8216;&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>title of the plot</dd>
+<dt><em>ylim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>range of y-axis values shown, e.g. [0,1]
+<em>None</em> means that default values of given estimator are taken
+into account</dd>
+<dt><em>xlim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list [from (int), to (int)]</span></dt>
+<dd>range of y-axis values shown, if None it is from 0 to Nyquist frequency</dd>
+<dt><em>signi</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>if significance levels are calculated they are shown in the plot</dd>
+<dt><em>show</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>show the plot or not</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.plot_data">
+<code class="descname">plot_data</code><span class="sig-paren">(</span><em>trial=0</em>, <em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.plot_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.plot_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot data in a subplot for each channel.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>trial</em> = 0 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>if there is multichannel data it should be a number of trial
+you want to plot.</dd>
+<dt><em>show</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>show the plot or not</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.plot_short_time_conn">
+<code class="descname">plot_short_time_conn</code><span class="sig-paren">(</span><em>name=''</em>, <em>signi=True</em>, <em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.plot_short_time_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.plot_short_time_conn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot short-time version of estimation results.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>name</em> = &#8216;&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>title of the plot</dd>
+<dt><em>signi</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>reset irrelevant values; it works only after short time
+significance calculation using <em>short_time_significance</em></dd>
+<dt><em>show</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>show the plot or not</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.resample">
+<code class="descname">resample</code><span class="sig-paren">(</span><em>fs_new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.resample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal resampling to new sampling frequency <em>new_fs</em> using
+<em>resample</em> function from <em>scipy.signal</em> (basing on Fourier method).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>fs_new</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>new sampling frequency</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.short_time_conn">
+<code class="descname">short_time_conn</code><span class="sig-paren">(</span><em>method</em>, <em>nfft=None</em>, <em>no=None</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.short_time_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.short_time_conn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short-time connectivity.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str {&#8216;yw&#8217;, &#8216;ns&#8217;, &#8216;vm&#8217;}</span></dt>
+<dd>method of estimation, for full list please type:
+connectivipy.mvar_methods</dd>
+<dt><em>nfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of data points in window; if None, it is signal length
+N/5.</dd>
+<dt><em>no</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of data points in overlap; if None, it is signal length
+N/10.</dd>
+<dt><em>params</em></dt>
+<dd>other parameters for specific estimator</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.short_time_significance">
+<code class="descname">short_time_significance</code><span class="sig-paren">(</span><em>Nrep=100</em>, <em>alpha=0.05</em>, <em>nfft=None</em>, <em>no=None</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.short_time_significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.short_time_significance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Statistical significance values of short-time version of
+connectivity estimation method.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>type I error rate (significance level)</dd>
+<dt><em>nfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of data points in window; if None, it is taken from
+<em>short_time_conn</em> method.</dd>
+<dt><em>no</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of data points in overlap; if None, it is taken from
+<em>short_time_conn</em> method.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>signi</em>: numpy.array</dt>
+<dd>matrix in shape of (k, k) with values for each pair of
+channels</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="data.Data.significance">
+<code class="descname">significance</code><span class="sig-paren">(</span><em>Nrep=100</em>, <em>alpha=0.05</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.significance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Statistical significance values of connectivity estimation method.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>type I error rate (significance level)</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>signi</em>: numpy.array</dt>
+<dd>matrix in shape of (k, k) with values for each pair of
+channels</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="data-loading">
+<h2>Data loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
+<p><strong>Additonal function which enable other data formats loading</strong></p>
+<span class="target" id="module-load.loaders"></span><dl class="function">
+<dt id="load.loaders.give_xml_info">
+<code class="descclassname">load.loaders.</code><code class="descname">give_xml_info</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/load/loaders.html#give_xml_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#load.loaders.give_xml_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>It returns dictionary from SignalML file.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>path</em> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>SML file eg. &#8216;test.xml&#8217;</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>xml_data</em> <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>dcitionary with keys: samplingFrequency, channelCount, firstSampleTimestamp,
+channelNames, calibrationCoef which means the same as in SML file</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="load.loaders.signalml_loader">
+<code class="descclassname">load.loaders.</code><code class="descname">signalml_loader</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/load/loaders.html#signalml_loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#load.loaders.signalml_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>It returns data and dictionary from SignalML files.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>file_name</em> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>must be the same for .xml and .raw files.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>data</em>: np.array</dt>
+<dd>eeg data from raw file</dd>
+<dt><em>xmlinfo</em> <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>dcitionary with keys: samplingFrequency, channelCount, firstSampleTimestamp,
+channelNames, calibrationCoef which means the same as in SML file</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conn.html">Connectvity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mvar.html">Mvarmodel</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+            <p class="searchtip" style="font-size: 90%">
+                Enter search terms or a module, class or function name.
+            </p>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="index.html" title="ConnectiviPy documentation"
+              >previous</a> |
+            <a href="conn.html" title="Connectvity"
+              >next</a> |
+            <a href="py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/data.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Dominik Krzeminski.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
