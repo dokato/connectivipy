@@ -293,15 +293,15 @@ class Data(object):
         Plot connectivity estimation results.
         
         Args:
-          *name*='' : str
+          *name* = '' : str
             title of the plot
-          *ylim*=None : list
+          *ylim* = None : list
             range of y-axis values shown, e.g. [0,1]
             *None* means that default values of given estimator are taken
             into account
-          *xlim*=None : list [from (int), to (int)]
+          *xlim* = None : list [from (int), to (int)]
             range of y-axis values shown, if None it is from 0 to Nyquist frequency
-          *signi*=True : boolean
+          *signi* = True : boolean
             if significance levels are calculated they are shown in the plot
           *show* = True : boolean
             show the plot or not            
@@ -343,12 +343,12 @@ class Data(object):
         Plot short-time version of estimation results.
         
         Args:
-          *name*='' : str
+          *name* = '' : str
             title of the plot
-          *signi*=True : boolean
+          *signi* = True : boolean
             reset irrelevant values; it works only after short time
             significance calculation using *short_time_significance*
-          *show*=True : boolean
+          *show* = True : boolean
             show the plot or not            
         '''
         assert hasattr(self,'_Data__shtimest')==True, "No valid data! Use calculation method first."
@@ -392,9 +392,9 @@ class Data(object):
         Export connectivity data to trans3D data file in order to make
         3D arrow plots.
         Args:
-          *filename*='conn_trnas3d.dat' : str
+          *filename* = 'conn_trnas3d.dat' : str
             title of the plot
-          *freq_band*=[] : list
+          *freq_band* = [] : list
             frequency range [from_value, to_value] in Hz.            
         '''
         trdef_str = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -8, 0, 0, 0, 1]
@@ -427,11 +427,11 @@ class Data(object):
         Args:
           *values* : numpy.array
             array of shape (time, freqs, channels, channels) to fill nans
-          *borders*: numpy.array
+          *borders* : numpy.array
             array of shape (time, channels, channels) with limes
             values
         Returns:
-          *values_nans*: numpy.array
+          *values_nans* : numpy.array
             array of shape (time, freq, channels, channels) with nans
             where values were less than appropieate value from *borders*
         '''

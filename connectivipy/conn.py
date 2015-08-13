@@ -82,7 +82,7 @@ def spectrum_inst(acoef, vcoef, fs=1, resolution=None):
           Acf[1] for one data point lag and so on.
       *Vcf* : numpy.array
           prediction error matrix (k, k)
-      *fs*=1 : int
+      *fs* = 1 : int
           sampling rate
       *resolution*=100 : int
           number of spectrum data points
@@ -147,9 +147,9 @@ class Connect(object):
         Args:
           *data* : numpy.array
               data matrix
-          *nfft*=None : int 
+          *nfft* = None : int 
               window length (if None it's N/5)
-          *no*=None : int
+          *no* = None : int
               overlap length (if None it's N/10)
           *params* :
               additional parameters
@@ -393,7 +393,7 @@ def dtf_fun(Acoef, Vcoef, fs, resolution, generalized=False):
           *p* is a model order.
       *Vcf* : numpy.array
           prediction error matrix (k, k)
-      *fs*=1 : int
+      *fs* = 1 : int
           sampling rate
       *resolution*=100 : int
           number of spectrum data points
@@ -427,7 +427,7 @@ def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
           *p* is a model order.
       *Vcf* : numpy.array
           prediction error matrix (k, k)
-      *fs*=1 : int
+      *fs* = 1 : int
           sampling rate
       *resolution*=100 : int
           number of spectrum data points
@@ -464,11 +464,11 @@ class PartialCoh(ConnectAR):
               *p* is a model order.
           *Vcf* : numpy.array
               prediction error matrix (k, k)
-          *fs*=1 : int
+          *fs* = 1 : int
               sampling rate
-          *resolution*=100 : int
+          *resolution* = 100 : int
               number of spectrum data points
-          *generalized*=False : bool
+          *generalized* = False : bool
               generalized version or not
         Returns:
           *PC* : numpy.array
@@ -541,11 +541,11 @@ class ffDTF(ConnectAR):
               *p* is a model order.
           *Vcf* : numpy.array
               prediction error matrix (k, k)
-          *fs*=1 : int
+          *fs* = 1 : int
               sampling rate
-          *resolution*=100 : int
+          *resolution* = 100 : int
               number of spectrum data points
-          *generalized*=False : bool
+          *generalized* = False : bool
               generalized version or not
         Returns:
           *ffDTF* : numpy.array
@@ -582,11 +582,11 @@ class dDTF(ConnectAR):
               *p* is a model order.
           *Vcf* : numpy.array
               prediction error matrix (k, k)
-          *fs*=1 : int
+          *fs* = 1 : int
               sampling rate
-          *resolution*=100 : int
+          *resolution* = 100 : int
               number of spectrum data points
-          *generalized*=False : bool
+          *generalized* = False : bool
               generalized version or not
         Returns:
           *dDTF* : numpy.array
@@ -629,11 +629,11 @@ class iPDC(ConnectAR):
               *p* is a model order. It's zero lag case.
           *Vcf* : numpy.array
               prediction error matrix (k, k)
-          *fs*=1 : int
+          *fs* = 1 : int
               sampling rate
-          *resolution*=100 : int
+          *resolution* = 100 : int
               number of spectrum data points
-          *generalized*=False : bool
+          *generalized* = False : bool
               generalized version or not
         Returns:
           *iPDC* : numpy.array
@@ -667,11 +667,11 @@ class iDTF(ConnectAR):
               *p* is a model order. It's zero lag case.
           *Vcf* : numpy.array
               prediction error matrix (k, k)
-          *fs*=1 : int
+          *fs* = 1 : int
               sampling rate
-          *resolution*=100 : int
+          *resolution* = 100 : int
               number of spectrum data points
-          *generalized*=False : bool
+          *generalized* = False : bool
               generalized version or not
         Returns:
           *iPDC* : numpy.array
@@ -708,13 +708,13 @@ class Coherency(Connect):
           *data* : numpy.array
               array of shape (k, N) where *k* is number of channels and
               *N* is number of data points.
-          *cnfft*=None : int
+          *cnfft* = None : int
               number of data points in window; if None, it is N/5
-          *cno*=0 : int
+          *cno* = 0 : int
               overlap; if None, it is N/10
-          *window*=np.hanning : <function> generating window with 1 arg *n*
+          *window* = np.hanning : <function> generating window with 1 arg *n*
               window function
-          *im*=False : bool
+          *im* = False : bool
               if False it return absolute value, otherwise complex number
         Returns:
           *COH* : numpy.array
@@ -764,13 +764,13 @@ class PSI(Connect):
           *data* : numpy.array
               array of shape (k, N) where *k* is number of channels and
               *N* is number of data points.
-          *band_width*=4 : int
+          *band_width* = 4 : int
               width of frequency band where PSI values are summed
-          *psinfft*=None : int
+          *psinfft* = None : int
               number of data points in window; if None, it is N/5
-          *psino*=0 : int
+          *psino* = 0 : int
               overlap; if None, it is N/10
-          *window*=np.hanning : <function> generating window with 1 arg *n*
+          *window* = np.hanning : <function> generating window with 1 arg *n*
               window function
         Returns:
           *COH* : numpy.array
@@ -803,9 +803,9 @@ class GCI(Connect):
           *data* : numpy.array
               array of shape (k, N) where *k* is number of channels and
               *N* is number of data points.
-          *method*='yw' : int
+          *method* = 'yw' : int
               MVAR parameters estimation model
-          *order*=None : int
+          *order* = None : int
               model order, if None appropiate value is chosen basic
               on default criterion
         Returns:

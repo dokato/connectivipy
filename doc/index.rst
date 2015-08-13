@@ -5,23 +5,28 @@
 
 ConnectiviPy documentation
 ========================================
+Python connectivity module. It is a part of GSOC 2015 project. 
+
+You can find it and download from `GitHub
+<https://github.com/dokato/connectivipy>`_.
+
+*Connectivity estimation is one of the most important problem in EEG/MEG 
+studies. Many estimators work correctly in different applications and
+this is python tool which allows to have them in one place. ConnectiviPy 
+is light and  extendable module open for many data formats.*
+
 
 Contents:
+######
 
 .. toctree::
-    connectivipy
     data
     conn
+    mvar
 
-Tutorial:
+Tutorials:
 
 .. toctree::
     tutorial
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

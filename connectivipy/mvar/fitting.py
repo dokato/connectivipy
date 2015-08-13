@@ -62,12 +62,12 @@ def meanncov(x, y=[], p=0, norm=True):
     Args:
       *x* : numpy.array
           multidimensional data (channels, data points, trials).
-      *y*=[] : numpy.array
+      *y* = [] : numpy.array
           multidimensional data. If not given the autocovariance of *x*
           will be calculated.
-       *p*=0: int
+       *p* = 0: int
           window shift of input data. It can be negative as well.
-       *norm*=True: bool
+       *norm* = True: bool
           normalization - if True the result is divided by length of *x*,
           otherwise it is not. 
     Returns:
@@ -94,12 +94,12 @@ def ncov(x, y=[], p=0, norm=True):
     Args:
       *x* : numpy.array
           onedimensional data.
-      *y*=[] : numpy.array
+      *y* = [] : numpy.array
           onedimensional data. If not given the autocovariance of *x*
           will be calculated.
-       *p*=0: int
+       *p* = 0: int
           window shift of input data. It can be negative as well.
-       *norm*=True: bool
+       *norm* = True: bool
           normalization - if True the result is divided by length of *x*,
           otherwise it is not. 
     Returns:
@@ -232,7 +232,7 @@ def yulewalker(y,pmax=1):
           k - nr of channels, n -data points, tr - nr of trials
       *pmax*: int >0
           model order
-'    Returns:
+    Returns:
       *Ar* : np.array
           matrix with parameters matrix (p, k, k) where p - model order,
           k - nr of channels
