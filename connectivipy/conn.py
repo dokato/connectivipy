@@ -101,6 +101,8 @@ def spectrum_inst(acoef, vcoef, fs=1, resolution=None):
     p, k, k = acoef.shape 
     if resolution == None:
         freqs=np.linspace(0,fs/2,512)
+    else:
+        freqs=np.linspace(0,fs/2,resolution)
     A_z=np.zeros((len(freqs),k,k),complex)
     B_z=np.zeros((len(freqs),k,k),complex)
 
@@ -304,7 +306,7 @@ class ConnectAR(Connect):
             stvalues[e] = self.calculate(ar, vr, fs, resol)
         return stvalues
 
-    def short_time_significance(self, data, Nrep=10, alpha=0.05, method='yw',\
+    def short_time_significance(self, data, Nrep=100, alpha=0.05, method='yw',\
                                 order=None, fs=1, resolution=None,\
                                 nfft=None, no=None, **params):
         if len(data.shape)>2:
@@ -450,9 +452,31 @@ def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
 
 class PartialCoh(ConnectAR):
     """
-    partial coherency 
+    PartialCoh - class inherits from ConnectAR and overloads
+    *calculate* method.
     """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=None):
+        """
+        Partial Coherence estimation from MVAR parameters.
+        Args:
+          *Acf* : numpy.array
+              array of shape (k, k, p) where *k* is number of channels and
+              *p* is a model order.
+          *Vcf* : numpy.array
+              prediction error matrix (k, k)
+          *fs*=1 : int
+              sampling rate
+          *resolution*=100 : int
+              number of spectrum data points
+          *generalized*=False : bool
+              generalized version or not
+        Returns:
+          *PC* : numpy.array
+              matrix with estimation results (*resolution*, k, k)
+        References:
+        .. [1] G. M. Jenkins, D. G. Watts. Spectral Analysis and its 
+               Applications. Holden-Day, USA, 1969
+        """
         A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution=resolution) 
         res, k, k = A_z.shape
         PC = np.zeros((res,k,k))
@@ -468,42 +492,45 @@ class PartialCoh(ConnectAR):
 
 class DTF(ConnectAR):
     """
-    Directed transfer function
-    Kaminski, M.; Blinowska, K. J. (1991).
+    DTF - class inherits from ConnectAR and overloads
+    *calculate* method.
     """
-
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
+        "More in *dtf_fun*"
         return dtf_fun(Acoef, Vcoef, fs, resolution)
 
 class PDC(ConnectAR):
     """
-    PDC
+    PDC - class inherits from ConnectAR and overloads
+    *calculate* method.
     """
-    
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
+        "More in *pdc_fun*"
         return pdc_fun(Acoef, Vcoef, fs, resolution)
 
 class gPDC(ConnectAR):
     """
-    generalized PDC
+    gPDC - class inherits from ConnectAR and overloads
+    *calculate* method.
     """
-    
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
+        "More in *pdc_fun*"
         return pdc_fun(Acoef, Vcoef, fs, resolution, generalized=True)
 
 class gDTF(ConnectAR):
     """
-    Directed transfer function
-    Kaminski, M.; Blinowska, K. J. (1991).
+    gDTF - class inherits from ConnectAR and overloads
+    *calculate* method.
     """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
+        "More in *dtf_fun*"
         return dtf_fun(Acoef, Vcoef, fs, resolution, generalized=True)
 
 class ffDTF(ConnectAR):
-
-    def fit_ar(self, data, order = None, method = 'yw'):
-        pass
-
+    """
+    ffDTF - class inherits from ConnectAR and overloads
+    *calculate* method.
+    """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         """
         full-frequency Directed Transfer Function estimation from MVAR
@@ -540,11 +567,15 @@ class ffDTF(ConnectAR):
         return ffDTF
 
 class dDTF(ConnectAR):
-
+    """
+    dDTF - class inherits from ConnectAR and overloads
+    *calculate* method.
+    """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         """
         direct Directed Transfer Function estimation from MVAR
-        parameters.
+        parameters. dDTF is a DTF multiplied in each frequency by
+        Patrial Coherence.
         Args:
           *Acf* : numpy.array
               array of shape (k, k, p) where *k* is number of channels and
@@ -584,6 +615,10 @@ class dDTF(ConnectAR):
         return dDTF
 
 class iPDC(ConnectAR):
+    """
+    iPDC - class inherits from ConnectAR and overloads
+    *calculate* method.
+    """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         """
         instantaneous Partial Directed Coherence  from MVAR
@@ -618,7 +653,10 @@ class iPDC(ConnectAR):
         return PDC
 
 class iDTF(ConnectAR):
-    
+    """
+    iDTF - class inherits from ConnectAR and overloads
+    *calculate* method.
+    """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         """
         instantaneous Partial Directed Coherence  from MVAR
@@ -656,33 +694,58 @@ class iDTF(ConnectAR):
 # Fourier Transform based methods:
 
 class Coherency(Connect):
+    """
+    Coherency - class inherits from Connect and overloads
+    *calculate* method and *values_range* attribute.
+    """
     def __init__(self):
         self.values_range = [0, 1]
 
-    def calculate(self, data, nfft=None, no=0, window=np.hanning, im=False):
+    def calculate(self, data, cnfft=None, cno=None, window=np.hanning, im=False):
+        """
+        Coherency calculation using FFT mehtod.
+        Args:
+          *data* : numpy.array
+              array of shape (k, N) where *k* is number of channels and
+              *N* is number of data points.
+          *cnfft*=None : int
+              number of data points in window; if None, it is N/5
+          *cno*=0 : int
+              overlap; if None, it is N/10
+          *window*=np.hanning : <function> generating window with 1 arg *n*
+              window function
+          *im*=False : bool
+              if False it return absolute value, otherwise complex number
+        Returns:
+          *COH* : numpy.array
+              matrix with estimation results (*resolution*, k, k)
+        References:
+        .. [1] M. B. Priestley Spectral Analysis and Time Series. 
+               Academic Press Inc. (London) LTD., 1981
+        """
         k, N = data.shape 
-        if not nfft:
-            nfft = int(N/4)
-        if not no:
-            no = int(N/10)
-        winarr = window(nfft)
-        slices = xrange(0, N, int(nfft-no))
-        ftsliced = np.zeros((len(slices), k, int(nfft/2)+1), complex)
+        if not cnfft:
+            cnfft = int(N/5)
+        if cno is None:
+            cno = int(N/10)
+        winarr = window(cnfft)
+        slices = xrange(0, N, int(cnfft-cno))
+        ftsliced = np.zeros((len(slices), k, int(cnfft/2)+1), complex)
         for e,i in enumerate(slices):
-            if i+nfft>=N:
-                datzer = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N))),axis=1)
+            if i+cnfft>=N:
+                datzer = np.concatenate((data[:,i:i+cnfft],np.zeros((k,i+cnfft-N))),axis=1)
                 ftsliced[e] = np.fft.rfft(datzer*winarr, axis=1)
             else:
-                ftsliced[e] = np.fft.rfft(data[:,i:i+nfft]*winarr, axis=1)
-        ctop = np.zeros((len(slices), k, k, int(nfft/2)+1), complex)
-        cdown = np.zeros((len(slices), k, int(nfft/2)+1))
+                ftsliced[e] = np.fft.rfft(data[:,i:i+cnfft]*winarr, axis=1)
+        ctop = np.zeros((len(slices), k, k, int(cnfft/2)+1), complex)
+        cdown = np.zeros((len(slices), k, int(cnfft/2)+1))
         for i in xrange(len(slices)):
-            c1 = ftsliced[i,:,:].reshape((k, 1, int(nfft/2)+1))
-            c2 = ftsliced[i,:,:].conj().reshape((1, k, int(nfft/2)+1))
+            c1 = ftsliced[i,:,:].reshape((k, 1, int(cnfft/2)+1))
+            c2 = ftsliced[i,:,:].conj().reshape((1, k, int(cnfft/2)+1))
             ctop[i] = c1*c2
             cdown[i] = np.abs(ftsliced[i,:,:])**2
-        cd1  = np.mean(cdown,axis=0).reshape((k, 1, int(nfft/2)+1))
-        cd2  = np.mean(cdown,axis=0).reshape((1, k, int(nfft/2)+1))
+        cd1  = np.mean(cdown,axis=0).reshape((k, 1, int(cnfft/2)+1))
+        cd2  = np.mean(cdown,axis=0).reshape((1, k, int(cnfft/2)+1))
         cdwn = cd1*cd2
         coh  = np.mean(ctop,axis=0)/np.sqrt(cdwn)
         if not im:
@@ -690,11 +753,38 @@ class Coherency(Connect):
         return coh.T
 
 class PSI(Connect):
-    def calculate(self, data, band_width=4, nfft=None, no=0, window=np.hanning):
+    """
+    PSI - class inherits from Connect and overloads
+    *calculate* method.
+    """
+    def calculate(self, data, band_width=4, psinfft=None, psino=0, window=np.hanning):
+        """
+        Phase Slope Index calculation using FFT mehtod.
+        Args:
+          *data* : numpy.array
+              array of shape (k, N) where *k* is number of channels and
+              *N* is number of data points.
+          *band_width*=4 : int
+              width of frequency band where PSI values are summed
+          *psinfft*=None : int
+              number of data points in window; if None, it is N/5
+          *psino*=0 : int
+              overlap; if None, it is N/10
+          *window*=np.hanning : <function> generating window with 1 arg *n*
+              window function
+        Returns:
+          *COH* : numpy.array
+              matrix with estimation results (*resolution*, k, k)
+        References:
+        .. [1] Nolte G. et all, Comparison of Granger Causality and 
+               Phase Slope Index. 267–276 (2009).
+        """
         k, N = data.shape 
+        if not psinfft:
+            psinfft = int(N/4)
         coh = Coherency()
-        cohval = coh.calculate(data, nfft=nfft, no=no, window=window, im=True)
-        fq_bands = np.arange(0, int(nfft/2)+1, band_width)
+        cohval = coh.calculate(data, cnfft=psinfft, cno=psino, window=window, im=True)
+        fq_bands = np.arange(0, int(psinfft/2)+1, band_width)
         psi = np.zeros((len(fq_bands)-1,k,k))
         for f in xrange(len(fq_bands)-1):
             ctmp = cohval[fq_bands[f]:fq_bands[f+1],:,:]
@@ -702,7 +792,29 @@ class PSI(Connect):
         return psi
 
 class GCI(Connect):
+    """
+    GCI - class inherits from Connect and overloads
+    *calculate* method.
+    """
     def calculate(self, data, method='yw', order=None):
+        """
+        Granger Causality Index calculation from MVAR model.
+        Args:
+          *data* : numpy.array
+              array of shape (k, N) where *k* is number of channels and
+              *N* is number of data points.
+          *method*='yw' : int
+              MVAR parameters estimation model
+          *order*=None : int
+              model order, if None appropiate value is chosen basic
+              on default criterion
+        Returns:
+          *gci* : numpy.array
+              matrix with estimation results (*resolution*, k, k)
+        References:
+        .. [1] Nolte G. et all, Comparison of Granger Causality and 
+               Phase Slope Index. 267–276 (2009).
+        """
         k, N = data.shape
         arfull, vrfull = Mvar().fit(data, order, method)
         gcval = np.zeros((k, k))

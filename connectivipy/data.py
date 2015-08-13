@@ -145,16 +145,22 @@ class Data(object):
         self._parameters.update(params)
         return self.__estim
 
-    def short_time_conn(self, method, nfft=None, no=None,**params):
+    def short_time_conn(self, method, nfft=None, no=None, **params):
         '''
         Short-time connectivity.
         
         Args:
-          *p* = None : int
-            estimation order, default None
           *method* = 'yw' : str {'yw', 'ns', 'vm'}
             method of estimation, for full list please type:
             connectivipy.mvar_methods
+          *nfft* = None : int
+            number of data points in window; if None, it is signal length
+            N/5.
+          *no* = None : int
+            number of data points in overlap; if None, it is signal length
+            N/10.
+          *params*
+            other parameters for specific estimator
         '''
         connobj = conn_estim_dc[method]()
         if not self._parameters.has_key("p"):
@@ -162,19 +168,29 @@ class Data(object):
                 self._parameters["p"] = params["order"]
             else:
                 self._parameters["p"] = None
-        if not params.has_key("nfft"):
-            params["nfft"] = None
-        if not params.has_key("no"):
-            params["no"] = None
+        if not nfft:
+            nfft = int(self.__length/5)
+        if not no:
+            no = int(self.__length/10)
         if not self._parameters.has_key("resolution"):
             self._parameters["resolution"] = 100
         if isinstance(connobj,ConnectAR):
-            self.__shtimest = connobj.short_time(self.__data, nfft=params["nfft"], no=params["no"],\
+            self.__shtimest = connobj.short_time(self.__data, nfft=nfft, no=no,\
                                                  fs=self.__fs, order=self._parameters["p"],\
                                                  resol=self._parameters["resolution"])
         else:
-            self.__shtimest = connobj.short_time(self.__data, nfft=params["nfft"], no=params["no"], **params)
+            if self.__multitrial:
+                for r in xrange(self.__multitrial):
+                    if r==0:
+                        self.__shtimest = connobj.short_time(self.__data[:,:,r], nfft=nfft, no=no, **params)
+                        continue
+                    self.__shtimest += connobj.short_time(self.__data[:,:,r], nfft=nfft, no=no, **params)
+                self.__shtimest/=self.__multitrial
+            else:
+                self.__shtimest = connobj.short_time(self.__data, nfft=nfft, no=no, **params)
         self._parameters["shorttime"] = method
+        self._parameters["nfft"] = nfft
+        self._parameters["no"] = no
         return self.__shtimest
 
     def significance(self, Nrep=100, alpha=0.05, **params):
@@ -202,12 +218,50 @@ class Data(object):
                                                     alpha=alpha, **params)
         else:
             if isinstance(connobj,ConnectAR):
-                self.__signific = connobj.bootstrap(self.__Ar, self.__Vr, Nrep=Nrep,
-                                                    alpha=alpha, fs=self.__fs, **params)
+                self.__signific = connobj.bootstrap(self.__data, Nrep=Nrep, alpha=alpha, 
+                                                    method=self._parameters["mvarmethod"],\
+                                                    fs=self.__fs, order=self._parameters["p"], **params)
             else:
                 self.__signific = connobj.bootstrap(self.__data, Nrep=Nrep,\
                                                     alpha=alpha, **params)
         return self.__signific
+
+    def short_time_significance(self, Nrep=100, alpha=0.05, nfft=None, no=None, **params):
+        '''
+        Statistical significance values of short-time version of
+        connectivity estimation method.
+        
+        Args:
+          *Nrep* = 100 : int
+            number of resamples
+          *alpha* = 0.05 : float
+            type I error rate (significance level)
+          *nfft* = None : int
+            number of data points in window; if None, it is taken from
+            *short_time_conn* method.
+          *no* = None : int
+            number of data points in overlap; if None, it is taken from
+            *short_time_conn* method.
+        Returns:
+          *signi*: numpy.array
+            matrix in shape of (k, k) with values for each pair of
+            channels
+        '''
+        if not nfft:
+            nfft = self._parameters["nfft"]
+        if not no:
+            no = self._parameters["no"]
+        connobj = conn_estim_dc[self._parameters["shorttime"]]()
+        if isinstance(connobj,ConnectAR):
+            self.__st_signific = connobj.short_time_significance(self.__data, Nrep=Nrep, alpha=alpha, 
+                                                              method=self._parameters["mvarmethod"],\
+                                                              fs=self.__fs, order=self._parameters["p"],
+                                                              nfft=nfft, no=no, **params)
+        else:
+            self.__st_signific = connobj.short_time_significance(self.__data, Nrep=Nrep,\
+                                                              nfft=nfft, no=no,\
+                                                              alpha=alpha, **params)
+        return self.__st_signific
 
     def plot_data(self, trial=0, show=True):
         '''
@@ -284,27 +338,33 @@ class Data(object):
         if show:
             plt.show()
 
-    def plot_short_time_conn(self, name='',show=True):
+    def plot_short_time_conn(self, name='',signi=True, show=True):
         '''
         Plot short-time version of estimation results.
         
         Args:
           *name*='' : str
             title of the plot
-          *show* = True : boolean
+          *signi*=True : boolean
+            reset irrelevant values; it works only after short time
+            significance calculation using *short_time_significance*
+          *show*=True : boolean
             show the plot or not            
         '''
         assert hasattr(self,'_Data__shtimest')==True, "No valid data! Use calculation method first."
+        shtvalues = self.__shtimest
+        if signi and hasattr(self,'_Data__st_signific'):
+            shtvalues = self.fill_nans(shtvalues,self.__st_signific)
         fig, axes = plt.subplots(self.__chans, self.__chans)
         freqs = np.linspace(0, self.__fs//2, 4)
         time = np.linspace(0, self.__length/self.__fs, 5)
         ticks_time = [0, self.__fs//2]
         ticks_freqs = [0, self.__length//self.__fs]
         # mask diagonal values to not contaminate the plot
-        mask = np.zeros(self.__shtimest.shape)
+        mask = np.zeros(shtvalues.shape)
         for i in xrange(self.__chans):
             mask[:,:,i,i] = 1
-        masked_shtimest = np.ma.array(self.__shtimest, mask=mask)
+        masked_shtimest = np.ma.array(shtvalues, mask=mask)
         dtmax = np.max(masked_shtimest)
         dtmin = np.min(masked_shtimest)
         for i in xrange(self.__chans):
@@ -313,7 +373,7 @@ class Data(object):
                     axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
                 if self.__channames and j==0:
                     axes[i, j].set_ylabel(self.__channames[i])
-                axes[i, j].imshow(self.__shtimest[:,:,i,j].T, aspect='auto',\
+                axes[i, j].imshow(shtvalues[:,:,i,j].T, aspect='auto',\
                                   extent=[0,self.__length/self.__fs,0,self.__fs//2], \
                                   interpolation='none', origin='lower', vmin=dtmin, vmax=dtmax)
                 if i!=self.__chans-1:
@@ -358,6 +418,27 @@ class Data(object):
             content+= "  " + "\t".join([ str(x) for x in cnest[i]]) + "\r\n" 
         with open(filename,'wb') as fl:
             fl.write(content)
+    
+    # auxiliary methods:
+    def fill_nans(self, values, borders):
+        '''
+        Fill nans where *values* < *borders* (independent of frequency).
+        
+        Args:
+          *values* : numpy.array
+            array of shape (time, freqs, channels, channels) to fill nans
+          *borders*: numpy.array
+            array of shape (time, channels, channels) with limes
+            values
+        Returns:
+          *values_nans*: numpy.array
+            array of shape (time, freq, channels, channels) with nans
+            where values were less than appropieate value from *borders*
+        '''
+        tm, fr, k, k = values.shape
+        for i in xrange(fr):
+            values[:,i,:,:][values[:,i,:,:]<borders] = 0
+        return values
     
     # accessors:
     @property
