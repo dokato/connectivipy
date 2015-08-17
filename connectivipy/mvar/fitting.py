@@ -9,7 +9,7 @@ def mvar_gen(Acf, n, omit=500):
     Generating data point from MVAR coefficiencs matrix *Acf*.
     Args:
       *Acf* : numpy.array
-          array of dimension kxkxp where *k* is number of channels and
+          array in shape of (p,k,k) where *k* is number of channels and
           *p* is a model order.
       *n* : int
           number of data points.
@@ -36,7 +36,7 @@ def mvar_gen_inst(Acf, n, omit=500):
     instantenous interaction not as in *mvar_gen* one data point lagged.
     Args:
       *Acf* : numpy.array
-          array of dimension kxkxp where *k* is number of channels and
+          array in shape of (p,k,k) where *k* is number of channels and
           *p* is a model order.
       *n* : int
           number of data points.

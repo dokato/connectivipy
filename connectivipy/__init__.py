@@ -11,7 +11,8 @@ __version__ = '0.34'
 # plain plotting from values
 def plot_conn(values, name='', fs=1, ylim=None, xlim=None, show=True):
     '''
-    Plot connectivity estimation results.
+    Plot connectivity estimation results. Allows to plot your results
+    without using *Data* class.
     
     Args:
       *values* : numpy.array
