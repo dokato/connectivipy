@@ -15,7 +15,7 @@ def mvar_gen(Acf, n, omit=500):
           number of data points.
     Returns:
       *y* : numpy.array
-          (k, n-omit) data points
+          (k, n) data points
     """
     p, chn, chn = Acf.shape
     y = np.zeros((chn, n + omit))
@@ -42,7 +42,7 @@ def mvar_gen_inst(Acf, n, omit=500):
           number of data points.
     Returns:
       *y* : np.array
-          kx(n-omit) data points
+          (k, n) data points
     """
     p, chn, chn = Acf.shape
     y = np.zeros((chn, n + omit))

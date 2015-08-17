@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>data &mdash; ConnectiviPy 0.32a documentation</title>
+    <title>data &mdash; ConnectiviPy 0.34a documentation</title>
     
     <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.32a',
+        VERSION:     '0.34a',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="ConnectiviPy 0.32a documentation" href="../index.html" />
+    <link rel="top" title="ConnectiviPy 0.34a documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" /> 
   </head>
   <body role="document">
@@ -34,7 +34,7 @@
             <img class="logo" src="../_static/connpy.png" alt="Logo"/>
           </a></p>
         <div class="headertitle"><a
-          href="../index.html">ConnectiviPy 0.32a documentation</a></div>
+          href="../index.html">ConnectiviPy 0.34a documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -163,8 +163,7 @@
 <span class="sd">          *p* = None : int</span>
 <span class="sd">            estimation order, default None</span>
 <span class="sd">          *method* = &#39;yw&#39; : str {&#39;yw&#39;, &#39;ns&#39;, &#39;vm&#39;}</span>
-<span class="sd">            method of estimation, for full list please type:</span>
-<span class="sd">            connectivipy.mvar_methods</span>
+<span class="sd">            method of estimation</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__Ar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Vr</span> <span class="o">=</span> <span class="n">Mvar</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s">&quot;mvar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
@@ -179,8 +178,7 @@
 <span class="sd">          *p* = None : int</span>
 <span class="sd">            estimation order, default None</span>
 <span class="sd">          *method* = &#39;yw&#39; : str {&#39;yw&#39;, &#39;ns&#39;, &#39;vm&#39;}</span>
-<span class="sd">            method of estimation, for full list please type:</span>
-<span class="sd">            connectivipy.mvar_methods</span>
+<span class="sd">            method of estimation</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">connobj</span> <span class="o">=</span> <span class="n">conn_estim_dc</span><span class="p">[</span><span class="n">method</span><span class="p">]()</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">connobj</span><span class="p">,</span><span class="n">ConnectAR</span><span class="p">):</span>
@@ -293,7 +291,7 @@
 <span class="sd">            type I error rate (significance level)</span>
 <span class="sd">          *nfft* = None : int</span>
 <span class="sd">            number of data points in window; if None, it is taken from</span>
-<span class="sd">            *short_time_conn* method.</span>
+<span class="sd">            :func:`Data.short_time_conn` method.</span>
 <span class="sd">          *no* = None : int</span>
 <span class="sd">            number of data points in overlap; if None, it is taken from</span>
 <span class="sd">            *short_time_conn* method.</span>
@@ -393,7 +391,7 @@
         <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="Data.plot_short_time_conn"><a class="viewcode-back" href="../data.html#data.Data.plot_short_time_conn">[docs]</a>    <span class="k">def</span> <span class="nf">plot_short_time_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">signi</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Data.plot_short_time_conn"><a class="viewcode-back" href="../data.html#data.Data.plot_short_time_conn">[docs]</a>    <span class="k">def</span> <span class="nf">plot_short_time_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">signi</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">percmax</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Plot short-time version of estimation results.</span>
 <span class="sd">        </span>
@@ -403,6 +401,8 @@
 <span class="sd">          *signi* = True : boolean</span>
 <span class="sd">            reset irrelevant values; it works only after short time</span>
 <span class="sd">            significance calculation using *short_time_significance*</span>
+<span class="sd">          *percmax* = 1. : float (0,1)</span>
+<span class="sd">            percent of maximal value which is maximum on the color map</span>
 <span class="sd">          *show* = True : boolean</span>
 <span class="sd">            show the plot or not            </span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -420,7 +420,7 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans</span><span class="p">):</span>
             <span class="n">mask</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">masked_shtimest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shtvalues</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
-        <span class="n">dtmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">masked_shtimest</span><span class="p">)</span>
+        <span class="n">dtmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">masked_shtimest</span><span class="p">)</span><span class="o">*</span><span class="n">percmax</span>
         <span class="n">dtmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">masked_shtimest</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans</span><span class="p">):</span>

@@ -127,7 +127,7 @@ html_theme_options = {
 #html_title = None
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-html_short_title = 'ConnPy'
+#html_short_title = 'ConnPy'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
@@ -161,9 +161,7 @@ html_static_path = ['_static']
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-html_additional_pages = {
-    'Download': 'https://github.com/dokato/connectivipy',
-}
+#html_additional_pages = {}
 
 # If false, no module index is generated.
 #html_domain_indices = True

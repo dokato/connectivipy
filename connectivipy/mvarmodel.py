@@ -7,7 +7,7 @@ from mvar.fitting import *
 class Mvar(object):
     """
     Static class *Mvar* to multivariete autoregressive model
-    fitting. Possible methods are in *_fit_dict* where key is
+    fitting. Possible methods are in `fit_dict` where key is
     acronym of algorithm and value is a function from *mvar.fitting*.
     """
     
@@ -22,7 +22,7 @@ class Mvar(object):
         Args:
           *data* : numpy.array
               array with data shaped (k, N), k - channels nr, N - data points)
-          *order*=None : int
+          *order* = None : int
               model order, when default None it estimates order using
               akaike order criteria.
           *method* = 'yw': str
@@ -47,9 +47,9 @@ class Mvar(object):
               multichannel data in shape (k, n) for one trial case and
               (k, n, tr) for multitrial
               k - nr of channels, n -data points, tr - nr of trials
-          *p_max*=5 : int 
+          *p_max* = 5 : int 
               maximal model order
-          *method*='yw' : str
+          *method* = 'yw' : str
               name of the mvar calculation method
         Returns:
           *best_order* : int
@@ -82,9 +82,9 @@ class Mvar(object):
               multichannel data in shape (k, n) for one trial case and
               (k, n, tr) for multitrial
               k - nr of channels, n -data points, tr - nr of trials
-          *p_max*=5 : int 
+          *p_max* = 5 : int 
               maximal model order
-          *method*='yw' : str
+          *method* = 'yw' : str
               name of the mvar calculation method
         Returns:
           *best_order* : int
@@ -117,9 +117,9 @@ class Mvar(object):
               multichannel data in shape (k, n) for one trial case and
               (k, n, tr) for multitrial
               k - nr of channels, n -data points, tr - nr of trials
-          *p_max*=5 : int 
+          *p_max* = 5 : int 
               maximal model order
-          *method*='yw' : str
+          *method* = 'yw' : str
               name of the mvar calculation method
         Returns:
           *best_order* : int
@@ -152,9 +152,9 @@ class Mvar(object):
               multichannel data in shape (k, n) for one trial case and
               (k, n, tr) for multitrial
               k - nr of channels, n -data points, tr - nr of trials
-          *p_max*=5 : int 
+          *p_max* = 5 : int 
               maximal model order
-          *method*='yw' : str
+          *method* = 'yw' : str
               name of the mvar calculation method
         Returns:
           *best_order* : int

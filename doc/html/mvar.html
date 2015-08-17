@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Mvarmodel &mdash; ConnectiviPy 0.32a documentation</title>
+    <title>Mvarmodel &mdash; ConnectiviPy 0.34a documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.32a',
+        VERSION:     '0.34a',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="ConnectiviPy 0.32a documentation" href="index.html" />
+    <link rel="top" title="ConnectiviPy 0.34a documentation" href="index.html" />
     <link rel="next" title="Tutorial" href="tutorial.html" />
     <link rel="prev" title="Connectvity" href="conn.html" /> 
   </head>
@@ -35,7 +35,7 @@
             <img class="logo" src="_static/connpy.png" alt="Logo"/>
           </a></p>
         <div class="headertitle"><a
-          href="index.html">ConnectiviPy 0.32a documentation</a></div>
+          href="index.html">ConnectiviPy 0.34a documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="conn.html" title="Connectvity"
              accesskey="P">previous</a> |
@@ -66,7 +66,7 @@
 <dt id="mvarmodel.Mvar">
 <em class="property">class </em><code class="descclassname">mvarmodel.</code><code class="descname">Mvar</code><a class="reference internal" href="_modules/mvarmodel.html#Mvar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvarmodel.Mvar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Static class <em>Mvar</em> to multivariete autoregressive model
-fitting. Possible methods are in <em>_fit_dict</em> where key is
+fitting. Possible methods are in <cite>fit_dict</cite> where key is
 acronym of algorithm and value is a function from <em>mvar.fitting</em>.</p>
 <dl class="classmethod">
 <dt id="mvarmodel.Mvar.fit">
@@ -76,8 +76,8 @@ Args:</p>
 <blockquote>
 <div><dl class="docutils">
 <dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array with data (kXN, k - channels nr, N - data points)</dd>
-<dt><a href="#id1"><span class="problematic" id="id2">*</span></a>order*=None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>array with data shaped (k, N), k - channels nr, N - data points)</dd>
+<dt><em>order</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>model order, when default None it estimates order using
 akaike order criteria.</dd>
 <dt><em>method</em> = &#8216;yw&#8217;: str</dt>
@@ -96,12 +96,192 @@ akaike order criteria.</dd>
 </dl>
 </dd></dl>
 
+<dl class="classmethod">
+<dt id="mvarmodel.Mvar.order_akaike">
+<em class="property">classmethod </em><code class="descname">order_akaike</code><span class="sig-paren">(</span><em>data</em>, <em>p_max=None</em>, <em>method='yw'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvarmodel.html#Mvar.order_akaike"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvarmodel.Mvar.order_akaike" title="Permalink to this definition">¶</a></dt>
+<dd><p>Akaike criterion of MVAR order estimation.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>multichannel data in shape (k, n) for one trial case and
+(k, n, tr) for multitrial
+k - nr of channels, n -data points, tr - nr of trials</dd>
+<dt><em>p_max</em> = 5 <span class="classifier-delimiter">:</span> <span class="classifier">int </span></dt>
+<dd>maximal model order</dd>
+<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>name of the mvar calculation method</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>best_order</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>minimum of <em>crit</em> array</dd>
+<dt><em>crit</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>order criterion values for each value of order <em>p</em> starting from 1</dd>
+</dl>
+</dd>
+</dl>
+<p>References:
+.. [1] Blinowska K. J., Zygierewicz J., (2012) Practical biomedical</p>
+<blockquote>
+<div>signal analysis using MATLAB. Boca Raton: Taylor &amp; Francis.</div></blockquote>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="mvarmodel.Mvar.order_hq">
+<em class="property">classmethod </em><code class="descname">order_hq</code><span class="sig-paren">(</span><em>data</em>, <em>p_max=None</em>, <em>method='yw'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvarmodel.html#Mvar.order_hq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvarmodel.Mvar.order_hq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hannan-Quin criterion of MVAR order estimation.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>multichannel data in shape (k, n) for one trial case and
+(k, n, tr) for multitrial
+k - nr of channels, n -data points, tr - nr of trials</dd>
+<dt><em>p_max</em> = 5 <span class="classifier-delimiter">:</span> <span class="classifier">int </span></dt>
+<dd>maximal model order</dd>
+<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>name of the mvar calculation method</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>best_order</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>minimum of <em>crit</em> array</dd>
+<dt><em>crit</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>order criterion values for each value of order <em>p</em> starting from 1</dd>
+</dl>
+</dd>
+</dl>
+<p>References:
+.. [1] Blinowska K. J., Zygierewicz J., (2012) Practical biomedical</p>
+<blockquote>
+<div>signal analysis using MATLAB. Boca Raton: Taylor &amp; Francis.</div></blockquote>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="mvarmodel.Mvar.order_schwartz">
+<em class="property">classmethod </em><code class="descname">order_schwartz</code><span class="sig-paren">(</span><em>data</em>, <em>p_max=None</em>, <em>method='yw'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvarmodel.html#Mvar.order_schwartz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvarmodel.Mvar.order_schwartz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Schwartz criterion of MVAR order estimation.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>multichannel data in shape (k, n) for one trial case and
+(k, n, tr) for multitrial
+k - nr of channels, n -data points, tr - nr of trials</dd>
+<dt><em>p_max</em> = 5 <span class="classifier-delimiter">:</span> <span class="classifier">int </span></dt>
+<dd>maximal model order</dd>
+<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>name of the mvar calculation method</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>best_order</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>minimum of <em>crit</em> array</dd>
+<dt><em>crit</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>order criterion values for each value of order <em>p</em> starting from 1</dd>
+</dl>
+</dd>
+</dl>
+<p>References:
+.. [1] Blinowska K. J., Zygierewicz J., (2012) Practical biomedical</p>
+<blockquote>
+<div>signal analysis using MATLAB. Boca Raton: Taylor &amp; Francis.</div></blockquote>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="mvarmodel.Mvar.order_fpe">
+<em class="property">classmethod </em><code class="descname">order_fpe</code><span class="sig-paren">(</span><em>data</em>, <em>p_max=None</em>, <em>method='yw'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvarmodel.html#Mvar.order_fpe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvarmodel.Mvar.order_fpe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Final Prediction Error criterion of MVAR order estimation.
+(not recommended)
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>multichannel data in shape (k, n) for one trial case and
+(k, n, tr) for multitrial
+k - nr of channels, n -data points, tr - nr of trials</dd>
+<dt><em>p_max</em> = 5 <span class="classifier-delimiter">:</span> <span class="classifier">int </span></dt>
+<dd>maximal model order</dd>
+<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>name of the mvar calculation method</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>best_order</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>minimum of <em>crit</em> array</dd>
+<dt><em>crit</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>order criterion values for each value of order <em>p</em> starting from 1</dd>
+</dl>
+</dd>
+</dl>
+<p>References:
+.. [1] Akaike H, (1970), Statistical predictor identification,</p>
+<blockquote>
+<div>Ann. Inst. Statist. Math., 22 203–217.</div></blockquote>
+</dd></dl>
+
 </dd></dl>
 
 </div>
 <div class="section" id="algorithms">
 <h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-mvar.fitting"></span><dl class="function">
+<dt id="mvar.fitting.mvar_gen">
+<code class="descclassname">mvar.fitting.</code><code class="descname">mvar_gen</code><span class="sig-paren">(</span><em>Acf</em>, <em>n</em>, <em>omit=500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvar/fitting.html#mvar_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvar.fitting.mvar_gen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generating data point from MVAR coefficiencs matrix <em>Acf</em>.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of dimension kxkxp where <em>k</em> is number of channels and
+<em>p</em> is a model order.</dd>
+<dt><em>n</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of data points.</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>y</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>(k, n) data points</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mvar.fitting.mvar_gen_inst">
+<code class="descclassname">mvar.fitting.</code><code class="descname">mvar_gen_inst</code><span class="sig-paren">(</span><em>Acf</em>, <em>n</em>, <em>omit=500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvar/fitting.html#mvar_gen_inst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvar.fitting.mvar_gen_inst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generating data point from matrix <em>A</em> with MVAR coefficients but it
+takes into account also zerolag interactions. So here Acf[0] means
+instantenous interaction not as in <em>mvar_gen</em> one data point lagged.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of dimension kxkxp where <em>k</em> is number of channels and
+<em>p</em> is a model order.</dd>
+<dt><em>n</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of data points.</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>y</em> <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
+<dd>(k, n) data points</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="mvar.fitting.meanncov">
 <code class="descclassname">mvar.fitting.</code><code class="descname">meanncov</code><span class="sig-paren">(</span><em>x</em>, <em>y=[]</em>, <em>p=0</em>, <em>norm=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvar/fitting.html#meanncov"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvar.fitting.meanncov" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper to multichannel case of new covariance <em>ncov</em>.
@@ -129,56 +309,6 @@ otherwise it is not.</dd>
 <dd><dl class="first last docutils">
 <dt><em>mcov</em> <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
 <dd>covariance matrix</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mvar.fitting.mvar_gen">
-<code class="descclassname">mvar.fitting.</code><code class="descname">mvar_gen</code><span class="sig-paren">(</span><em>Acf</em>, <em>n</em>, <em>omit=500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvar/fitting.html#mvar_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvar.fitting.mvar_gen" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generating data point from MVAR coefficiencs matrix <em>Acf</em>.
-Args:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of dimension kxkxp where <em>k</em> is number of channels and
-<em>p</em> is a model order.</dd>
-<dt><em>n</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of data points.</dd>
-</dl>
-</div></blockquote>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt><em>y</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>(k, n-omit) data points</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="mvar.fitting.mvar_gen_inst">
-<code class="descclassname">mvar.fitting.</code><code class="descname">mvar_gen_inst</code><span class="sig-paren">(</span><em>Acf</em>, <em>n</em>, <em>omit=500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvar/fitting.html#mvar_gen_inst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvar.fitting.mvar_gen_inst" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generating data point from matrix <em>A</em> with MVAR coefficients but it
-takes into account also zerolag interactions. So here Acf[0] means
-instantenous interaction not as in <em>mvar_gen</em> one data point lagged.
-Args:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of dimension kxkxp where <em>k</em> is number of channels and
-<em>p</em> is a model order.</dd>
-<dt><em>n</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of data points.</dd>
-</dl>
-</div></blockquote>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt><em>y</em> <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
-<dd>kx(n-omit) data points</dd>
 </dl>
 </dd>
 </dl>
@@ -218,10 +348,10 @@ otherwise it is not.</dd>
 </dd></dl>
 
 <dl class="function">
-<dt id="mvar.fitting.nutallstrand">
-<code class="descclassname">mvar.fitting.</code><code class="descname">nutallstrand</code><span class="sig-paren">(</span><em>y</em>, <em>pmax=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvar/fitting.html#nutallstrand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvar.fitting.nutallstrand" title="Permalink to this definition">¶</a></dt>
+<dt id="mvar.fitting.vieiramorf">
+<code class="descclassname">mvar.fitting.</code><code class="descname">vieiramorf</code><span class="sig-paren">(</span><em>y</em>, <em>pmax=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvar/fitting.html#vieiramorf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvar.fitting.vieiramorf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute multichannel autoregresive model coefficients using
-Nutall-Strand algorithm.
+Vieira-Morf algorithm.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
@@ -251,10 +381,10 @@ k - nr of channels</dd>
 </dd></dl>
 
 <dl class="function">
-<dt id="mvar.fitting.vieiramorf">
-<code class="descclassname">mvar.fitting.</code><code class="descname">vieiramorf</code><span class="sig-paren">(</span><em>y</em>, <em>pmax=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvar/fitting.html#vieiramorf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvar.fitting.vieiramorf" title="Permalink to this definition">¶</a></dt>
+<dt id="mvar.fitting.nutallstrand">
+<code class="descclassname">mvar.fitting.</code><code class="descname">nutallstrand</code><span class="sig-paren">(</span><em>y</em>, <em>pmax=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mvar/fitting.html#nutallstrand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mvar.fitting.nutallstrand" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute multichannel autoregresive model coefficients using
-Vieira-Morf algorithm.
+Nutall-Strand algorithm.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">

@@ -36,9 +36,9 @@ def spectrum(acoef, vcoef, fs=1, resolution=100):
           *p* is a model order.
       *Vcf* : numpy.array
           prediction error matrix (k, k)
-      *fs*=1 : int
+      *fs* = 1 : int
           sampling rate
-      *resolution*=100 : int
+      *resolution* = 100 : int
           number of spectrum data points
     Returns:
       *A_z* : numpy.array
@@ -84,7 +84,7 @@ def spectrum_inst(acoef, vcoef, fs=1, resolution=None):
           prediction error matrix (k, k)
       *fs* = 1 : int
           sampling rate
-      *resolution*=100 : int
+      *resolution* = 100 : int
           number of spectrum data points
     Returns:
       *A_z* : numpy.array
@@ -137,6 +137,8 @@ class Connect(object):
     
     @abstractmethod
     def calculate(self):
+        """Abstract method to calculate values of estimators from specific
+        parameters"""
         pass
     
     def short_time(self, data, nfft=None, no=None, **params):
@@ -395,9 +397,9 @@ def dtf_fun(Acoef, Vcoef, fs, resolution, generalized=False):
           prediction error matrix (k, k)
       *fs* = 1 : int
           sampling rate
-      *resolution*=100 : int
+      *resolution* = 100 : int
           number of spectrum data points
-      *generalized*=False : bool
+      *generalized* = False : bool
           generalized version or not
     Returns:
       *DTF* : numpy.array
@@ -429,9 +431,9 @@ def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
           prediction error matrix (k, k)
       *fs* = 1 : int
           sampling rate
-      *resolution*=100 : int
+      *resolution* = 100 : int
           number of spectrum data points
-      *generalized*=False : bool
+      *generalized* = False : bool
           generalized version or not
     Returns:
       *PDC* : numpy.array
@@ -452,8 +454,8 @@ def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
 
 class PartialCoh(ConnectAR):
     """
-    PartialCoh - class inherits from ConnectAR and overloads
-    *calculate* method.
+    PartialCoh - class inherits from :class:`ConnectAR` and overloads
+    :func:`Connect.calculate` method.
     """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=None):
         """
@@ -490,46 +492,46 @@ class PartialCoh(ConnectAR):
             PC[i] = -1*before*(np.abs(D_z)/np.sqrt(mD))
         return np.abs(PC)
 
-class DTF(ConnectAR):
-    """
-    DTF - class inherits from ConnectAR and overloads
-    *calculate* method.
-    """
-    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
-        "More in *dtf_fun*"
-        return dtf_fun(Acoef, Vcoef, fs, resolution)
-
 class PDC(ConnectAR):
     """
-    PDC - class inherits from ConnectAR and overloads
-    *calculate* method.
+    PDC - class inherits from :class:`ConnectAR` and overloads
+    :func:`Connect.calculate` method.
     """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
-        "More in *pdc_fun*"
+        "More in :func:`pdc_fun`."
         return pdc_fun(Acoef, Vcoef, fs, resolution)
 
 class gPDC(ConnectAR):
     """
-    gPDC - class inherits from ConnectAR and overloads
-    *calculate* method.
+    gPDC - class inherits from :class:`ConnectAR` and overloads
+    :func:`Connect.calculate` method.
     """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
-        "More in *pdc_fun*"
+        "More in :func:`pdc_fun`"
         return pdc_fun(Acoef, Vcoef, fs, resolution, generalized=True)
+
+class DTF(ConnectAR):
+    """
+    DTF - class inherits from :class:`ConnectAR` and overloads
+    :func:`Connect.calculate` method.
+    """
+    def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
+        "More in :func:`dtf_fun`."
+        return dtf_fun(Acoef, Vcoef, fs, resolution)
 
 class gDTF(ConnectAR):
     """
-    gDTF - class inherits from ConnectAR and overloads
-    *calculate* method.
+    gDTF - class inherits from :class:`ConnectAR` and overloads
+    :func:`Connect.calculate` method.
     """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
-        "More in *dtf_fun*"
+        "More in :func:`dtf_fun`."
         return dtf_fun(Acoef, Vcoef, fs, resolution, generalized=True)
 
 class ffDTF(ConnectAR):
     """
-    ffDTF - class inherits from ConnectAR and overloads
-    *calculate* method.
+    ffDTF - class inherits from :class:`ConnectAR` and overloads
+    :func:`Connect.calculate` method.
     """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         """
@@ -568,8 +570,8 @@ class ffDTF(ConnectAR):
 
 class dDTF(ConnectAR):
     """
-    dDTF - class inherits from ConnectAR and overloads
-    *calculate* method.
+    dDTF - class inherits from :class:`ConnectAR` and overloads
+    :func:`Connect.calculate` method.
     """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         """
@@ -616,8 +618,8 @@ class dDTF(ConnectAR):
 
 class iPDC(ConnectAR):
     """
-    iPDC - class inherits from ConnectAR and overloads
-    *calculate* method.
+    iPDC - class inherits from :class:`ConnectAR` and overloads
+    :func:`Connect.calculate` method.
     """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         """
@@ -654,8 +656,8 @@ class iPDC(ConnectAR):
 
 class iDTF(ConnectAR):
     """
-    iDTF - class inherits from ConnectAR and overloads
-    *calculate* method.
+    iDTF - class inherits from :class:`ConnectAR` and overloads
+    :func:`Connect.calculate` method.
     """
     def calculate(self, Acoef=None, Vcoef=None, fs=None, resolution=100):
         """
@@ -695,8 +697,8 @@ class iDTF(ConnectAR):
 
 class Coherency(Connect):
     """
-    Coherency - class inherits from Connect and overloads
-    *calculate* method and *values_range* attribute.
+    Coherency - class inherits from :class:`Connect` and overloads
+    :func:`Connect.calculate` method and *values_range* attribute.
     """
     def __init__(self):
         self.values_range = [0, 1]
@@ -754,8 +756,8 @@ class Coherency(Connect):
 
 class PSI(Connect):
     """
-    PSI - class inherits from Connect and overloads
-    *calculate* method.
+    PSI - class inherits from :class:`Connect` and overloads
+    :func:`Connect.calculate` method.
     """
     def calculate(self, data, band_width=4, psinfft=None, psino=0, window=np.hanning):
         """
@@ -793,8 +795,8 @@ class PSI(Connect):
 
 class GCI(Connect):
     """
-    GCI - class inherits from Connect and overloads
-    *calculate* method.
+    GCI - class inherits from :class:`Connect` and overloads
+    :func:`Connect.calculate` method.
     """
     def calculate(self, data, method='yw', order=None):
         """

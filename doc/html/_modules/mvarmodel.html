@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mvarmodel &mdash; ConnectiviPy 0.32a documentation</title>
+    <title>mvarmodel &mdash; ConnectiviPy 0.34a documentation</title>
     
     <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.32a',
+        VERSION:     '0.34a',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="ConnectiviPy 0.32a documentation" href="../index.html" />
+    <link rel="top" title="ConnectiviPy 0.34a documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" /> 
   </head>
   <body role="document">
@@ -34,7 +34,7 @@
             <img class="logo" src="../_static/connpy.png" alt="Logo"/>
           </a></p>
         <div class="headertitle"><a
-          href="../index.html">ConnectiviPy 0.32a documentation</a></div>
+          href="../index.html">ConnectiviPy 0.34a documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -62,13 +62,13 @@
 <div class="viewcode-block" id="Mvar"><a class="viewcode-back" href="../mvar.html#mvarmodel.Mvar">[docs]</a><span class="k">class</span> <span class="nc">Mvar</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Static class *Mvar* to multivariete autoregressive model</span>
-<span class="sd">    fitting. Possible methods are in *_fit_dict* where key is</span>
+<span class="sd">    fitting. Possible methods are in `fit_dict` where key is</span>
 <span class="sd">    acronym of algorithm and value is a function from *mvar.fitting*.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="n">_fit_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;yw&#39;</span><span class="p">:</span> <span class="n">yulewalker</span><span class="p">,</span>
-                 <span class="s">&#39;ns&#39;</span><span class="p">:</span> <span class="n">nutallstrand</span><span class="p">,</span>
-                 <span class="s">&#39;vm&#39;</span><span class="p">:</span> <span class="n">vieiramorf</span><span class="p">}</span>
+    <span class="n">fit_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;yw&#39;</span><span class="p">:</span> <span class="n">yulewalker</span><span class="p">,</span>
+                <span class="s">&#39;ns&#39;</span><span class="p">:</span> <span class="n">nutallstrand</span><span class="p">,</span>
+                <span class="s">&#39;vm&#39;</span><span class="p">:</span> <span class="n">vieiramorf</span><span class="p">}</span>
 
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="Mvar.fit"><a class="viewcode-back" href="../mvar.html#mvarmodel.Mvar.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">):</span>
@@ -76,8 +76,8 @@
 <span class="sd">        Mvar model fitting.</span>
 <span class="sd">        Args:</span>
 <span class="sd">          *data* : numpy.array</span>
-<span class="sd">              array with data (kXN, k - channels nr, N - data points)</span>
-<span class="sd">          *order*=None : int</span>
+<span class="sd">              array with data shaped (k, N), k - channels nr, N - data points)</span>
+<span class="sd">          *order* = None : int</span>
 <span class="sd">              model order, when default None it estimates order using</span>
 <span class="sd">              akaike order criteria.</span>
 <span class="sd">          *method* = &#39;yw&#39;: str</span>
@@ -89,11 +89,11 @@
 <span class="sd">              reflection matrix (kXk)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">order</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">order</span><span class="p">,</span> <span class="n">crit_val</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_order_hq</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>        
-        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_fit_dict</span><span class="p">[</span><span class="n">method</span><span class="p">](</span><span class="n">data</span><span class="p">,</span><span class="n">order</span><span class="p">)</span>
+            <span class="n">order</span><span class="p">,</span> <span class="n">crit_val</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">order_hq</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>        
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">fit_dict</span><span class="p">[</span><span class="n">method</span><span class="p">](</span><span class="n">data</span><span class="p">,</span><span class="n">order</span><span class="p">)</span>
     </div>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_order_akaike</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Mvar.order_akaike"><a class="viewcode-back" href="../mvar.html#mvarmodel.Mvar.order_akaike">[docs]</a>    <span class="k">def</span> <span class="nf">order_akaike</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Akaike criterion of MVAR order estimation.</span>
 
@@ -102,9 +102,9 @@
 <span class="sd">              multichannel data in shape (k, n) for one trial case and</span>
 <span class="sd">              (k, n, tr) for multitrial</span>
 <span class="sd">              k - nr of channels, n -data points, tr - nr of trials</span>
-<span class="sd">          *p_max*=5 : int </span>
+<span class="sd">          *p_max* = 5 : int </span>
 <span class="sd">              maximal model order</span>
-<span class="sd">          *method*=&#39;yw&#39; : str</span>
+<span class="sd">          *method* = &#39;yw&#39; : str</span>
 <span class="sd">              name of the mvar calculation method</span>
 <span class="sd">        Returns:</span>
 <span class="sd">          *best_order* : int</span>
@@ -126,9 +126,9 @@
             <span class="p">(</span><span class="n">a_coef</span><span class="p">,</span> <span class="n">v_r</span><span class="p">)</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
             <span class="n">crit</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">v_r</span><span class="p">))</span><span class="o">+</span><span class="mf">2.</span><span class="o">*</span><span class="p">((</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">chn</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">chn</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">crit</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">crit</span> 
-
+</div>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_order_hq</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Mvar.order_hq"><a class="viewcode-back" href="../mvar.html#mvarmodel.Mvar.order_hq">[docs]</a>    <span class="k">def</span> <span class="nf">order_hq</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Hannan-Quin criterion of MVAR order estimation.</span>
 
@@ -137,9 +137,9 @@
 <span class="sd">              multichannel data in shape (k, n) for one trial case and</span>
 <span class="sd">              (k, n, tr) for multitrial</span>
 <span class="sd">              k - nr of channels, n -data points, tr - nr of trials</span>
-<span class="sd">          *p_max*=5 : int </span>
+<span class="sd">          *p_max* = 5 : int </span>
 <span class="sd">              maximal model order</span>
-<span class="sd">          *method*=&#39;yw&#39; : str</span>
+<span class="sd">          *method* = &#39;yw&#39; : str</span>
 <span class="sd">              name of the mvar calculation method</span>
 <span class="sd">        Returns:</span>
 <span class="sd">          *best_order* : int</span>
@@ -161,9 +161,9 @@
             <span class="p">(</span><span class="n">a_coef</span><span class="p">,</span> <span class="n">v_r</span><span class="p">)</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
             <span class="n">crit</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">v_r</span><span class="p">))</span><span class="o">+</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">chn</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">N</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">crit</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">crit</span>
-
+</div>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_order_schwartz</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Mvar.order_schwartz"><a class="viewcode-back" href="../mvar.html#mvarmodel.Mvar.order_schwartz">[docs]</a>    <span class="k">def</span> <span class="nf">order_schwartz</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Schwartz criterion of MVAR order estimation.</span>
 
@@ -172,9 +172,9 @@
 <span class="sd">              multichannel data in shape (k, n) for one trial case and</span>
 <span class="sd">              (k, n, tr) for multitrial</span>
 <span class="sd">              k - nr of channels, n -data points, tr - nr of trials</span>
-<span class="sd">          *p_max*=5 : int </span>
+<span class="sd">          *p_max* = 5 : int </span>
 <span class="sd">              maximal model order</span>
-<span class="sd">          *method*=&#39;yw&#39; : str</span>
+<span class="sd">          *method* = &#39;yw&#39; : str</span>
 <span class="sd">              name of the mvar calculation method</span>
 <span class="sd">        Returns:</span>
 <span class="sd">          *best_order* : int</span>
@@ -196,9 +196,9 @@
             <span class="p">(</span><span class="n">a_coef</span><span class="p">,</span><span class="n">v_r</span><span class="p">)</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">method</span><span class="p">)</span>
             <span class="n">crit</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">v_r</span><span class="p">))</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">chn</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">N</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">crit</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">crit</span>
-
+</div>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_order_fpe</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Mvar.order_fpe"><a class="viewcode-back" href="../mvar.html#mvarmodel.Mvar.order_fpe">[docs]</a>    <span class="k">def</span> <span class="nf">order_fpe</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Final Prediction Error criterion of MVAR order estimation.</span>
 <span class="sd">        (not recommended)</span>
@@ -207,9 +207,9 @@
 <span class="sd">              multichannel data in shape (k, n) for one trial case and</span>
 <span class="sd">              (k, n, tr) for multitrial</span>
 <span class="sd">              k - nr of channels, n -data points, tr - nr of trials</span>
-<span class="sd">          *p_max*=5 : int </span>
+<span class="sd">          *p_max* = 5 : int </span>
 <span class="sd">              maximal model order</span>
-<span class="sd">          *method*=&#39;yw&#39; : str</span>
+<span class="sd">          *method* = &#39;yw&#39; : str</span>
 <span class="sd">              name of the mvar calculation method</span>
 <span class="sd">        Returns:</span>
 <span class="sd">          *best_order* : int</span>
@@ -230,7 +230,7 @@
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p_max</span><span class="p">):</span>
             <span class="p">(</span><span class="n">a_coef</span><span class="p">,</span><span class="n">v_r</span><span class="p">)</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">method</span><span class="p">)</span>
             <span class="n">crit</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">v_r</span><span class="p">)</span> <span class="o">+</span> <span class="n">chn</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">N</span><span class="o">+</span><span class="n">chn</span><span class="o">*</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="n">chn</span><span class="o">*</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">crit</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">crit</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">crit</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">crit</span></div></div>
 </pre></div>
 
           </div>

@@ -108,8 +108,7 @@ class Data(object):
           *p* = None : int
             estimation order, default None
           *method* = 'yw' : str {'yw', 'ns', 'vm'}
-            method of estimation, for full list please type:
-            connectivipy.mvar_methods
+            method of estimation
         '''
         self.__Ar, self.__Vr = Mvar().fit(self.__data, p, method)
         self._parameters["mvar"] = True
@@ -124,8 +123,7 @@ class Data(object):
           *p* = None : int
             estimation order, default None
           *method* = 'yw' : str {'yw', 'ns', 'vm'}
-            method of estimation, for full list please type:
-            connectivipy.mvar_methods
+            method of estimation
         '''
         connobj = conn_estim_dc[method]()
         if isinstance(connobj,ConnectAR):
@@ -238,7 +236,7 @@ class Data(object):
             type I error rate (significance level)
           *nfft* = None : int
             number of data points in window; if None, it is taken from
-            *short_time_conn* method.
+            :func:`Data.short_time_conn` method.
           *no* = None : int
             number of data points in overlap; if None, it is taken from
             *short_time_conn* method.

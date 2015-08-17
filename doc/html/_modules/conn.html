@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>conn &mdash; ConnectiviPy 0.32a documentation</title>
+    <title>conn &mdash; ConnectiviPy 0.34a documentation</title>
     
     <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.32a',
+        VERSION:     '0.34a',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="ConnectiviPy 0.32a documentation" href="../index.html" />
+    <link rel="top" title="ConnectiviPy 0.34a documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" /> 
   </head>
   <body role="document">
@@ -34,7 +34,7 @@
             <img class="logo" src="../_static/connpy.png" alt="Logo"/>
           </a></p>
         <div class="headertitle"><a
-          href="../index.html">ConnectiviPy 0.32a documentation</a></div>
+          href="../index.html">ConnectiviPy 0.34a documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -91,9 +91,9 @@
 <span class="sd">          *p* is a model order.</span>
 <span class="sd">      *Vcf* : numpy.array</span>
 <span class="sd">          prediction error matrix (k, k)</span>
-<span class="sd">      *fs*=1 : int</span>
+<span class="sd">      *fs* = 1 : int</span>
 <span class="sd">          sampling rate</span>
-<span class="sd">      *resolution*=100 : int</span>
+<span class="sd">      *resolution* = 100 : int</span>
 <span class="sd">          number of spectrum data points</span>
 <span class="sd">    Returns:</span>
 <span class="sd">      *A_z* : numpy.array</span>
@@ -139,7 +139,7 @@
 <span class="sd">          prediction error matrix (k, k)</span>
 <span class="sd">      *fs* = 1 : int</span>
 <span class="sd">          sampling rate</span>
-<span class="sd">      *resolution*=100 : int</span>
+<span class="sd">      *resolution* = 100 : int</span>
 <span class="sd">          number of spectrum data points</span>
 <span class="sd">    Returns:</span>
 <span class="sd">      *A_z* : numpy.array</span>
@@ -191,9 +191,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">values_range</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
     
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Connect.calculate"><a class="viewcode-back" href="../conn.html#conn.Connect.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Abstract method to calculate values of estimators from specific</span>
+<span class="sd">        parameters&quot;&quot;&quot;</span>
         <span class="k">pass</span>
-    
+    </div>
 <div class="viewcode-block" id="Connect.short_time"><a class="viewcode-back" href="../conn.html#conn.Connect.short_time">[docs]</a>    <span class="k">def</span> <span class="nf">short_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Short-tme version of estimator, where data is windowed into parts</span>
@@ -450,9 +452,9 @@
 <span class="sd">          prediction error matrix (k, k)</span>
 <span class="sd">      *fs* = 1 : int</span>
 <span class="sd">          sampling rate</span>
-<span class="sd">      *resolution*=100 : int</span>
+<span class="sd">      *resolution* = 100 : int</span>
 <span class="sd">          number of spectrum data points</span>
-<span class="sd">      *generalized*=False : bool</span>
+<span class="sd">      *generalized* = False : bool</span>
 <span class="sd">          generalized version or not</span>
 <span class="sd">    Returns:</span>
 <span class="sd">      *DTF* : numpy.array</span>
@@ -484,9 +486,9 @@
 <span class="sd">          prediction error matrix (k, k)</span>
 <span class="sd">      *fs* = 1 : int</span>
 <span class="sd">          sampling rate</span>
-<span class="sd">      *resolution*=100 : int</span>
+<span class="sd">      *resolution* = 100 : int</span>
 <span class="sd">          number of spectrum data points</span>
-<span class="sd">      *generalized*=False : bool</span>
+<span class="sd">      *generalized* = False : bool</span>
 <span class="sd">          generalized version or not</span>
 <span class="sd">    Returns:</span>
 <span class="sd">      *PDC* : numpy.array</span>
@@ -507,8 +509,8 @@
 </div>
 <div class="viewcode-block" id="PartialCoh"><a class="viewcode-back" href="../conn.html#conn.PartialCoh">[docs]</a><span class="k">class</span> <span class="nc">PartialCoh</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    PartialCoh - class inherits from ConnectAR and overloads</span>
-<span class="sd">    *calculate* method.</span>
+<span class="sd">    PartialCoh - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="PartialCoh.calculate"><a class="viewcode-back" href="../conn.html#conn.PartialCoh.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -545,46 +547,46 @@
             <span class="n">PC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">before</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">D_z</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mD</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">PC</span><span class="p">)</span>
 </div></div>
-<div class="viewcode-block" id="DTF"><a class="viewcode-back" href="../conn.html#conn.DTF">[docs]</a><span class="k">class</span> <span class="nc">DTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    DTF - class inherits from ConnectAR and overloads</span>
-<span class="sd">    *calculate* method.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="DTF.calculate"><a class="viewcode-back" href="../conn.html#conn.DTF.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
-        <span class="s">&quot;More in *dtf_fun*&quot;</span>
-        <span class="k">return</span> <span class="n">dtf_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
-</div></div>
 <div class="viewcode-block" id="PDC"><a class="viewcode-back" href="../conn.html#conn.PDC">[docs]</a><span class="k">class</span> <span class="nc">PDC</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    PDC - class inherits from ConnectAR and overloads</span>
-<span class="sd">    *calculate* method.</span>
+<span class="sd">    PDC - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="PDC.calculate"><a class="viewcode-back" href="../conn.html#conn.PDC.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
-        <span class="s">&quot;More in *pdc_fun*&quot;</span>
+        <span class="s">&quot;More in :func:`pdc_fun`.&quot;</span>
         <span class="k">return</span> <span class="n">pdc_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
 </div></div>
 <div class="viewcode-block" id="gPDC"><a class="viewcode-back" href="../conn.html#conn.gPDC">[docs]</a><span class="k">class</span> <span class="nc">gPDC</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    gPDC - class inherits from ConnectAR and overloads</span>
-<span class="sd">    *calculate* method.</span>
+<span class="sd">    gPDC - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="gPDC.calculate"><a class="viewcode-back" href="../conn.html#conn.gPDC.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
-        <span class="s">&quot;More in *pdc_fun*&quot;</span>
+        <span class="s">&quot;More in :func:`pdc_fun`&quot;</span>
         <span class="k">return</span> <span class="n">pdc_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">generalized</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="DTF"><a class="viewcode-back" href="../conn.html#conn.DTF">[docs]</a><span class="k">class</span> <span class="nc">DTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    DTF - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="DTF.calculate"><a class="viewcode-back" href="../conn.html#conn.DTF.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="s">&quot;More in :func:`dtf_fun`.&quot;</span>
+        <span class="k">return</span> <span class="n">dtf_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
 </div></div>
 <div class="viewcode-block" id="gDTF"><a class="viewcode-back" href="../conn.html#conn.gDTF">[docs]</a><span class="k">class</span> <span class="nc">gDTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    gDTF - class inherits from ConnectAR and overloads</span>
-<span class="sd">    *calculate* method.</span>
+<span class="sd">    gDTF - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="gDTF.calculate"><a class="viewcode-back" href="../conn.html#conn.gDTF.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
-        <span class="s">&quot;More in *dtf_fun*&quot;</span>
+        <span class="s">&quot;More in :func:`dtf_fun`.&quot;</span>
         <span class="k">return</span> <span class="n">dtf_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">generalized</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </div></div>
 <div class="viewcode-block" id="ffDTF"><a class="viewcode-back" href="../conn.html#conn.ffDTF">[docs]</a><span class="k">class</span> <span class="nc">ffDTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ffDTF - class inherits from ConnectAR and overloads</span>
-<span class="sd">    *calculate* method.</span>
+<span class="sd">    ffDTF - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="ffDTF.calculate"><a class="viewcode-back" href="../conn.html#conn.ffDTF.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -623,8 +625,8 @@
 </div></div>
 <div class="viewcode-block" id="dDTF"><a class="viewcode-back" href="../conn.html#conn.dDTF">[docs]</a><span class="k">class</span> <span class="nc">dDTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    dDTF - class inherits from ConnectAR and overloads</span>
-<span class="sd">    *calculate* method.</span>
+<span class="sd">    dDTF - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="dDTF.calculate"><a class="viewcode-back" href="../conn.html#conn.dDTF.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -671,8 +673,8 @@
 </div></div>
 <div class="viewcode-block" id="iPDC"><a class="viewcode-back" href="../conn.html#conn.iPDC">[docs]</a><span class="k">class</span> <span class="nc">iPDC</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    iPDC - class inherits from ConnectAR and overloads</span>
-<span class="sd">    *calculate* method.</span>
+<span class="sd">    iPDC - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="iPDC.calculate"><a class="viewcode-back" href="../conn.html#conn.iPDC.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -709,8 +711,8 @@
 </div></div>
 <div class="viewcode-block" id="iDTF"><a class="viewcode-back" href="../conn.html#conn.iDTF">[docs]</a><span class="k">class</span> <span class="nc">iDTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    iDTF - class inherits from ConnectAR and overloads</span>
-<span class="sd">    *calculate* method.</span>
+<span class="sd">    iDTF - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="iDTF.calculate"><a class="viewcode-back" href="../conn.html#conn.iDTF.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -750,8 +752,8 @@
 </div></div>
 <div class="viewcode-block" id="Coherency"><a class="viewcode-back" href="../conn.html#conn.Coherency">[docs]</a><span class="k">class</span> <span class="nc">Coherency</span><span class="p">(</span><span class="n">Connect</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Coherency - class inherits from Connect and overloads</span>
-<span class="sd">    *calculate* method and *values_range* attribute.</span>
+<span class="sd">    Coherency - class inherits from :class:`Connect` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method and *values_range* attribute.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">values_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
@@ -809,8 +811,8 @@
 </div></div>
 <div class="viewcode-block" id="PSI"><a class="viewcode-back" href="../conn.html#conn.PSI">[docs]</a><span class="k">class</span> <span class="nc">PSI</span><span class="p">(</span><span class="n">Connect</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    PSI - class inherits from Connect and overloads</span>
-<span class="sd">    *calculate* method.</span>
+<span class="sd">    PSI - class inherits from :class:`Connect` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="PSI.calculate"><a class="viewcode-back" href="../conn.html#conn.PSI.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">band_width</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">psinfft</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">psino</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">hanning</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -848,8 +850,8 @@
 </div></div>
 <div class="viewcode-block" id="GCI"><a class="viewcode-back" href="../conn.html#conn.GCI">[docs]</a><span class="k">class</span> <span class="nc">GCI</span><span class="p">(</span><span class="n">Connect</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    GCI - class inherits from Connect and overloads</span>
-<span class="sd">    *calculate* method.</span>
+<span class="sd">    GCI - class inherits from :class:`Connect` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="GCI.calculate"><a class="viewcode-back" href="../conn.html#conn.GCI.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

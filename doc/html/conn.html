@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Connectvity &mdash; ConnectiviPy 0.32a documentation</title>
+    <title>Connectvity &mdash; ConnectiviPy 0.34a documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.32a',
+        VERSION:     '0.34a',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="ConnectiviPy 0.32a documentation" href="index.html" />
+    <link rel="top" title="ConnectiviPy 0.34a documentation" href="index.html" />
     <link rel="next" title="Mvarmodel" href="mvar.html" />
     <link rel="prev" title="Data" href="data.html" /> 
   </head>
@@ -35,7 +35,7 @@
             <img class="logo" src="_static/connpy.png" alt="Logo"/>
           </a></p>
         <div class="headertitle"><a
-          href="index.html">ConnectiviPy 0.32a documentation</a></div>
+          href="index.html">ConnectiviPy 0.34a documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="data.html" title="Data"
              accesskey="P">previous</a> |
@@ -57,48 +57,116 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="connectvity">
-<span id="conn"></span><h1>Connectvity<a class="headerlink" href="#connectvity" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-__init__">
+<span id="connectvity"></span><span id="conn"></span><h1>Connectvity<a class="headerlink" href="#module-__init__" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="__init__.plot_conn">
+<code class="descclassname">__init__.</code><code class="descname">plot_conn</code><span class="sig-paren">(</span><em>values</em>, <em>name=''</em>, <em>fs=1</em>, <em>ylim=None</em>, <em>xlim=None</em>, <em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/__init__.html#plot_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#__init__.plot_conn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot connectivity estimation results.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>values</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>connectivity estimation values in shape (fq, k, k) where fq -
+frequency, k - number of channels</dd>
+<dt><em>name</em> = &#8216;&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>title of the plot</dd>
+<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;int</span></dt>
+<dd>sampling frequency</dd>
+<dt><em>ylim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>range of y-axis values shown, e.g. [0,1]
+<em>None</em> means that default values of given estimator are taken
+into account</dd>
+<dt><em>xlim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list [from (int), to (int)]</span></dt>
+<dd>range of y-axis values shown, if None it is from 0 to Nyquist frequency</dd>
+<dt><em>show</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>show the plot or not</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <p>Connectivity methods classes.</p>
-<span class="target" id="module-conn"></span><dl class="class">
-<dt id="conn.Coherency">
-<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">Coherency</code><a class="reference internal" href="_modules/conn.html#Coherency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Coherency" title="Permalink to this definition">¶</a></dt>
-<dd><p>Coherency - class inherits from Connect and overloads
-<em>calculate</em> method and <em>values_range</em> attribute.</p>
-<dl class="method">
-<dt id="conn.Coherency.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>cnfft=None</em>, <em>cno=None</em>, <em>window=&lt;function hanning at 0x00000000039C05F8&gt;</em>, <em>im=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Coherency.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Coherency.calculate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Coherency calculation using FFT mehtod.
+<span class="target" id="module-conn"></span><dl class="function">
+<dt id="conn.spectrumft">
+<code class="descclassname">conn.</code><code class="descname">spectrumft</code><span class="sig-paren">(</span><em>acoef</em>, <em>vcoef</em>, <em>fs=1</em>, <em>resolution=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#spectrumft"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.spectrumft" title="Permalink to this definition">¶</a></dt>
+<dd><p>not ready to use</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="conn.spectrum">
+<code class="descclassname">conn.</code><code class="descname">spectrum</code><span class="sig-paren">(</span><em>acoef</em>, <em>vcoef</em>, <em>fs=1</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generating data point from matrix <em>A</em> with MVAR coefficients.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (k, N) where <em>k</em> is number of channels and
-<em>N</em> is number of data points.</dd>
-<dt><em>cnfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of data points in window; if None, it is N/5</dd>
-<dt><em>cno</em> = 0 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>overlap; if None, it is N/10</dd>
-<dt><em>window</em> = np.hanning <span class="classifier-delimiter">:</span> <span class="classifier">&lt;function&gt; generating window with 1 arg <em>n</em></span></dt>
-<dd>window function</dd>
-<dt><em>im</em> = False <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>if False it return absolute value, otherwise complex number</dd>
+<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (k, k, p) where <em>k</em> is number of channels and
+<em>p</em> is a model order.</dd>
+<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>prediction error matrix (k, k)</dd>
+<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>sampling rate</dd>
+<dt><em>resolution</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of spectrum data points</dd>
 </dl>
 </div></blockquote>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
-<dt><em>COH</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>matrix with estimation results (<em>resolution</em>, k, k)</dd>
+<dt><em>A_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>z-transformed A(f) complex matrix in shape (<em>resolution</em>, k, k)</dd>
+<dt><em>H_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>inversion of <em>A_z</em></dd>
+<dt><em>S_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>spectrum matrix (<em>resolution</em>, k, k)</dd>
 </dl>
 </dd>
 </dl>
 <p>References:
-.. [1] M. B. Priestley Spectral Analysis and Time Series.</p>
+.. [1] K. J. Blinowska, R. Kus, M. Kaminski (2004) “Granger causality</p>
 <blockquote>
-<div>Academic Press Inc. (London) LTD., 1981</div></blockquote>
+<div>and information flow in multivariate processes”
+Physical Review E 70, 050902.</div></blockquote>
 </dd></dl>
 
+<dl class="function">
+<dt id="conn.spectrum_inst">
+<code class="descclassname">conn.</code><code class="descname">spectrum_inst</code><span class="sig-paren">(</span><em>acoef</em>, <em>vcoef</em>, <em>fs=1</em>, <em>resolution=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#spectrum_inst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.spectrum_inst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generating data point from matrix <em>A</em> with MVAR coefficients taking
+into account zero-lag effects.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (k, k, p+1) where <em>k</em> is number of channels and
+<em>p</em> is a model order. Acf[0] - is (k, k) matrix for zero lag,
+Acf[1] for one data point lag and so on.</dd>
+<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>prediction error matrix (k, k)</dd>
+<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>sampling rate</dd>
+<dt><em>resolution</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of spectrum data points</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>A_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>z-transformed A(f) complex matrix in shape (<em>resolution</em>, k, k)</dd>
+<dt><em>H_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>inversion of <em>A_z</em></dd>
+<dt><em>S_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>spectrum matrix (<em>resolution</em>, k, k)</dd>
+</dl>
+</dd>
+</dl>
+<p>References:
+.. [1] Erla S. et all, Multivariate Autoregressive Model with</p>
+<blockquote>
+<div>Instantaneous Effects to Improve Brain Connectivity Estimation, 
+Int. J. Bioelectromagn. 11, 74–79 (2009).</div></blockquote>
 </dd></dl>
 
 <dl class="class">
@@ -107,6 +175,13 @@ Args:</p>
 <dd><p>Abstract class governing calculation of various connectivity estimators
 with concrete methods: <em>short_time</em>, <em>significance</em> and
 abstract <em>calculate</em>.</p>
+<dl class="method">
+<dt id="conn.Connect.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Connect.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Connect.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract method to calculate values of estimators from specific
+parameters</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="conn.Connect.short_time">
 <code class="descname">short_time</code><span class="sig-paren">(</span><em>data</em>, <em>nfft=None</em>, <em>no=None</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Connect.short_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Connect.short_time" title="Permalink to this definition">¶</a></dt>
@@ -146,116 +221,80 @@ connectivity estimators basing on MVAR model methods. It overloads
 <em>short_time</em>, <em>significance</em> methods but <em>calculate</em> remains abstract.</p>
 </dd></dl>
 
-<dl class="class">
-<dt id="conn.DTF">
-<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">DTF</code><a class="reference internal" href="_modules/conn.html#DTF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.DTF" title="Permalink to this definition">¶</a></dt>
-<dd><p>DTF - class inherits from ConnectAR and overloads
-<em>calculate</em> method.</p>
-<dl class="method">
-<dt id="conn.DTF.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#DTF.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.DTF.calculate" title="Permalink to this definition">¶</a></dt>
-<dd><p>More in <em>dtf_fun</em></p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="conn.GCI">
-<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">GCI</code><a class="reference internal" href="_modules/conn.html#GCI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.GCI" title="Permalink to this definition">¶</a></dt>
-<dd><p>GCI - class inherits from Connect and overloads
-<em>calculate</em> method.</p>
-<dl class="method">
-<dt id="conn.GCI.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>method='yw'</em>, <em>order=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#GCI.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.GCI.calculate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Granger Causality Index calculation from MVAR model.
+<dl class="function">
+<dt id="conn.dtf_fun">
+<code class="descclassname">conn.</code><code class="descname">dtf_fun</code><span class="sig-paren">(</span><em>Acoef</em>, <em>Vcoef</em>, <em>fs</em>, <em>resolution</em>, <em>generalized=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#dtf_fun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.dtf_fun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directed Transfer Function estimation from MVAR parameters.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (k, N) where <em>k</em> is number of channels and
-<em>N</em> is number of data points.</dd>
-<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>MVAR parameters estimation model</dd>
-<dt><em>order</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>model order, if None appropiate value is chosen basic
-on default criterion</dd>
+<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (k, k, p) where <em>k</em> is number of channels and
+<em>p</em> is a model order.</dd>
+<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>prediction error matrix (k, k)</dd>
+<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>sampling rate</dd>
+<dt><em>resolution</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of spectrum data points</dd>
+<dt><em>generalized</em> = False <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>generalized version or not</dd>
 </dl>
 </div></blockquote>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
-<dt><em>gci</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>DTF</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>matrix with estimation results (<em>resolution</em>, k, k)</dd>
 </dl>
 </dd>
 </dl>
 <p>References:
-.. [1] Nolte G. et all, Comparison of Granger Causality and</p>
+.. [1] M. Kaminski, K.J. Blinowska. A new method of the description</p>
 <blockquote>
-<div>Phase Slope Index. 267–276 (2009).</div></blockquote>
+<div>of the information flow. Biol.Cybern. 65:203-210, (1991).</div></blockquote>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="class">
-<dt id="conn.PDC">
-<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">PDC</code><a class="reference internal" href="_modules/conn.html#PDC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PDC" title="Permalink to this definition">¶</a></dt>
-<dd><p>PDC - class inherits from ConnectAR and overloads
-<em>calculate</em> method.</p>
-<dl class="method">
-<dt id="conn.PDC.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#PDC.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PDC.calculate" title="Permalink to this definition">¶</a></dt>
-<dd><p>More in <em>pdc_fun</em></p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="conn.PSI">
-<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">PSI</code><a class="reference internal" href="_modules/conn.html#PSI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PSI" title="Permalink to this definition">¶</a></dt>
-<dd><p>PSI - class inherits from Connect and overloads
-<em>calculate</em> method.</p>
-<dl class="method">
-<dt id="conn.PSI.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>band_width=4</em>, <em>psinfft=None</em>, <em>psino=0</em>, <em>window=&lt;function hanning at 0x00000000039C05F8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#PSI.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PSI.calculate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Phase Slope Index calculation using FFT mehtod.
+<dl class="function">
+<dt id="conn.pdc_fun">
+<code class="descclassname">conn.</code><code class="descname">pdc_fun</code><span class="sig-paren">(</span><em>Acoef</em>, <em>Vcoef</em>, <em>fs</em>, <em>resolution</em>, <em>generalized=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#pdc_fun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.pdc_fun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Partial Directed Coherence estimation from MVAR parameters.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (k, N) where <em>k</em> is number of channels and
-<em>N</em> is number of data points.</dd>
-<dt><em>band_width</em> = 4 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>width of frequency band where PSI values are summed</dd>
-<dt><em>psinfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of data points in window; if None, it is N/5</dd>
-<dt><em>psino</em> = 0 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>overlap; if None, it is N/10</dd>
-<dt><em>window</em> = np.hanning <span class="classifier-delimiter">:</span> <span class="classifier">&lt;function&gt; generating window with 1 arg <em>n</em></span></dt>
-<dd>window function</dd>
+<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (k, k, p) where <em>k</em> is number of channels and
+<em>p</em> is a model order.</dd>
+<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>prediction error matrix (k, k)</dd>
+<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>sampling rate</dd>
+<dt><em>resolution</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of spectrum data points</dd>
+<dt><em>generalized</em> = False <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>generalized version or not</dd>
 </dl>
 </div></blockquote>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
-<dt><em>COH</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>PDC</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>matrix with estimation results (<em>resolution</em>, k, k)</dd>
 </dl>
 </dd>
 </dl>
 <p>References:
-.. [1] Nolte G. et all, Comparison of Granger Causality and</p>
+.. [1] Sameshima, K., Baccala, L. A., Partial directed</p>
 <blockquote>
-<div>Phase Slope Index. 267–276 (2009).</div></blockquote>
-</dd></dl>
-
+<div>coherence: a new concept in neural structure determination.,
+2001, Biol. Cybern. 84, 463–474.</div></blockquote>
 </dd></dl>
 
 <dl class="class">
 <dt id="conn.PartialCoh">
 <em class="property">class </em><code class="descclassname">conn.</code><code class="descname">PartialCoh</code><a class="reference internal" href="_modules/conn.html#PartialCoh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PartialCoh" title="Permalink to this definition">¶</a></dt>
-<dd><p>PartialCoh - class inherits from ConnectAR and overloads
-<em>calculate</em> method.</p>
+<dd><p>PartialCoh - class inherits from <a class="reference internal" href="#conn.ConnectAR" title="conn.ConnectAR"><code class="xref py py-class docutils literal"><span class="pre">ConnectAR</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
 <dl class="method">
 <dt id="conn.PartialCoh.calculate">
 <code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#PartialCoh.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PartialCoh.calculate" title="Permalink to this definition">¶</a></dt>
@@ -293,88 +332,62 @@ Args:</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="conn.dDTF">
-<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">dDTF</code><a class="reference internal" href="_modules/conn.html#dDTF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.dDTF" title="Permalink to this definition">¶</a></dt>
-<dd><p>dDTF - class inherits from ConnectAR and overloads
-<em>calculate</em> method.</p>
+<dt id="conn.PDC">
+<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">PDC</code><a class="reference internal" href="_modules/conn.html#PDC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PDC" title="Permalink to this definition">¶</a></dt>
+<dd><p>PDC - class inherits from <a class="reference internal" href="#conn.ConnectAR" title="conn.ConnectAR"><code class="xref py py-class docutils literal"><span class="pre">ConnectAR</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
 <dl class="method">
-<dt id="conn.dDTF.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#dDTF.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.dDTF.calculate" title="Permalink to this definition">¶</a></dt>
-<dd><p>direct Directed Transfer Function estimation from MVAR
-parameters. dDTF is a DTF multiplied in each frequency by
-Patrial Coherence.
-Args:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (k, k, p) where <em>k</em> is number of channels and
-<em>p</em> is a model order.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>prediction error matrix (k, k)</dd>
-<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>sampling rate</dd>
-<dt><em>resolution</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of spectrum data points</dd>
-<dt><em>generalized</em> = False <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>generalized version or not</dd>
-</dl>
-</div></blockquote>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt><em>dDTF</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>matrix with estimation results (<em>resolution</em>, k, k)</dd>
-</dl>
-</dd>
-</dl>
-<p>References:
-.. [1] Korzeniewska, A.et. all. Determination of information flow direction</p>
-<blockquote>
-<div>among brain structures by a modified directed transfer function (dDTF) 
-method. J. Neurosci. Methods 125, 195–207 (2003).</div></blockquote>
+<dt id="conn.PDC.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#PDC.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PDC.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>More in <a class="reference internal" href="#conn.pdc_fun" title="conn.pdc_fun"><code class="xref py py-func docutils literal"><span class="pre">pdc_fun()</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="function">
-<dt id="conn.dtf_fun">
-<code class="descclassname">conn.</code><code class="descname">dtf_fun</code><span class="sig-paren">(</span><em>Acoef</em>, <em>Vcoef</em>, <em>fs</em>, <em>resolution</em>, <em>generalized=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#dtf_fun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.dtf_fun" title="Permalink to this definition">¶</a></dt>
-<dd><p>Directed Transfer Function estimation from MVAR parameters.
-Args:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (k, k, p) where <em>k</em> is number of channels and
-<em>p</em> is a model order.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>prediction error matrix (k, k)</dd>
-<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>sampling rate</dd>
-<dt><a href="#id1"><span class="problematic" id="id2">*</span></a>resolution*=100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of spectrum data points</dd>
-<dt><a href="#id3"><span class="problematic" id="id4">*</span></a>generalized*=False <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>generalized version or not</dd>
-</dl>
-</div></blockquote>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt><em>DTF</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>matrix with estimation results (<em>resolution</em>, k, k)</dd>
-</dl>
-</dd>
-</dl>
-<p>References:
-.. [1] M. Kaminski, K.J. Blinowska. A new method of the description</p>
-<blockquote>
-<div>of the information flow. Biol.Cybern. 65:203-210, (1991).</div></blockquote>
+<dl class="class">
+<dt id="conn.gPDC">
+<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">gPDC</code><a class="reference internal" href="_modules/conn.html#gPDC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.gPDC" title="Permalink to this definition">¶</a></dt>
+<dd><p>gPDC - class inherits from <a class="reference internal" href="#conn.ConnectAR" title="conn.ConnectAR"><code class="xref py py-class docutils literal"><span class="pre">ConnectAR</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
+<dl class="method">
+<dt id="conn.gPDC.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#gPDC.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.gPDC.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>More in <a class="reference internal" href="#conn.pdc_fun" title="conn.pdc_fun"><code class="xref py py-func docutils literal"><span class="pre">pdc_fun()</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="conn.DTF">
+<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">DTF</code><a class="reference internal" href="_modules/conn.html#DTF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.DTF" title="Permalink to this definition">¶</a></dt>
+<dd><p>DTF - class inherits from <a class="reference internal" href="#conn.ConnectAR" title="conn.ConnectAR"><code class="xref py py-class docutils literal"><span class="pre">ConnectAR</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
+<dl class="method">
+<dt id="conn.DTF.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#DTF.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.DTF.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>More in <a class="reference internal" href="#conn.dtf_fun" title="conn.dtf_fun"><code class="xref py py-func docutils literal"><span class="pre">dtf_fun()</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="conn.gDTF">
+<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">gDTF</code><a class="reference internal" href="_modules/conn.html#gDTF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.gDTF" title="Permalink to this definition">¶</a></dt>
+<dd><p>gDTF - class inherits from <a class="reference internal" href="#conn.ConnectAR" title="conn.ConnectAR"><code class="xref py py-class docutils literal"><span class="pre">ConnectAR</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
+<dl class="method">
+<dt id="conn.gDTF.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#gDTF.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.gDTF.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>More in <a class="reference internal" href="#conn.dtf_fun" title="conn.dtf_fun"><code class="xref py py-func docutils literal"><span class="pre">dtf_fun()</span></code></a>.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="conn.ffDTF">
 <em class="property">class </em><code class="descclassname">conn.</code><code class="descname">ffDTF</code><a class="reference internal" href="_modules/conn.html#ffDTF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.ffDTF" title="Permalink to this definition">¶</a></dt>
-<dd><p>ffDTF - class inherits from ConnectAR and overloads
-<em>calculate</em> method.</p>
+<dd><p>ffDTF - class inherits from <a class="reference internal" href="#conn.ConnectAR" title="conn.ConnectAR"><code class="xref py py-class docutils literal"><span class="pre">ConnectAR</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
 <dl class="method">
 <dt id="conn.ffDTF.calculate">
 <code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#ffDTF.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.ffDTF.calculate" title="Permalink to this definition">¶</a></dt>
@@ -414,27 +427,88 @@ method. J. Neurosci. Methods 125, 195–207 (2003).</div></blockquote>
 </dd></dl>
 
 <dl class="class">
-<dt id="conn.gDTF">
-<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">gDTF</code><a class="reference internal" href="_modules/conn.html#gDTF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.gDTF" title="Permalink to this definition">¶</a></dt>
-<dd><p>gDTF - class inherits from ConnectAR and overloads
-<em>calculate</em> method.</p>
+<dt id="conn.dDTF">
+<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">dDTF</code><a class="reference internal" href="_modules/conn.html#dDTF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.dDTF" title="Permalink to this definition">¶</a></dt>
+<dd><p>dDTF - class inherits from <a class="reference internal" href="#conn.ConnectAR" title="conn.ConnectAR"><code class="xref py py-class docutils literal"><span class="pre">ConnectAR</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
 <dl class="method">
-<dt id="conn.gDTF.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#gDTF.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.gDTF.calculate" title="Permalink to this definition">¶</a></dt>
-<dd><p>More in <em>dtf_fun</em></p>
+<dt id="conn.dDTF.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#dDTF.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.dDTF.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>direct Directed Transfer Function estimation from MVAR
+parameters. dDTF is a DTF multiplied in each frequency by
+Patrial Coherence.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (k, k, p) where <em>k</em> is number of channels and
+<em>p</em> is a model order.</dd>
+<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>prediction error matrix (k, k)</dd>
+<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>sampling rate</dd>
+<dt><em>resolution</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of spectrum data points</dd>
+<dt><em>generalized</em> = False <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>generalized version or not</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>dDTF</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>matrix with estimation results (<em>resolution</em>, k, k)</dd>
+</dl>
+</dd>
+</dl>
+<p>References:
+.. [1] Korzeniewska, A.et. all. Determination of information flow direction</p>
+<blockquote>
+<div>among brain structures by a modified directed transfer function (dDTF) 
+method. J. Neurosci. Methods 125, 195–207 (2003).</div></blockquote>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="conn.gPDC">
-<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">gPDC</code><a class="reference internal" href="_modules/conn.html#gPDC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.gPDC" title="Permalink to this definition">¶</a></dt>
-<dd><p>gPDC - class inherits from ConnectAR and overloads
-<em>calculate</em> method.</p>
+<dt id="conn.iPDC">
+<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">iPDC</code><a class="reference internal" href="_modules/conn.html#iPDC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.iPDC" title="Permalink to this definition">¶</a></dt>
+<dd><p>iPDC - class inherits from <a class="reference internal" href="#conn.ConnectAR" title="conn.ConnectAR"><code class="xref py py-class docutils literal"><span class="pre">ConnectAR</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
 <dl class="method">
-<dt id="conn.gPDC.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#gPDC.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.gPDC.calculate" title="Permalink to this definition">¶</a></dt>
-<dd><p>More in <em>pdc_fun</em></p>
+<dt id="conn.iPDC.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#iPDC.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.iPDC.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>instantaneous Partial Directed Coherence  from MVAR
+parameters.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (k, k, p+1) where <em>k</em> is number of channels and
+<em>p</em> is a model order. It&#8217;s zero lag case.</dd>
+<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>prediction error matrix (k, k)</dd>
+<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>sampling rate</dd>
+<dt><em>resolution</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of spectrum data points</dd>
+<dt><em>generalized</em> = False <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>generalized version or not</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>iPDC</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>matrix with estimation results (<em>resolution</em>, k, k)</dd>
+</dl>
+</dd>
+</dl>
+<p>References:
+.. [1] Erla, S. et all Multivariate Autoregressive Model with Instantaneous</p>
+<blockquote>
+<div>Effects to Improve Brain Connectivity Estimation. 
+Int. J. Bioelectromagn. 11, 74–79 (2009).</div></blockquote>
 </dd></dl>
 
 </dd></dl>
@@ -442,8 +516,8 @@ method. J. Neurosci. Methods 125, 195–207 (2003).</div></blockquote>
 <dl class="class">
 <dt id="conn.iDTF">
 <em class="property">class </em><code class="descclassname">conn.</code><code class="descname">iDTF</code><a class="reference internal" href="_modules/conn.html#iDTF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.iDTF" title="Permalink to this definition">¶</a></dt>
-<dd><p>iDTF - class inherits from ConnectAR and overloads
-<em>calculate</em> method.</p>
+<dd><p>iDTF - class inherits from <a class="reference internal" href="#conn.ConnectAR" title="conn.ConnectAR"><code class="xref py py-class docutils literal"><span class="pre">ConnectAR</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
 <dl class="method">
 <dt id="conn.iDTF.calculate">
 <code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#iDTF.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.iDTF.calculate" title="Permalink to this definition">¶</a></dt>
@@ -483,163 +557,123 @@ Int. J. Bioelectromagn. 11, 74–79 (2009).</div></blockquote>
 </dd></dl>
 
 <dl class="class">
-<dt id="conn.iPDC">
-<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">iPDC</code><a class="reference internal" href="_modules/conn.html#iPDC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.iPDC" title="Permalink to this definition">¶</a></dt>
-<dd><p>iPDC - class inherits from ConnectAR and overloads
-<em>calculate</em> method.</p>
+<dt id="conn.Coherency">
+<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">Coherency</code><a class="reference internal" href="_modules/conn.html#Coherency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Coherency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coherency - class inherits from <a class="reference internal" href="#conn.Connect" title="conn.Connect"><code class="xref py py-class docutils literal"><span class="pre">Connect</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method and <em>values_range</em> attribute.</p>
 <dl class="method">
-<dt id="conn.iPDC.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>Acoef=None</em>, <em>Vcoef=None</em>, <em>fs=None</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#iPDC.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.iPDC.calculate" title="Permalink to this definition">¶</a></dt>
-<dd><p>instantaneous Partial Directed Coherence  from MVAR
-parameters.
+<dt id="conn.Coherency.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>cnfft=None</em>, <em>cno=None</em>, <em>window=&lt;function hanning at 0x00000000039556D8&gt;</em>, <em>im=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Coherency.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Coherency.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coherency calculation using FFT mehtod.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (k, k, p+1) where <em>k</em> is number of channels and
-<em>p</em> is a model order. It&#8217;s zero lag case.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>prediction error matrix (k, k)</dd>
-<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>sampling rate</dd>
-<dt><em>resolution</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of spectrum data points</dd>
-<dt><em>generalized</em> = False <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>generalized version or not</dd>
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (k, N) where <em>k</em> is number of channels and
+<em>N</em> is number of data points.</dd>
+<dt><em>cnfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of data points in window; if None, it is N/5</dd>
+<dt><em>cno</em> = 0 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>overlap; if None, it is N/10</dd>
+<dt><em>window</em> = np.hanning <span class="classifier-delimiter">:</span> <span class="classifier">&lt;function&gt; generating window with 1 arg <em>n</em></span></dt>
+<dd>window function</dd>
+<dt><em>im</em> = False <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if False it return absolute value, otherwise complex number</dd>
 </dl>
 </div></blockquote>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
-<dt><em>iPDC</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>COH</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>matrix with estimation results (<em>resolution</em>, k, k)</dd>
 </dl>
 </dd>
 </dl>
 <p>References:
-.. [1] Erla, S. et all Multivariate Autoregressive Model with Instantaneous</p>
+.. [1] M. B. Priestley Spectral Analysis and Time Series.</p>
 <blockquote>
-<div>Effects to Improve Brain Connectivity Estimation. 
-Int. J. Bioelectromagn. 11, 74–79 (2009).</div></blockquote>
+<div>Academic Press Inc. (London) LTD., 1981</div></blockquote>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="function">
-<dt id="conn.pdc_fun">
-<code class="descclassname">conn.</code><code class="descname">pdc_fun</code><span class="sig-paren">(</span><em>Acoef</em>, <em>Vcoef</em>, <em>fs</em>, <em>resolution</em>, <em>generalized=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#pdc_fun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.pdc_fun" title="Permalink to this definition">¶</a></dt>
-<dd><p>Partial Directed Coherence estimation from MVAR parameters.
+<dl class="class">
+<dt id="conn.PSI">
+<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">PSI</code><a class="reference internal" href="_modules/conn.html#PSI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PSI" title="Permalink to this definition">¶</a></dt>
+<dd><p>PSI - class inherits from <a class="reference internal" href="#conn.Connect" title="conn.Connect"><code class="xref py py-class docutils literal"><span class="pre">Connect</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
+<dl class="method">
+<dt id="conn.PSI.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>band_width=4</em>, <em>psinfft=None</em>, <em>psino=0</em>, <em>window=&lt;function hanning at 0x00000000039556D8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#PSI.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PSI.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Phase Slope Index calculation using FFT mehtod.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (k, k, p) where <em>k</em> is number of channels and
-<em>p</em> is a model order.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>prediction error matrix (k, k)</dd>
-<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>sampling rate</dd>
-<dt><a href="#id5"><span class="problematic" id="id6">*</span></a>resolution*=100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of spectrum data points</dd>
-<dt><a href="#id7"><span class="problematic" id="id8">*</span></a>generalized*=False <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>generalized version or not</dd>
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (k, N) where <em>k</em> is number of channels and
+<em>N</em> is number of data points.</dd>
+<dt><em>band_width</em> = 4 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>width of frequency band where PSI values are summed</dd>
+<dt><em>psinfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of data points in window; if None, it is N/5</dd>
+<dt><em>psino</em> = 0 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>overlap; if None, it is N/10</dd>
+<dt><em>window</em> = np.hanning <span class="classifier-delimiter">:</span> <span class="classifier">&lt;function&gt; generating window with 1 arg <em>n</em></span></dt>
+<dd>window function</dd>
 </dl>
 </div></blockquote>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
-<dt><em>PDC</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>COH</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>matrix with estimation results (<em>resolution</em>, k, k)</dd>
 </dl>
 </dd>
 </dl>
 <p>References:
-.. [1] Sameshima, K., Baccala, L. A., Partial directed</p>
+.. [1] Nolte G. et all, Comparison of Granger Causality and</p>
 <blockquote>
-<div>coherence: a new concept in neural structure determination.,
-2001, Biol. Cybern. 84, 463–474.</div></blockquote>
+<div>Phase Slope Index. 267–276 (2009).</div></blockquote>
 </dd></dl>
 
-<dl class="function">
-<dt id="conn.spectrum">
-<code class="descclassname">conn.</code><code class="descname">spectrum</code><span class="sig-paren">(</span><em>acoef</em>, <em>vcoef</em>, <em>fs=1</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.spectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generating data point from matrix <em>A</em> with MVAR coefficients.
+</dd></dl>
+
+<dl class="class">
+<dt id="conn.GCI">
+<em class="property">class </em><code class="descclassname">conn.</code><code class="descname">GCI</code><a class="reference internal" href="_modules/conn.html#GCI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.GCI" title="Permalink to this definition">¶</a></dt>
+<dd><p>GCI - class inherits from <a class="reference internal" href="#conn.Connect" title="conn.Connect"><code class="xref py py-class docutils literal"><span class="pre">Connect</span></code></a> and overloads
+<a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
+<dl class="method">
+<dt id="conn.GCI.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>method='yw'</em>, <em>order=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#GCI.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.GCI.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Granger Causality Index calculation from MVAR model.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (k, k, p) where <em>k</em> is number of channels and
-<em>p</em> is a model order.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>prediction error matrix (k, k)</dd>
-<dt><a href="#id9"><span class="problematic" id="id10">*</span></a>fs*=1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>sampling rate</dd>
-<dt><a href="#id11"><span class="problematic" id="id12">*</span></a>resolution*=100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of spectrum data points</dd>
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>array of shape (k, N) where <em>k</em> is number of channels and
+<em>N</em> is number of data points.</dd>
+<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>MVAR parameters estimation model</dd>
+<dt><em>order</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>model order, if None appropiate value is chosen basic
+on default criterion</dd>
 </dl>
 </div></blockquote>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
-<dt><em>A_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>z-transformed A(f) complex matrix in shape (<em>resolution</em>, k, k)</dd>
-<dt><em>H_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>inversion of <em>A_z</em></dd>
-<dt><em>S_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>spectrum matrix (<em>resolution</em>, k, k)</dd>
+<dt><em>gci</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>matrix with estimation results (<em>resolution</em>, k, k)</dd>
 </dl>
 </dd>
 </dl>
 <p>References:
-.. [1] K. J. Blinowska, R. Kus, M. Kaminski (2004) “Granger causality</p>
+.. [1] Nolte G. et all, Comparison of Granger Causality and</p>
 <blockquote>
-<div>and information flow in multivariate processes”
-Physical Review E 70, 050902.</div></blockquote>
+<div>Phase Slope Index. 267–276 (2009).</div></blockquote>
 </dd></dl>
 
-<dl class="function">
-<dt id="conn.spectrum_inst">
-<code class="descclassname">conn.</code><code class="descname">spectrum_inst</code><span class="sig-paren">(</span><em>acoef</em>, <em>vcoef</em>, <em>fs=1</em>, <em>resolution=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#spectrum_inst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.spectrum_inst" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generating data point from matrix <em>A</em> with MVAR coefficients taking
-into account zero-lag effects.
-Args:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (k, k, p+1) where <em>k</em> is number of channels and
-<em>p</em> is a model order. Acf[0] - is (k, k) matrix for zero lag,
-Acf[1] for one data point lag and so on.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>prediction error matrix (k, k)</dd>
-<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>sampling rate</dd>
-<dt><a href="#id13"><span class="problematic" id="id14">*</span></a>resolution*=100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of spectrum data points</dd>
-</dl>
-</div></blockquote>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt><em>A_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>z-transformed A(f) complex matrix in shape (<em>resolution</em>, k, k)</dd>
-<dt><em>H_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>inversion of <em>A_z</em></dd>
-<dt><em>S_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>spectrum matrix (<em>resolution</em>, k, k)</dd>
-</dl>
-</dd>
-</dl>
-<p>References:
-.. [1] Erla S. et all, Multivariate Autoregressive Model with</p>
-<blockquote>
-<div>Instantaneous Effects to Improve Brain Connectivity Estimation, 
-Int. J. Bioelectromagn. 11, 74–79 (2009).</div></blockquote>
-</dd></dl>
-
-<dl class="function">
-<dt id="conn.spectrumft">
-<code class="descclassname">conn.</code><code class="descname">spectrumft</code><span class="sig-paren">(</span><em>acoef</em>, <em>vcoef</em>, <em>fs=1</em>, <em>resolution=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#spectrumft"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.spectrumft" title="Permalink to this definition">¶</a></dt>
-<dd><p>not ready to use</p>
 </dd></dl>
 
 </div>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tutorial &mdash; ConnectiviPy 0.32a documentation</title>
+    <title>Tutorial &mdash; ConnectiviPy 0.34a documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.32a',
+        VERSION:     '0.34a',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="ConnectiviPy 0.32a documentation" href="index.html" />
+    <link rel="top" title="ConnectiviPy 0.34a documentation" href="index.html" />
     <link rel="prev" title="Mvarmodel" href="mvar.html" /> 
   </head>
   <body role="document">
@@ -34,7 +34,7 @@
             <img class="logo" src="_static/connpy.png" alt="Logo"/>
           </a></p>
         <div class="headertitle"><a
-          href="index.html">ConnectiviPy 0.32a documentation</a></div>
+          href="index.html">ConnectiviPy 0.34a documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="mvar.html" title="Mvarmodel"
              accesskey="P">previous</a> |
@@ -57,6 +57,8 @@
   <div class="section" id="tutorial">
 <span id="id1"></span><h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
 <p>All examples and tutorial will go here.</p>
+<div class="section" id="data-class-example">
+<h2>Data class example<a class="headerlink" href="#data-class-example" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Example 1</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -105,6 +107,59 @@
 <span class="n">pdc_shorttime</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">short_time_conn</span><span class="p">(</span><span class="s">&#39;pdc&#39;</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">data</span><span class="o">.</span><span class="n">plot_short_time_conn</span><span class="p">(</span><span class="s">&quot;PDC&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+<div class="section" id="how-to-use-specific-classes">
+<h2>How to use specific classes<a class="headerlink" href="#how-to-use-specific-classes" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Example 2</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">connectivipy</span> <span class="kn">as</span> <span class="nn">cp</span>
+<span class="kn">from</span> <span class="nn">connectivipy.mvar.fitting</span> <span class="kn">import</span> <span class="n">mvar_gen</span>
+
+<span class="n">fs</span> <span class="o">=</span> <span class="mf">256.</span>
+<span class="n">acf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="c"># matrix shape meaning (p,k,k) k - number of channels,</span>
+<span class="c"># p - order of mvar parameters</span>
+
+<span class="n">acf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.4</span>
+
+<span class="c"># generate 3-channel signal from matrix above</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">acf</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
+
+<span class="c"># assign static class cp.Mvar to variable mv</span>
+<span class="n">mv</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Mvar</span>
+
+<span class="c"># find best model order</span>
+<span class="n">best</span><span class="p">,</span> <span class="n">crit</span> <span class="o">=</span> <span class="n">mv</span><span class="o">.</span><span class="n">_order_akaike</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="s">&#39;vm&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">crit</span><span class="p">)),</span><span class="n">crit</span><span class="p">,</span><span class="s">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">best</span>
+<span class="c"># here we know that this is 3 but in real-life cases</span>
+<span class="c"># we are always uncertain about it</span>
+
+<span class="c"># now let&#39;s fit parameters to the signal</span>
+<span class="n">av</span><span class="p">,</span> <span class="n">vf</span> <span class="o">=</span> <span class="n">mv</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">best</span><span class="p">,</span> <span class="s">&#39;vm&#39;</span><span class="p">)</span>
+
+<span class="c"># and check whether values are correct +/- 0.01</span>
+<span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">acf</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+
+<span class="c"># now we can calculate Directed Transfer Function from the data</span>
+<span class="n">dtf</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">DTF</span><span class="p">()</span>
+<span class="n">dtfval</span> <span class="o">=</span> <span class="n">dtf</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">av</span><span class="p">,</span> <span class="n">vf</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+<span class="c"># all possible methods are visible in that dictionary:</span>
+<span class="k">print</span> <span class="n">cp</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">conn_estim_dc</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+<span class="n">cp</span><span class="o">.</span><span class="n">plot_conn</span><span class="p">(</span><span class="n">dtfval</span><span class="p">,</span><span class="s">&#39;DTF values&#39;</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 </div>
 

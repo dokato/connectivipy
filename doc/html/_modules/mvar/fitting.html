@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mvar.fitting &mdash; ConnectiviPy 0.32a documentation</title>
+    <title>mvar.fitting &mdash; ConnectiviPy 0.34a documentation</title>
     
     <link rel="stylesheet" href="../../_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.32a',
+        VERSION:     '0.34a',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="ConnectiviPy 0.32a documentation" href="../../index.html" />
+    <link rel="top" title="ConnectiviPy 0.34a documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" /> 
   </head>
   <body role="document">
@@ -34,7 +34,7 @@
             <img class="logo" src="../../_static/connpy.png" alt="Logo"/>
           </a></p>
         <div class="headertitle"><a
-          href="../../index.html">ConnectiviPy 0.32a documentation</a></div>
+          href="../../index.html">ConnectiviPy 0.34a documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -70,7 +70,7 @@
 <span class="sd">          number of data points.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">      *y* : numpy.array</span>
-<span class="sd">          (k, n-omit) data points</span>
+<span class="sd">          (k, n) data points</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">p</span><span class="p">,</span> <span class="n">chn</span><span class="p">,</span> <span class="n">chn</span> <span class="o">=</span> <span class="n">Acf</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">chn</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="n">omit</span><span class="p">))</span>
@@ -97,7 +97,7 @@
 <span class="sd">          number of data points.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">      *y* : np.array</span>
-<span class="sd">          kx(n-omit) data points</span>
+<span class="sd">          (k, n) data points</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">p</span><span class="p">,</span> <span class="n">chn</span><span class="p">,</span> <span class="n">chn</span> <span class="o">=</span> <span class="n">Acf</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">chn</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="n">omit</span><span class="p">))</span>
