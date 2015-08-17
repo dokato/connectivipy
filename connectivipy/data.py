@@ -338,7 +338,7 @@ class Data(object):
         if show:
             plt.show()
 
-    def plot_short_time_conn(self, name='',signi=True, show=True):
+    def plot_short_time_conn(self, name='', signi=True, percmax=1., show=True):
         '''
         Plot short-time version of estimation results.
         
@@ -348,6 +348,8 @@ class Data(object):
           *signi* = True : boolean
             reset irrelevant values; it works only after short time
             significance calculation using *short_time_significance*
+          *percmax* = 1. : float (0,1)
+            percent of maximal value which is maximum on the color map
           *show* = True : boolean
             show the plot or not            
         '''
@@ -365,7 +367,7 @@ class Data(object):
         for i in xrange(self.__chans):
             mask[:,:,i,i] = 1
         masked_shtimest = np.ma.array(shtvalues, mask=mask)
-        dtmax = np.max(masked_shtimest)
+        dtmax = np.max(masked_shtimest)*percmax
         dtmin = np.min(masked_shtimest)
         for i in xrange(self.__chans):
             for j in xrange(self.__chans):

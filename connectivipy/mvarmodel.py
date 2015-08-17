@@ -11,9 +11,9 @@ class Mvar(object):
     acronym of algorithm and value is a function from *mvar.fitting*.
     """
     
-    _fit_dict = {'yw': yulewalker,
-                 'ns': nutallstrand,
-                 'vm': vieiramorf}
+    fit_dict = {'yw': yulewalker,
+                'ns': nutallstrand,
+                'vm': vieiramorf}
 
     @classmethod
     def fit(cls, data, order=None, method='yw'):
@@ -21,7 +21,7 @@ class Mvar(object):
         Mvar model fitting.
         Args:
           *data* : numpy.array
-              array with data (kXN, k - channels nr, N - data points)
+              array with data shaped (k, N), k - channels nr, N - data points)
           *order*=None : int
               model order, when default None it estimates order using
               akaike order criteria.
@@ -34,11 +34,11 @@ class Mvar(object):
               reflection matrix (kXk)
         """
         if order == None:
-            order, crit_val = cls._order_hq(data, p_max=None, method=method)        
-        return cls._fit_dict[method](data,order)
+            order, crit_val = cls.order_hq(data, p_max=None, method=method)        
+        return cls.fit_dict[method](data,order)
     
     @classmethod
-    def _order_akaike(cls, data, p_max=None, method='yw'):
+    def order_akaike(cls, data, p_max=None, method='yw'):
         """
         Akaike criterion of MVAR order estimation.
 
@@ -73,7 +73,7 @@ class Mvar(object):
         return np.argmin(crit)+1, crit 
 
     @classmethod
-    def _order_hq(cls, data, p_max=None, method='yw'):
+    def order_hq(cls, data, p_max=None, method='yw'):
         """
         Hannan-Quin criterion of MVAR order estimation.
 
@@ -108,7 +108,7 @@ class Mvar(object):
         return np.argmin(crit)+1, crit
 
     @classmethod
-    def _order_schwartz(cls, data, p_max=None, method='yw'):
+    def order_schwartz(cls, data, p_max=None, method='yw'):
         """
         Schwartz criterion of MVAR order estimation.
 
@@ -143,7 +143,7 @@ class Mvar(object):
         return np.argmin(crit)+1, crit
 
     @classmethod
-    def _order_fpe(cls, data, p_max=None, method='yw'):
+    def order_fpe(cls, data, p_max=None, method='yw'):
         """
         Final Prediction Error criterion of MVAR order estimation.
         (not recommended)

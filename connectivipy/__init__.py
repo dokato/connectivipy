@@ -2,7 +2,8 @@
 #! /usr/bin/env python
 
 from data import Data
-from conn import ConnectAR, spectrum, spectrumft, DTF
+from conn import conn_estim_dc
 from mvarmodel import Mvar
+from mvar.fitting import mvar_gen, mvar_gen_inst
 
-__version__ = '0.31'
+__version__ = '0.34'
