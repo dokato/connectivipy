@@ -5,7 +5,6 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 from mvar.comp import ldl
 from mvarmodel import Mvar
-import pdb
 import scipy.stats as st
 
 ########################################################################
@@ -31,10 +30,10 @@ def spectrum(acoef, vcoef, fs=1, resolution=100):
     """
     Generating data point from matrix *A* with MVAR coefficients.
     Args:
-      *Acf* : numpy.array
+      *acoef* : numpy.array
           array of shape (k, k, p) where *k* is number of channels and
           *p* is a model order.
-      *Vcf* : numpy.array
+      *vcoef* : numpy.array
           prediction error matrix (k, k)
       *fs* = 1 : int
           sampling rate
@@ -76,11 +75,11 @@ def spectrum_inst(acoef, vcoef, fs=1, resolution=100):
     Generating data point from matrix *A* with MVAR coefficients taking
     into account zero-lag effects.
     Args:
-      *Acf* : numpy.array
+      *acoef* : numpy.array
           array of shape (k, k, p+1) where *k* is number of channels and
-          *p* is a model order. Acf[0] - is (k, k) matrix for zero lag,
-          Acf[1] for one data point lag and so on.
-      *Vcf* : numpy.array
+          *p* is a model order. acoef[0] - is (k, k) matrix for zero lag,
+          acoef[1] for one data point lag and so on.
+      *vcoef* : numpy.array
           prediction error matrix (k, k)
       *fs* = 1 : int
           sampling rate
@@ -198,7 +197,10 @@ class Connect(object):
         if not no:
             no = int(N/10)
         slices = xrange(0, N, int(nfft-no))
-        signi_st = np.zeros((len(slices, k, k)))
+        if self.two_sided:
+            signi_st = np.zeros((len(slices),2,k,k))
+        else:
+            signi_st = np.zeros((len(slices),k,k))
         for e,i in enumerate(slices):
             if i+nfft>=N:
                 if trls:
@@ -218,6 +220,20 @@ class Connect(object):
         return signific
 
     def levels(self, signi, alpha, k):
+        """
+        Levels of significance
+        Args:
+          *signi* : numpy.array
+              bootstraped values of each channel
+          *alpha* : float 
+              type I error rate (significance level)
+          *k* : int
+              number of channels
+        Returns:
+          *ficance* : numpy.array
+              maximal value throughout frequency of score at percentile
+              at level 1-*alpha*
+        """
         if self.two_sided:
             ficance = np.zeros((2, k, k))
         else:
@@ -225,9 +241,10 @@ class Connect(object):
         for i in range(k):
             for j in range(k):
                 if self.two_sided:
-                    ficance[i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], alpha*100, axis=1))
+                    ficance[0][i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], alpha*100, axis=1))
+                    ficance[1][i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], (1-alpha)*100, axis=1))
                 else:
-                    ficance[i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], alpha*100, axis=1))
+                    ficance[i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], (1-alpha)*100, axis=1))
         return ficance
         
     def __calc_multitrial(self, data, **params):
@@ -284,6 +301,7 @@ class ConnectAR(Connect):
     __metaclass__ = ABCMeta
     
     def __init__(self):
+        super(ConnectAR, self).__init__()
         self.values_range = [0, 1]
         
     def short_time(self, data, nfft=None, no=None, mvarmethod='yw',\
@@ -425,10 +443,10 @@ def dtf_fun(Acoef, Vcoef, fs, resolution, generalized=False):
     """
     Directed Transfer Function estimation from MVAR parameters.
     Args:
-      *Acf* : numpy.array
+      *Acoef* : numpy.array
           array of shape (k, k, p) where *k* is number of channels and
           *p* is a model order.
-      *Vcf* : numpy.array
+      *Vcoef* : numpy.array
           prediction error matrix (k, k)
       *fs* = 1 : int
           sampling rate
@@ -459,10 +477,10 @@ def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
     """
     Partial Directed Coherence estimation from MVAR parameters.
     Args:
-      *Acf* : numpy.array
+      *Acoef* : numpy.array
           array of shape (k, k, p) where *k* is number of channels and
           *p* is a model order.
-      *Vcf* : numpy.array
+      *Vcoef* : numpy.array
           prediction error matrix (k, k)
       *fs* = 1 : int
           sampling rate
@@ -496,10 +514,10 @@ class PartialCoh(ConnectAR):
         """
         Partial Coherence estimation from MVAR parameters.
         Args:
-          *Acf* : numpy.array
+          *Acoef* : numpy.array
               array of shape (k, k, p) where *k* is number of channels and
               *p* is a model order.
-          *Vcf* : numpy.array
+          *Vcoef* : numpy.array
               prediction error matrix (k, k)
           *fs* = 1 : int
               sampling rate
@@ -573,10 +591,10 @@ class ffDTF(ConnectAR):
         full-frequency Directed Transfer Function estimation from MVAR
         parameters.
         Args:
-          *Acf* : numpy.array
+          *Acoef* : numpy.array
               array of shape (k, k, p) where *k* is number of channels and
               *p* is a model order.
-          *Vcf* : numpy.array
+          *Vcoef* : numpy.array
               prediction error matrix (k, k)
           *fs* = 1 : int
               sampling rate
@@ -614,10 +632,10 @@ class dDTF(ConnectAR):
         parameters. dDTF is a DTF multiplied in each frequency by
         Patrial Coherence.
         Args:
-          *Acf* : numpy.array
+          *Acoef* : numpy.array
               array of shape (k, k, p) where *k* is number of channels and
               *p* is a model order.
-          *Vcf* : numpy.array
+          *Vcoef* : numpy.array
               prediction error matrix (k, k)
           *fs* = 1 : int
               sampling rate
@@ -661,10 +679,10 @@ class iPDC(ConnectAR):
         instantaneous Partial Directed Coherence  from MVAR
         parameters.
         Args:
-          *Acf* : numpy.array
+          *Acoef* : numpy.array
               array of shape (k, k, p+1) where *k* is number of channels and
               *p* is a model order. It's zero lag case.
-          *Vcf* : numpy.array
+          *Vcoef* : numpy.array
               prediction error matrix (k, k)
           *fs* = 1 : int
               sampling rate
@@ -699,10 +717,10 @@ class iDTF(ConnectAR):
         instantaneous Partial Directed Coherence  from MVAR
         parameters.
         Args:
-          *Acf* : numpy.array
+          *Acoef* : numpy.array
               array of shape (k, k, p+1) where *k* is number of channels and
               *p* is a model order. It's zero lag case.
-          *Vcf* : numpy.array
+          *Vcoef* : numpy.array
               prediction error matrix (k, k)
           *fs* = 1 : int
               sampling rate
@@ -796,6 +814,7 @@ class PSI(Connect):
     :func:`Connect.calculate` method.
     """
     def __init__(self):
+        super(PSI, self).__init__()
         self.two_sided = True
 
     def calculate(self, data, band_width=4, psinfft=None, psino=0, window=np.hanning):
@@ -820,10 +839,10 @@ class PSI(Connect):
         .. [1] Nolte G. et all, Comparison of Granger Causality and 
                Phase Slope Index. 267–276 (2009).
         """
-        assert psinfft>psino, "overlap must be smaller than window"
         k, N = data.shape 
         if not psinfft:
             psinfft = int(N/4)
+        assert psinfft>psino, "overlap must be smaller than window"
         coh = Coherency()
         cohval = coh.calculate(data, cnfft=psinfft, cno=psino, window=window, im=True)
         fq_bands = np.arange(0, int(psinfft/2)+1, band_width)
@@ -839,18 +858,19 @@ class GCI(Connect):
     :func:`Connect.calculate` method.
     """
     def __init__(self):
+        super(GCI, self).__init__()
         self.two_sided = True
 
-    def calculate(self, data, method='yw', order=None):
+    def calculate(self, data, gcimethod='yw', gciorder=None):
         """
         Granger Causality Index calculation from MVAR model.
         Args:
           *data* : numpy.array
               array of shape (k, N) where *k* is number of channels and
               *N* is number of data points.
-          *method* = 'yw' : int
+          *gcimethod* = 'yw' : int
               MVAR parameters estimation model
-          *order* = None : int
+          *gciorder* = None : int
               model order, if None appropiate value is chosen basic
               on default criterion
         Returns:
@@ -861,11 +881,11 @@ class GCI(Connect):
                Phase Slope Index. 267–276 (2009).
         """
         k, N = data.shape
-        arfull, vrfull = Mvar().fit(data, order, method)
+        arfull, vrfull = Mvar().fit(data, gciorder, gcimethod)
         gcval = np.zeros((k, k))
         for i in xrange(k):
             arix = [j for j in xrange(k) if i!=j]
-            ar_i, vr_i = Mvar().fit(data[arix,:], order, method)
+            ar_i, vr_i = Mvar().fit(data[arix,:], gciorder, gcimethod)
             for e,c in enumerate(arix):
                 gcval[c,i] = np.log(vrfull[i,i]/vr_i[e,e])
         return np.tile(gcval,(2,1,1))

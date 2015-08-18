@@ -16,7 +16,7 @@ def plot_conn(values, name='', fs=1, ylim=None, xlim=None, show=True):
        frequency, k - number of channels 
       *name* = '' : str
         title of the plot
-      *fs* = 1 : 'int
+      *fs* = 1 : int
         sampling frequency
       *ylim* = None : list
         range of y-axis values shown, e.g. [0,1]

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+#! /usr/bin/env python
 
+import inspect
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -19,10 +21,12 @@ class Data(object):
           * array with data (kXNxR, k - channels nr, N - data points,
                              R - nr of trials)
           * str - path to file with appropieate format
-      *fs* : int
+      *fs* = 1: int
           sampling frequency
-      *chan_names*: list
+      *chan_names* = []: list
           names of channels
+      *data_info* = '': string
+          other information about the data
     '''
     def __init__(self, data, fs=1., chan_names=[], data_info=''):
         self.__data = self._load_file(data, data_info)
@@ -31,6 +35,7 @@ class Data(object):
             self.__channames = chan_names
         else:
             self.__channames = ["x"+str(i) for i in range(self.__chans)]
+        self.data_info = data_info
         self._parameters = {}
         self._parameters["mvar"] = False
 
@@ -161,6 +166,9 @@ class Data(object):
             other parameters for specific estimator
         '''
         connobj = conn_estim_dc[method]()
+        self._parameters.update(params)
+        arg = inspect.getargspec(connobj.calculate)
+        newparams = self.__make_params_dict(arg[0])
         if not self._parameters.has_key("p"):
             if params.has_key("order"):
                 self._parameters["p"] = params["order"]
@@ -180,12 +188,12 @@ class Data(object):
             if self.__multitrial:
                 for r in xrange(self.__multitrial):
                     if r==0:
-                        self.__shtimest = connobj.short_time(self.__data[:,:,r], nfft=nfft, no=no, **params)
+                        self.__shtimest = connobj.short_time(self.__data[:,:,r], nfft=nfft, no=no, **newparams)
                         continue
-                    self.__shtimest += connobj.short_time(self.__data[:,:,r], nfft=nfft, no=no, **params)
+                    self.__shtimest += connobj.short_time(self.__data[:,:,r], nfft=nfft, no=no, **newparams)
                 self.__shtimest/=self.__multitrial
             else:
-                self.__shtimest = connobj.short_time(self.__data, nfft=nfft, no=no, **params)
+                self.__shtimest = connobj.short_time(self.__data, nfft=nfft, no=no, **newparams)
         self._parameters["shorttime"] = method
         self._parameters["nfft"] = nfft
         self._parameters["no"] = no
@@ -206,24 +214,27 @@ class Data(object):
             channels
         '''
         connobj = conn_estim_dc[self._parameters["method"]]()
+        self._parameters.update(params)
+        arg = inspect.getargspec(connobj.calculate)
+        newparams = self.__make_params_dict(arg[0])
         if not self.__multitrial:
             if isinstance(connobj,ConnectAR):
                 self.__signific = connobj.surrogate(self.__data, Nrep=Nrep, alpha=alpha, 
                                                     method=self._parameters["mvarmethod"],\
-                                                    fs=self.__fs, order=self._parameters["p"], **params)
+                                                    fs=self.__fs, order=self._parameters["p"], **newparams)
             else:
                 self.__signific = connobj.surrogate(self.__data, Nrep=Nrep,\
-                                                    alpha=alpha, **params)
+                                                    alpha=alpha, **newparams)
         else:
             if isinstance(connobj,ConnectAR):
                 self.__signific = connobj.bootstrap(self.__data, Nrep=Nrep, alpha=alpha, 
                                                     method=self._parameters["mvarmethod"],\
-                                                    fs=self.__fs, order=self._parameters["p"], **params)
+                                                    fs=self.__fs, order=self._parameters["p"], **newparams)
             else:
                 self.__signific = connobj.bootstrap(self.__data, Nrep=Nrep,\
-                                                    alpha=alpha, **params)
+                                                    alpha=alpha, **newparams)
         return self.__signific
-
+    
     def short_time_significance(self, Nrep=100, alpha=0.05, nfft=None, no=None, **params):
         '''
         Statistical significance values of short-time version of
@@ -250,15 +261,18 @@ class Data(object):
         if not no:
             no = self._parameters["no"]
         connobj = conn_estim_dc[self._parameters["shorttime"]]()
+        self._parameters.update(params)
+        arg = inspect.getargspec(connobj.calculate)
+        newparams = self.__make_params_dict(arg[0])
         if isinstance(connobj,ConnectAR):
             self.__st_signific = connobj.short_time_significance(self.__data, Nrep=Nrep, alpha=alpha, 
                                                               method=self._parameters["mvarmethod"],\
                                                               fs=self.__fs, order=self._parameters["p"],
-                                                              nfft=nfft, no=no, **params)
+                                                              nfft=nfft, no=no, **newparams)
         else:
             self.__st_signific = connobj.short_time_significance(self.__data, Nrep=Nrep,\
                                                               nfft=nfft, no=no,\
-                                                              alpha=alpha, **params)
+                                                              alpha=alpha, **newparams)
         return self.__st_signific
 
     def plot_data(self, trial=0, show=True):
@@ -315,8 +329,11 @@ class Data(object):
                 ylim[0] = np.min(self.__estim)
             if ylim[1] == None:
                 ylim[1] = np.max(self.__estim)
+        two_sides = False
         if signi and hasattr(self,'_Data__signific'):
             flag_sig = True
+            if len(self.__signific.shape)>2:
+                two_sides = True
         else:
             flag_sig = False
         for i in xrange(self.__chans):
@@ -327,9 +344,17 @@ class Data(object):
                     axes[i, j].set_ylabel(self.__channames[i])
                 axes[i, j].fill_between(freqs, self.__estim[:, i, j], 0)
                 if flag_sig:
-                    l = axes[i, j].axhline(y=self.__signific[i,j], color='r')
+                    if two_sides:
+                        l_u = axes[i, j].axhline(y=self.__signific[0,i,j], color='r')
+                        l_d = axes[i, j].axhline(y=self.__signific[1,i,j], color='r')
+                    else:
+                        l = axes[i, j].axhline(y=self.__signific[i,j], color='r')
                 axes[i, j].set_xlim(xlim)
                 axes[i, j].set_ylim(ylim)
+                if i!=self.__chans-1:
+                    axes[i,j].get_xaxis().set_visible(False)
+                if j!=0:
+                    axes[i,j].get_yaxis().set_visible(False)
         plt.suptitle(name,y=0.98)
         plt.tight_layout()
         plt.subplots_adjust(top=0.92)
@@ -354,7 +379,11 @@ class Data(object):
         assert hasattr(self,'_Data__shtimest')==True, "No valid data! Use calculation method first."
         shtvalues = self.__shtimest
         if signi and hasattr(self,'_Data__st_signific'):
-            shtvalues = self.fill_nans(shtvalues,self.__st_signific)
+            if len(self.__st_signific.shape)>3:
+                shtvalues = self.fill_nans(shtvalues,self.__st_signific[:,0,:,:])
+                shtvalues = self.fill_nans(shtvalues,self.__st_signific[:,1,:,:])
+            else:
+                shtvalues = self.fill_nans(shtvalues,self.__st_signific)
         fig, axes = plt.subplots(self.__chans, self.__chans)
         freqs = np.linspace(0, self.__fs//2, 4)
         time = np.linspace(0, self.__length/self.__fs, 5)
@@ -373,9 +402,9 @@ class Data(object):
                     axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
                 if self.__channames and j==0:
                     axes[i, j].set_ylabel(self.__channames[i])
-                axes[i, j].imshow(shtvalues[:,:,i,j].T, aspect='auto',\
-                                  extent=[0,self.__length/self.__fs,0,self.__fs//2], \
-                                  interpolation='none', origin='lower', vmin=dtmin, vmax=dtmax)
+                img = axes[i, j].imshow(shtvalues[:,:,i,j].T, aspect='auto',\
+                                       extent=[0,self.__length/self.__fs,0,self.__fs//2], \
+                                       interpolation='none', origin='lower', vmin=dtmin, vmax=dtmax)
                 if i!=self.__chans-1:
                     axes[i,j].get_xaxis().set_visible(False)
                 if j!=0:
@@ -383,7 +412,10 @@ class Data(object):
                 xt  = np.array(axes[i,j].get_xticks())/self.__fs
         plt.suptitle(name,y=0.98)
         plt.tight_layout()
-        plt.subplots_adjust(top=0.92)
+        fig.subplots_adjust(top=0.92, right=0.91)
+        cbar_ax = fig.add_axes([0.93, 0.1, 0.02, 0.7])
+        cbar_ax.tick_params(labelsize=10)
+        fig.colorbar(img, cax=cbar_ax)
         if show:
             plt.show()
 
@@ -420,6 +452,26 @@ class Data(object):
             fl.write(content)
     
     # auxiliary methods:
+
+    def __make_params_dict(self, args):
+        """
+        Making list of parameters from *self._parameters*
+        Args:
+          *args* : list
+            list with parameters of *calculate* method of specific
+            estimator
+        Returns:
+          *newparams* : dict
+            dictionary with new parameters
+        """
+        newparams = {}
+        for ag in args[1:]:
+            if ag in ['data']:
+                continue
+            if self._parameters.has_key(ag):
+                newparams[ag] = self._parameters[ag]
+        return newparams
+
     def fill_nans(self, values, borders):
         '''
         Fill nans where *values* < *borders* (independent of frequency).

@@ -2,7 +2,9 @@ ConnectiviPy
 =========================
 Python connectivity module.
 It is a part of [GSOC 2015](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/dokato/5649050225344512) project.
-Project blog is [here](http://dokato.github.io/connpy-blog/)! 
+Project blog is [here](http://dokato.github.io/connpy-blog/).
+
+Documentation on [ReadTheDocs](http://connectivipy.readthedocs.org/).
 
 ## Content
 
@@ -12,8 +14,15 @@ Project blog is [here](http://dokato.github.io/connpy-blog/)!
 
 ##Changelog
 
+### 0.34
+* short-time statistics
+* documentation in sphinx ready on readthedocs
+* visualization improved
+* conversion to trans3d
+* more examples
+
 ### 0.31
-* connectivity methods: gDTF, gPDC, Coherency, PSI, GC
+* connectivity methods: gDTF, gPDC, Coherency, PSI, GCI
 * new mvar estimation criterion: FPE
 * statistics for multitrial (bootstrap) and normal case (surrogate data)
 * fitting mvar for multitrial
