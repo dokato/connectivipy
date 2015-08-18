@@ -44,5 +44,5 @@ gdtf_values = data.conn('gdtf')
 data.plot_conn('gDTF')
 
 # short time version with default parameters
-pdc_shorttime = data.short_time_conn('pdc', nfft=1, no=10)
+pdc_shorttime = data.short_time_conn('pdc', nfft=100, no=10)
 data.plot_short_time_conn("PDC")

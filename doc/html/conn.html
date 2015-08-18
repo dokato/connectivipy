@@ -57,35 +57,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-__init__">
-<span id="connectvity"></span><span id="conn"></span><h1>Connectvity<a class="headerlink" href="#module-__init__" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="__init__.plot_conn">
-<code class="descclassname">__init__.</code><code class="descname">plot_conn</code><span class="sig-paren">(</span><em>values</em>, <em>name=''</em>, <em>fs=1</em>, <em>ylim=None</em>, <em>xlim=None</em>, <em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/__init__.html#plot_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#__init__.plot_conn" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot connectivity estimation results.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>values</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>connectivity estimation values in shape (fq, k, k) where fq -
-frequency, k - number of channels</dd>
-<dt><em>name</em> = &#8216;&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>title of the plot</dd>
-<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;int</span></dt>
-<dd>sampling frequency</dd>
-<dt><em>ylim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd>range of y-axis values shown, e.g. [0,1]
-<em>None</em> means that default values of given estimator are taken
-into account</dd>
-<dt><em>xlim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list [from (int), to (int)]</span></dt>
-<dd>range of y-axis values shown, if None it is from 0 to Nyquist frequency</dd>
-<dt><em>show</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>show the plot or not</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
+  <div class="section" id="connectvity">
+<span id="conn"></span><h1>Connectvity<a class="headerlink" href="#connectvity" title="Permalink to this headline">¶</a></h1>
 <p>Connectivity methods classes.</p>
 <span class="target" id="module-conn"></span><dl class="function">
 <dt id="conn.spectrumft">
@@ -132,7 +105,7 @@ Physical Review E 70, 050902.</div></blockquote>
 
 <dl class="function">
 <dt id="conn.spectrum_inst">
-<code class="descclassname">conn.</code><code class="descname">spectrum_inst</code><span class="sig-paren">(</span><em>acoef</em>, <em>vcoef</em>, <em>fs=1</em>, <em>resolution=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#spectrum_inst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.spectrum_inst" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">conn.</code><code class="descname">spectrum_inst</code><span class="sig-paren">(</span><em>acoef</em>, <em>vcoef</em>, <em>fs=1</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#spectrum_inst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.spectrum_inst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generating data point from matrix <em>A</em> with MVAR coefficients taking
 into account zero-lag effects.
 Args:</p>
@@ -198,14 +171,15 @@ Args:</p>
 <dt><em>no</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>overlap length (if None it&#8217;s N/10)</dd>
 <dt><em>params</em> :</dt>
-<dd>additional parameters</dd>
+<dd>additional parameters specific for chosen estimator</dd>
 </dl>
 </div></blockquote>
 <dl class="docutils">
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
-<dt><em>A_z</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>z-transformed A(f) complex matrix in shape (<em>resolution</em>, k, k)</dd>
+<dt><em>stvalues</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>short time values (time points, frequency, k, k), where k
+is number of channels</dd>
 </dl>
 </dd>
 </dl>
@@ -219,6 +193,44 @@ Args:</p>
 <dd><p>Inherits from <em>Connect</em> class and governs calculation of various
 connectivity estimators basing on MVAR model methods. It overloads
 <em>short_time</em>, <em>significance</em> methods but <em>calculate</em> remains abstract.</p>
+<dl class="method">
+<dt id="conn.ConnectAR.short_time">
+<code class="descname">short_time</code><span class="sig-paren">(</span><em>data</em>, <em>nfft=None</em>, <em>no=None</em>, <em>mvarmethod='yw'</em>, <em>order=None</em>, <em>resol=None</em>, <em>fs=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#ConnectAR.short_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.ConnectAR.short_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>It overloads <a class="reference internal" href="#conn.ConnectAR" title="conn.ConnectAR"><code class="xref py py-class docutils literal"><span class="pre">ConnectAR</span></code></a> method <a class="reference internal" href="#conn.Connect.short_time" title="conn.Connect.short_time"><code class="xref py py-func docutils literal"><span class="pre">Connect.short_time()</span></code></a>.
+Short-tme version of estimator, where data is windowed into parts
+of length <em>nfft</em> and overlap <em>no</em>. <em>params</em> catch additional
+parameters specific for estimator.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>data matrix</dd>
+<dt><em>nfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int </span></dt>
+<dd>window length (if None it&#8217;s N/5)</dd>
+<dt><em>no</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>overlap length (if None it&#8217;s N/10)</dd>
+<dt><em>mvarmethod</em> = &#8216;yw&#8217; :</dt>
+<dd>MVAR parameters estimation method</dd>
+<dt><em>order</em> = None:</dt>
+<dd>MVAR model order; it None, it is set automatically basing
+on default criterion.</dd>
+<dt><em>resol</em> = None:</dt>
+<dd>frequency resolution; if None, it is 100.</dd>
+<dt><em>fs</em> = 1 :</dt>
+<dd>sampling frequency</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>stvalues</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>short time values (time points, frequency, k, k), where k
+is number of channels</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="function">
@@ -563,7 +575,7 @@ Int. J. Bioelectromagn. 11, 74–79 (2009).</div></blockquote>
 <a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method and <em>values_range</em> attribute.</p>
 <dl class="method">
 <dt id="conn.Coherency.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>cnfft=None</em>, <em>cno=None</em>, <em>window=&lt;function hanning at 0x00000000039556D8&gt;</em>, <em>im=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Coherency.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Coherency.calculate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>cnfft=None</em>, <em>cno=None</em>, <em>window=&lt;function hanning at 0x0000000003A735F8&gt;</em>, <em>im=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Coherency.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Coherency.calculate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coherency calculation using FFT mehtod.
 Args:</p>
 <blockquote>
@@ -604,7 +616,7 @@ Args:</p>
 <a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
 <dl class="method">
 <dt id="conn.PSI.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>band_width=4</em>, <em>psinfft=None</em>, <em>psino=0</em>, <em>window=&lt;function hanning at 0x00000000039556D8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#PSI.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PSI.calculate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>band_width=4</em>, <em>psinfft=None</em>, <em>psino=0</em>, <em>window=&lt;function hanning at 0x0000000003A735F8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#PSI.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PSI.calculate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Phase Slope Index calculation using FFT mehtod.
 Args:</p>
 <blockquote>
@@ -689,6 +701,7 @@ on default criterion</dd>
 <li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Connectvity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mvar.html">Mvarmodel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Plot</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>

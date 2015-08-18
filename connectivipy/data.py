@@ -100,7 +100,7 @@ class Data(object):
         self.__data = ss.resample(self.__data, new_nr_samples, axis=1)
         self.__fs = fs_new
     
-    def fit_mvar(self, p = None, method = 'yw'):
+    def fit_mvar(self, p=None, method='yw'):
         '''
         Fitting MVAR coefficients.
         

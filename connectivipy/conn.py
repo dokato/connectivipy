@@ -71,7 +71,7 @@ def spectrum(acoef, vcoef, fs=1, resolution=100):
         S_z[e] = np.dot(np.dot(H_z[e],vcoef), H_z[e].T.conj())
     return A_z, H_z, S_z
 
-def spectrum_inst(acoef, vcoef, fs=1, resolution=None):
+def spectrum_inst(acoef, vcoef, fs=1, resolution=100):
     """
     Generating data point from matrix *A* with MVAR coefficients taking
     into account zero-lag effects.
@@ -99,10 +99,7 @@ def spectrum_inst(acoef, vcoef, fs=1, resolution=None):
            Int. J. Bioelectromagn. 11, 74–79 (2009).
     """
     p, k, k = acoef.shape 
-    if resolution == None:
-        freqs=np.linspace(0,fs/2,512)
-    else:
-        freqs=np.linspace(0,fs/2,resolution)
+    freqs=np.linspace(0,fs/2,resolution)
     A_z=np.zeros((len(freqs),k,k),complex)
     B_z=np.zeros((len(freqs),k,k),complex)
 
@@ -133,7 +130,8 @@ class Connect(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):
-        self.values_range = [None, None]
+        self.values_range = [None, None] # normalization bands
+        self.two_sided = False # only positive, or also negative values
     
     @abstractmethod
     def calculate(self):
@@ -154,11 +152,13 @@ class Connect(object):
           *no* = None : int
               overlap length (if None it's N/10)
           *params* :
-              additional parameters
+              additional parameters specific for chosen estimator
         Returns:
-          *A_z* : numpy.array
-              z-transformed A(f) complex matrix in shape (*resolution*, k, k)
+          *stvalues* : numpy.array
+              short time values (time points, frequency, k, k), where k
+              is number of channels
         """
+        assert nfft>no, "overlap must be smaller than window"
         if len(data.shape)>2:
             k, N, trls = data.shape
         else:
@@ -187,6 +187,7 @@ class Connect(object):
 
     def short_time_significance(self, data, Nrep=10, alpha=0.05,\
                                         nfft=None, no=None, **params):
+        assert nfft>no, "overlap must be smaller than window"
         if len(data.shape)>2:
             k, N, trls = data.shape
         else:
@@ -217,10 +218,16 @@ class Connect(object):
         return signific
 
     def levels(self, signi, alpha, k):
-        ficance = np.zeros((k,k))
+        if self.two_sided:
+            ficance = np.zeros((2, k, k))
+        else:
+            ficance = np.zeros((k, k))
         for i in range(k):
             for j in range(k):
-                ficance[i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], alpha*100, axis=1))
+                if self.two_sided:
+                    ficance[i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], alpha*100, axis=1))
+                else:
+                    ficance[i][j] = np.max(st.scoreatpercentile(signi[:,:,i,j], alpha*100, axis=1))
         return ficance
         
     def __calc_multitrial(self, data, **params):
@@ -281,6 +288,33 @@ class ConnectAR(Connect):
         
     def short_time(self, data, nfft=None, no=None, mvarmethod='yw',\
                                           order=None, resol=None, fs=1):
+        """
+        It overloads :class:`ConnectAR` method :func:`Connect.short_time`.
+        Short-tme version of estimator, where data is windowed into parts
+        of length *nfft* and overlap *no*. *params* catch additional
+        parameters specific for estimator.
+        Args:
+          *data* : numpy.array
+              data matrix
+          *nfft* = None : int 
+              window length (if None it's N/5)
+          *no* = None : int
+              overlap length (if None it's N/10)
+          *mvarmethod* = 'yw' :
+              MVAR parameters estimation method
+          *order* = None:
+              MVAR model order; it None, it is set automatically basing
+              on default criterion.
+          *resol* = None:
+              frequency resolution; if None, it is 100.
+          *fs* = 1 :
+              sampling frequency
+        Returns:
+          *stvalues* : numpy.array
+              short time values (time points, frequency, k, k), where k
+              is number of channels
+        """
+        assert nfft>no, "overlap must be smaller than window"
         if len(data.shape)>2:
             k, N, trls = data.shape
         else:
@@ -311,6 +345,7 @@ class ConnectAR(Connect):
     def short_time_significance(self, data, Nrep=100, alpha=0.05, method='yw',\
                                 order=None, fs=1, resolution=None,\
                                 nfft=None, no=None, **params):
+        assert nfft>no, "overlap must be smaller than window"
         if len(data.shape)>2:
             k, N, trls = data.shape
         else:
@@ -725,6 +760,7 @@ class Coherency(Connect):
         .. [1] M. B. Priestley Spectral Analysis and Time Series. 
                Academic Press Inc. (London) LTD., 1981
         """
+        assert cnfft>cno, "overlap must be smaller than window"
         k, N = data.shape 
         if not cnfft:
             cnfft = int(N/5)
@@ -759,6 +795,9 @@ class PSI(Connect):
     PSI - class inherits from :class:`Connect` and overloads
     :func:`Connect.calculate` method.
     """
+    def __init__(self):
+        self.two_sided = True
+
     def calculate(self, data, band_width=4, psinfft=None, psino=0, window=np.hanning):
         """
         Phase Slope Index calculation using FFT mehtod.
@@ -781,6 +820,7 @@ class PSI(Connect):
         .. [1] Nolte G. et all, Comparison of Granger Causality and 
                Phase Slope Index. 267–276 (2009).
         """
+        assert psinfft>psino, "overlap must be smaller than window"
         k, N = data.shape 
         if not psinfft:
             psinfft = int(N/4)
@@ -798,6 +838,9 @@ class GCI(Connect):
     GCI - class inherits from :class:`Connect` and overloads
     :func:`Connect.calculate` method.
     """
+    def __init__(self):
+        self.two_sided = True
+
     def calculate(self, data, method='yw', order=None):
         """
         Granger Causality Index calculation from MVAR model.

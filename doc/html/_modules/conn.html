@@ -126,7 +126,7 @@
         <span class="n">S_z</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">H_z</span><span class="p">[</span><span class="n">e</span><span class="p">],</span><span class="n">vcoef</span><span class="p">),</span> <span class="n">H_z</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">A_z</span><span class="p">,</span> <span class="n">H_z</span><span class="p">,</span> <span class="n">S_z</span>
 </div>
-<div class="viewcode-block" id="spectrum_inst"><a class="viewcode-back" href="../conn.html#conn.spectrum_inst">[docs]</a><span class="k">def</span> <span class="nf">spectrum_inst</span><span class="p">(</span><span class="n">acoef</span><span class="p">,</span> <span class="n">vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="spectrum_inst"><a class="viewcode-back" href="../conn.html#conn.spectrum_inst">[docs]</a><span class="k">def</span> <span class="nf">spectrum_inst</span><span class="p">(</span><span class="n">acoef</span><span class="p">,</span> <span class="n">vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generating data point from matrix *A* with MVAR coefficients taking</span>
 <span class="sd">    into account zero-lag effects.</span>
@@ -154,10 +154,7 @@
 <span class="sd">           Int. J. Bioelectromagn. 11, 74–79 (2009).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">p</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">acoef</span><span class="o">.</span><span class="n">shape</span> 
-    <span class="k">if</span> <span class="n">resolution</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">freqs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">fs</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">512</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">freqs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">fs</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">resolution</span><span class="p">)</span>
+    <span class="n">freqs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">fs</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">resolution</span><span class="p">)</span>
     <span class="n">A_z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">),</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">),</span><span class="nb">complex</span><span class="p">)</span>
     <span class="n">B_z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">),</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">),</span><span class="nb">complex</span><span class="p">)</span>
 
@@ -188,7 +185,8 @@
     <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">values_range</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_range</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="c"># normalization bands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span> <span class="o">=</span> <span class="bp">False</span> <span class="c"># only positive, or also negative values</span>
     
     <span class="nd">@abstractmethod</span>
 <div class="viewcode-block" id="Connect.calculate"><a class="viewcode-back" href="../conn.html#conn.Connect.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -209,11 +207,13 @@
 <span class="sd">          *no* = None : int</span>
 <span class="sd">              overlap length (if None it&#39;s N/10)</span>
 <span class="sd">          *params* :</span>
-<span class="sd">              additional parameters</span>
+<span class="sd">              additional parameters specific for chosen estimator</span>
 <span class="sd">        Returns:</span>
-<span class="sd">          *A_z* : numpy.array</span>
-<span class="sd">              z-transformed A(f) complex matrix in shape (*resolution*, k, k)</span>
+<span class="sd">          *stvalues* : numpy.array</span>
+<span class="sd">              short time values (time points, frequency, k, k), where k</span>
+<span class="sd">              is number of channels</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">nfft</span><span class="o">&gt;</span><span class="n">no</span><span class="p">,</span> <span class="s">&quot;overlap must be smaller than window&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
             <span class="n">k</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">trls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">else</span><span class="p">:</span>
@@ -242,6 +242,7 @@
 </div>
     <span class="k">def</span> <span class="nf">short_time_significance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>\
                                         <span class="n">nfft</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">nfft</span><span class="o">&gt;</span><span class="n">no</span><span class="p">,</span> <span class="s">&quot;overlap must be smaller than window&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
             <span class="n">k</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">trls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">else</span><span class="p">:</span>
@@ -272,10 +273,16 @@
         <span class="k">return</span> <span class="n">signific</span>
 
     <span class="k">def</span> <span class="nf">levels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signi</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
-        <span class="n">ficance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span><span class="p">:</span>
+            <span class="n">ficance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ficance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
-                <span class="n">ficance</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">scoreatpercentile</span><span class="p">(</span><span class="n">signi</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">alpha</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span><span class="p">:</span>
+                    <span class="n">ficance</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">scoreatpercentile</span><span class="p">(</span><span class="n">signi</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">alpha</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ficance</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">scoreatpercentile</span><span class="p">(</span><span class="n">signi</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">alpha</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ficance</span>
         
     <span class="k">def</span> <span class="nf">__calc_multitrial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
@@ -334,8 +341,35 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">values_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
         
-    <span class="k">def</span> <span class="nf">short_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mvarmethod</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">,</span>\
+<div class="viewcode-block" id="ConnectAR.short_time"><a class="viewcode-back" href="../conn.html#conn.ConnectAR.short_time">[docs]</a>    <span class="k">def</span> <span class="nf">short_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mvarmethod</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">,</span>\
                                           <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">resol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        It overloads :class:`ConnectAR` method :func:`Connect.short_time`.</span>
+<span class="sd">        Short-tme version of estimator, where data is windowed into parts</span>
+<span class="sd">        of length *nfft* and overlap *no*. *params* catch additional</span>
+<span class="sd">        parameters specific for estimator.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              data matrix</span>
+<span class="sd">          *nfft* = None : int </span>
+<span class="sd">              window length (if None it&#39;s N/5)</span>
+<span class="sd">          *no* = None : int</span>
+<span class="sd">              overlap length (if None it&#39;s N/10)</span>
+<span class="sd">          *mvarmethod* = &#39;yw&#39; :</span>
+<span class="sd">              MVAR parameters estimation method</span>
+<span class="sd">          *order* = None:</span>
+<span class="sd">              MVAR model order; it None, it is set automatically basing</span>
+<span class="sd">              on default criterion.</span>
+<span class="sd">          *resol* = None:</span>
+<span class="sd">              frequency resolution; if None, it is 100.</span>
+<span class="sd">          *fs* = 1 :</span>
+<span class="sd">              sampling frequency</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *stvalues* : numpy.array</span>
+<span class="sd">              short time values (time points, frequency, k, k), where k</span>
+<span class="sd">              is number of channels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">nfft</span><span class="o">&gt;</span><span class="n">no</span><span class="p">,</span> <span class="s">&quot;overlap must be smaller than window&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
             <span class="n">k</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">trls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">else</span><span class="p">:</span>
@@ -362,10 +396,11 @@
                 <span class="k">continue</span>
             <span class="n">stvalues</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">vr</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resol</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">stvalues</span>
-
+</div>
     <span class="k">def</span> <span class="nf">short_time_significance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">,</span>\
                                 <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>\
                                 <span class="n">nfft</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">nfft</span><span class="o">&gt;</span><span class="n">no</span><span class="p">,</span> <span class="s">&quot;overlap must be smaller than window&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
             <span class="n">k</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">trls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">else</span><span class="p">:</span>
@@ -780,6 +815,7 @@
 <span class="sd">        .. [1] M. B. Priestley Spectral Analysis and Time Series. </span>
 <span class="sd">               Academic Press Inc. (London) LTD., 1981</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">cnfft</span><span class="o">&gt;</span><span class="n">cno</span><span class="p">,</span> <span class="s">&quot;overlap must be smaller than window&quot;</span>
         <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span> 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cnfft</span><span class="p">:</span>
             <span class="n">cnfft</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">5</span><span class="p">)</span>
@@ -814,6 +850,9 @@
 <span class="sd">    PSI - class inherits from :class:`Connect` and overloads</span>
 <span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span> <span class="o">=</span> <span class="bp">True</span>
+
 <div class="viewcode-block" id="PSI.calculate"><a class="viewcode-back" href="../conn.html#conn.PSI.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">band_width</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">psinfft</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">psino</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">hanning</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Phase Slope Index calculation using FFT mehtod.</span>
@@ -836,6 +875,7 @@
 <span class="sd">        .. [1] Nolte G. et all, Comparison of Granger Causality and </span>
 <span class="sd">               Phase Slope Index. 267–276 (2009).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">psinfft</span><span class="o">&gt;</span><span class="n">psino</span><span class="p">,</span> <span class="s">&quot;overlap must be smaller than window&quot;</span>
         <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span> 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">psinfft</span><span class="p">:</span>
             <span class="n">psinfft</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
@@ -853,6 +893,9 @@
 <span class="sd">    GCI - class inherits from :class:`Connect` and overloads</span>
 <span class="sd">    :func:`Connect.calculate` method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span> <span class="o">=</span> <span class="bp">True</span>
+
 <div class="viewcode-block" id="GCI.calculate"><a class="viewcode-back" href="../conn.html#conn.GCI.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Granger Causality Index calculation from MVAR model.</span>
@@ -906,6 +949,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../conn.html">Connectvity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mvar.html">Mvarmodel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plot.html">Plot</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>

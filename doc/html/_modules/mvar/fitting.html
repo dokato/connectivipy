@@ -64,7 +64,7 @@
 <span class="sd">    Generating data point from MVAR coefficiencs matrix *Acf*.</span>
 <span class="sd">    Args:</span>
 <span class="sd">      *Acf* : numpy.array</span>
-<span class="sd">          array of dimension kxkxp where *k* is number of channels and</span>
+<span class="sd">          array in shape of (p,k,k) where *k* is number of channels and</span>
 <span class="sd">          *p* is a model order.</span>
 <span class="sd">      *n* : int</span>
 <span class="sd">          number of data points.</span>
@@ -91,7 +91,7 @@
 <span class="sd">    instantenous interaction not as in *mvar_gen* one data point lagged.</span>
 <span class="sd">    Args:</span>
 <span class="sd">      *Acf* : numpy.array</span>
-<span class="sd">          array of dimension kxkxp where *k* is number of channels and</span>
+<span class="sd">          array in shape of (p,k,k) where *k* is number of channels and</span>
 <span class="sd">          *p* is a model order.</span>
 <span class="sd">      *n* : int</span>
 <span class="sd">          number of data points.</span>
@@ -329,6 +329,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connectvity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mvar.html">Mvarmodel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Plot</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>

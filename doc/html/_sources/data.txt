@@ -15,3 +15,8 @@ Data loading
 
 .. automodule:: load.loaders
    :members:
+
+Additional functions
+########
+
+.. autofunction:: __init__.plot_conn

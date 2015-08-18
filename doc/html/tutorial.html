@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="ConnectiviPy 0.34a documentation" href="index.html" />
-    <link rel="prev" title="Mvarmodel" href="mvar.html" /> 
+    <link rel="prev" title="Plot" href="plot.html" /> 
   </head>
   <body role="document">
     <div class="header-wrapper" role="banner">
@@ -36,7 +36,7 @@
         <div class="headertitle"><a
           href="index.html">ConnectiviPy 0.34a documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="mvar.html" title="Mvarmodel"
+          <a href="plot.html" title="Plot"
              accesskey="P">previous</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -114,9 +114,7 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Example 2</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">connectivipy</span> <span class="kn">as</span> <span class="nn">cp</span>
-<span class="kn">from</span> <span class="nn">connectivipy.mvar.fitting</span> <span class="kn">import</span> <span class="n">mvar_gen</span>
 
 <span class="n">fs</span> <span class="o">=</span> <span class="mf">256.</span>
 <span class="n">acf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
@@ -132,7 +130,7 @@
 <span class="n">acf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.4</span>
 
 <span class="c"># generate 3-channel signal from matrix above</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">acf</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">mvar_gen</span><span class="p">(</span><span class="n">acf</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
 
 <span class="c"># assign static class cp.Mvar to variable mv</span>
 <span class="n">mv</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Mvar</span>
@@ -161,6 +159,88 @@
 </pre></div>
 </div>
 </div>
+<div class="section" id="instantaneous">
+<h2>Instantaneous<a class="headerlink" href="#instantaneous" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">connectivipy</span> <span class="kn">as</span> <span class="nn">cp</span>
+
+<span class="c"># this example reproduce simulation from article:</span>
+<span class="c"># Erla S et all (2009) &quot;Multivariate autoregressive model with</span>
+<span class="c">#                      instantaneous effects to improve brain</span>
+<span class="c">#                      connectivity estimation&quot;</span>
+
+
+<span class="c"># let&#39;s make a matrix from original article</span>
+
+<span class="n">bcf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="c"># matrix shape meaning (k,k,p) k - number of channels,</span>
+<span class="c"># p - order of mvar parameters</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.58</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.81</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.01</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.6</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.8</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.25</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.6</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>
+
+<span class="c"># now we build a corresponding MVAR process without instantenous effect</span>
+<span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">-</span><span class="n">bcf</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">acf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">acf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">bcf</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c"># generate 5-channel signals from matrix above</span>
+<span class="n">signal_inst</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">mvar_gen_inst</span><span class="p">(</span><span class="n">bcf</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
+<span class="n">signal</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">mvar_gen</span><span class="p">(</span><span class="n">acf</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
+
+<span class="c"># fit MVAR parameters</span>
+<span class="n">bv</span><span class="p">,</span> <span class="n">vfb</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Mvar</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">signal_inst</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#39;yw&#39;</span><span class="p">)</span>
+
+<span class="n">av</span><span class="p">,</span> <span class="n">vfa</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Mvar</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#39;yw&#39;</span><span class="p">)</span>
+
+<span class="c"># use connectivity estimators</span>
+<span class="n">ipdc</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">iPDC</span><span class="p">()</span>
+<span class="n">ipdcval</span> <span class="o">=</span> <span class="n">ipdc</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">bv</span><span class="p">,</span> <span class="n">vfb</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+
+<span class="n">pdc</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">PDC</span><span class="p">()</span>
+<span class="n">pdcval</span> <span class="o">=</span> <span class="n">pdc</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">av</span><span class="p">,</span> <span class="n">vfa</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">plot_double_conn</span><span class="p">(</span><span class="n">values_a</span><span class="p">,</span> <span class="n">values_b</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="s">&quot;function to plot two sets of connectivity values&quot;</span>
+    <span class="n">fq</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">values_a</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fs</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fq</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">xlim</span><span class="p">:</span>
+        <span class="n">xlim</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">freqs</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ylim</span><span class="p">:</span>
+            <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">values_b</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;red&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">values_a</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">)</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="mf">0.98</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mf">0.92</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">plot_double_conn</span><span class="p">(</span><span class="n">pdcval</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">ipdcval</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="s">&#39;PDC / iPDC&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -174,6 +254,7 @@
 <li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="conn.html">Connectvity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mvar.html">Mvarmodel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Plot</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="">Tutorial</a></li>
@@ -200,7 +281,7 @@
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="mvar.html" title="Mvarmodel"
+            <a href="plot.html" title="Plot"
               >previous</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |

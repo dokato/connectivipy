@@ -390,6 +390,37 @@ channelNames, calibrationCoef which means the same as in SML file</dd>
 </dd></dl>
 
 </div>
+<div class="section" id="additional-functions">
+<h2>Additional functions<a class="headerlink" href="#additional-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="__init__.plot_conn">
+<code class="descclassname">__init__.</code><code class="descname">plot_conn</code><span class="sig-paren">(</span><em>values</em>, <em>name=''</em>, <em>fs=1</em>, <em>ylim=None</em>, <em>xlim=None</em>, <em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/plot.html#plot_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#__init__.plot_conn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot connectivity estimation results. Allows to plot your results
+without using <em>Data</em> class.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><em>values</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>connectivity estimation values in shape (fq, k, k) where fq -
+frequency, k - number of channels</dd>
+<dt><em>name</em> = &#8216;&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>title of the plot</dd>
+<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;int</span></dt>
+<dd>sampling frequency</dd>
+<dt><em>ylim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>range of y-axis values shown, e.g. [0,1]
+<em>None</em> means that default values of given estimator are taken
+into account</dd>
+<dt><em>xlim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list [from (int), to (int)]</span></dt>
+<dd>range of y-axis values shown, if None it is from 0 to Nyquist frequency</dd>
+<dt><em>show</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>show the plot or not</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -403,6 +434,7 @@ channelNames, calibrationCoef which means the same as in SML file</dd>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="conn.html">Connectvity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mvar.html">Mvarmodel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Plot</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>

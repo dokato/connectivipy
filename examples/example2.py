@@ -23,7 +23,7 @@ y = mvar_gen(acf,int(10e4))
 mv = cp.Mvar
 
 # find best model order
-best, crit = mv._order_akaike(y,15,'vm')
+best, crit = mv.order_akaike(y,15,'vm')
 plt.plot(1+np.arange(len(crit)),crit,'g')
 plt.show()
 print best

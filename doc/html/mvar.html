@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="ConnectiviPy 0.34a documentation" href="index.html" />
-    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="next" title="Plot" href="plot.html" />
     <link rel="prev" title="Connectvity" href="conn.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="conn.html" title="Connectvity"
              accesskey="P">previous</a> |
-          <a href="tutorial.html" title="Tutorial"
+          <a href="plot.html" title="Plot"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -239,7 +239,7 @@ Args:</p>
 <blockquote>
 <div><dl class="docutils">
 <dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of dimension kxkxp where <em>k</em> is number of channels and
+<dd>array in shape of (p,k,k) where <em>k</em> is number of channels and
 <em>p</em> is a model order.</dd>
 <dt><em>n</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>number of data points.</dd>
@@ -265,7 +265,7 @@ Args:</p>
 <blockquote>
 <div><dl class="docutils">
 <dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of dimension kxkxp where <em>k</em> is number of channels and
+<dd>array in shape of (p,k,k) where <em>k</em> is number of channels and
 <em>p</em> is a model order.</dd>
 <dt><em>n</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>number of data points.</dd>
@@ -486,6 +486,7 @@ and <em>LT</em> is a transpose of <em>L</em>.</dd>
 <li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="conn.html">Connectvity</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Mvarmodel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Plot</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
@@ -514,7 +515,7 @@ and <em>LT</em> is a transpose of <em>L</em>.</dd>
           <div role="navigation" aria-label="related navigaton">
             <a href="conn.html" title="Connectvity"
               >previous</a> |
-            <a href="tutorial.html" title="Tutorial"
+            <a href="plot.html" title="Plot"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |

@@ -26,6 +26,7 @@ Contents:
     data
     conn
     mvar
+    plot
 
 Tutorials:
 
