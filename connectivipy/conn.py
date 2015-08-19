@@ -396,9 +396,9 @@ class ConnectAR(Connect):
 
     def significance(self, data, method, order=None, resolution=None, Nrep=10, alpha=0.05, **params):
         if len(data.shape)>2:
-            signific = self.bootstrap(data, method, order=order, resolution=resolution, Nrep=10, alpha=alpha, **params)
+            signific = self.bootstrap(data, method, order=order, resolution=resolution, Nrep=Nrep, alpha=alpha, **params)
         else:
-            signific = self.surrogate(data, method, order=order, resolution=resolution, Nrep=10, alpha=alpha, **params)
+            signific = self.surrogate(data, method, order=order, resolution=resolution, Nrep=Nrep, alpha=alpha, **params)
         return signific
 
     def bootstrap(self, data, method, order=None, Nrep=10, alpha=0.05, fs=1, **params):
