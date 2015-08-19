@@ -4,10 +4,9 @@
 import unittest
 import numpy as np 
 import connectivipy as cp
-from  connectivipy.mvar.fitting import mvar_gen, mvar_gen_inst
-from  connectivipy.mvar.fitting import vieiramorf, nutallstrand, yulewalker
+from  connectivipy.mvar.fitting import *
 from  connectivipy.mvarmodel import Mvar
-from connectivipy.conn import ConnectAR, spectrum, spectrumft, DTF, PDC
+from connectivipy.conn import *
 import pylab as py
 
 #Parameters from Sameshima, Baccala (2001) Fig. 3a
@@ -24,7 +23,7 @@ A[0, 4, 4] = 0.25 * 2**0.5
 
 
 # from Erla, S. et all (2009)
-A2 = np.zeros((4, 5, 5))
+Ains = np.zeros((4, 5, 5))
 Ains[1, 0, 0] = 1.58
 Ains[2, 0, 0] = -0.81
 Ains[0, 1, 0] = 0.9
@@ -45,8 +44,24 @@ Ains[3, 4, 2] = 0.6
 
 class DataTest(unittest.TestCase):
     "test data class"
-    def test_load(self):
-        pass 
+    def test_resample(self):
+        do = cp.Data(np.random.randn(3,100, 4), fs=10)
+        do.resample(5)
+        self.assertEquals(do.fs,5)
+
+    def test_conn(self):
+        ys = mvar_gen(A,10**3)
+        dat = cp.Data(ys)
+        with self.assertRaises(AttributeError):
+            dat.conn('dtf')
+
+    def test_conn2(self):
+        ys = mvar_gen(A,10**3)
+        dat = cp.Data(ys)
+        dat.fit_mvar(2,'vm')
+        estm = dat.short_time_conn('dtf', nfft=100, no=10)
+        stst = dat.short_time_significance(Nrep=100,alpha=0.5, verbose=False)
+        self.assertTrue(np.all(stst<=1))
 
 class MvarTest(unittest.TestCase):
     def test_fitting(self):
@@ -67,10 +82,12 @@ class MvarTest(unittest.TestCase):
     def test_orders(self):
         m = Mvar()
         ys = mvar_gen(A,10**4)
-        crmin,critpl = m._order_schwartz(ys, p_max = 20, method = 'yw')
-        print '****', crmin
-        #py.plot(critpl)
-        #py.show()
+        crmin,critpl = m.order_schwartz(ys, p_max=20, method='yw')
+        self.assertEqual(crmin, 2)
+        crmin,critpl = m.order_akaike(ys, p_max=20, method='yw')
+        self.assertEqual(crmin, 2)
+        crmin,critpl = m.order_hq(ys, p_max=20, method='yw')
+        self.assertEqual(crmin, 2)
 
 class ConnTest(unittest.TestCase):
     def test_spectrum(self):
@@ -79,19 +96,12 @@ class ConnTest(unittest.TestCase):
         a,h,s = spectrum(avm,vvm,512)
         s13 = np.abs(s[:,1,3])
         fq = np.linspace(0,512./2,s.shape[0])
-        self.assertAlmostEqual(fq[np.argmax(s13)],64, places=0)
+        self.assertAlmostEqual(fq[np.argmax(s13)],65, delta=1.0)
 
     def test_dtf(self):
         ys = mvar_gen(A,10**4)
         ans,vns = nutallstrand(ys,2)
         dt = DTF() 
-        dtf = dt.calculate(ans,vns, 128)
-        self.assertTrue(np.allclose(np.sum(np.abs(dtf)**2,axis=2),1))
-
-    def test_gdtf(self):
-        ys = mvar_gen(A,10**4)
-        ans,vns = nutallstrand(ys,2)
-        dt = gDTF() 
         dtf = dt.calculate(ans,vns, 128)
         self.assertTrue(np.allclose(np.sum(np.abs(dtf)**2,axis=2),1))
 
@@ -115,6 +125,16 @@ class ConnTest(unittest.TestCase):
         dt = iPDC() 
         ipdc = dt.calculate(ans,vns, 128)
         self.assertTrue(np.allclose(np.sum(np.abs(ipdc)**2,axis=1),1))
+
+    def test_twosided(self):
+        gci = GCI()
+        psi = PSI()
+        gdtf = gDTF()
+        ipdc = iPDC()
+        self.assertTrue(psi.two_sided)
+        self.assertTrue(gci.two_sided)
+        self.assertFalse(gdtf.two_sided)
+        self.assertFalse(ipdc.two_sided)
 
 if __name__ == '__main__':
     unittest.main()

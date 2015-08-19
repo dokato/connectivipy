@@ -185,7 +185,7 @@ class Connect(object):
         return stvalues
 
     def short_time_significance(self, data, Nrep=10, alpha=0.05,\
-                                        nfft=None, no=None, **params):
+                                        nfft=None, no=None, verbose=True, **params):
         assert nfft>no, "overlap must be smaller than window"
         if len(data.shape)>2:
             k, N, trls = data.shape
@@ -209,14 +209,14 @@ class Connect(object):
                     datcut = np.concatenate((data[:,i:i+nfft],np.zeros((k,i+nfft-N))),axis=1)
             else:
                 datcut = data[:,i:i+nfft]
-            signi_st[e] = self.significance(datcut, Nrep=Nrep, alpha=alpha, **params)
+            signi_st[e] = self.significance(datcut, Nrep=Nrep, alpha=alpha, verbose=verbose, **params)
         return signi_st
         
-    def significance(self, data, Nrep=10, alpha=0.05, **params):
+    def significance(self, data, Nrep=10, alpha=0.05, verbose=True, **params):
         if len(data.shape)>2:
-            signific = self.bootstrap(data, Nrep=10, alpha=alpha, **params)
+            signific = self.bootstrap(data, Nrep=10, alpha=alpha, verbose=verbose, **params)
         else:
-            signific = self.surrogate(data, Nrep=10, alpha=alpha, **params)
+            signific = self.surrogate(data, Nrep=10, alpha=alpha, verbose=verbose, **params)
         return signific
 
     def levels(self, signi, alpha, k):
@@ -263,9 +263,9 @@ class Connect(object):
                 rescalc += self.calculate(trdata, **params)*occurence
         return rescalc/trials
 
-    def bootstrap(self, data, Nrep=10, alpha=0.05, **params):
+    def bootstrap(self, data, Nrep=10, alpha=0.05, verbose=True, **params):
         for i in xrange(Nrep):
-            print '.',
+            if verbose: print '.',
             if i==0:
                 tmpsig = self.__calc_multitrial(data, **params)
                 fres, k, k = tmpsig.shape
@@ -273,14 +273,14 @@ class Connect(object):
                 signi[i] = tmpsig
             else:
                 signi[i] = self.__calc_multitrial(data, **params)
-        print '|'
+        if verbose: print '|'
         return self.levels(signi, alpha, k)
 
-    def surrogate(self, data, Nrep = 10, alpha=0.05, **params):
+    def surrogate(self, data, Nrep = 10, alpha=0.05, verbose=True, **params):
         k, N = data.shape
         shdata = data.copy()
         for i in xrange(Nrep):
-            print '.',
+            if verbose: print '.',
             map(np.random.shuffle, shdata)
             if i==0:
                 rtmp = self.calculate(data, **params)
@@ -288,7 +288,7 @@ class Connect(object):
                 reskeeper[i] = rtmp
                 continue
             reskeeper[i] = self.calculate(data, **params)
-        print '|'
+        if verbose: print '|'
         return self.levels(reskeeper, alpha, k)
 
 class ConnectAR(Connect):
@@ -362,7 +362,7 @@ class ConnectAR(Connect):
 
     def short_time_significance(self, data, Nrep=100, alpha=0.05, method='yw',\
                                 order=None, fs=1, resolution=None,\
-                                nfft=None, no=None, **params):
+                                nfft=None, no=None, verbose=True, **params):
         assert nfft>no, "overlap must be smaller than window"
         if len(data.shape)>2:
             k, N, trls = data.shape
@@ -384,7 +384,7 @@ class ConnectAR(Connect):
             else:
                 datcut = data[:,i:i+nfft]
             signi_st[e] = self.significance(datcut, method, order=order, resolution=resolution,\
-                                            Nrep=Nrep, alpha=alpha, **params)
+                                            Nrep=Nrep, alpha=alpha, verbose=verbose, **params)
         return signi_st
 
     def __calc_multitrial(self, data, method='yw', order=None, fs=1, resolution=None, **params):
@@ -394,19 +394,19 @@ class ConnectAR(Connect):
         rescalc = self.calculate(ar, vr, fs, resolution)
         return rescalc
 
-    def significance(self, data, method, order=None, resolution=None, Nrep=10, alpha=0.05, **params):
+    def significance(self, data, method, order=None, resolution=None, Nrep=10, alpha=0.05, verbose=True, **params):
         if len(data.shape)>2:
-            signific = self.bootstrap(data, method, order=order, resolution=resolution, Nrep=Nrep, alpha=alpha, **params)
+            signific = self.bootstrap(data, method, order=order, resolution=resolution, Nrep=Nrep, alpha=alpha, verbose=verbose, **params)
         else:
-            signific = self.surrogate(data, method, order=order, resolution=resolution, Nrep=Nrep, alpha=alpha, **params)
+            signific = self.surrogate(data, method, order=order, resolution=resolution, Nrep=Nrep, alpha=alpha, verbose=verbose, **params)
         return signific
 
-    def bootstrap(self, data, method, order=None, Nrep=10, alpha=0.05, fs=1, **params):
+    def bootstrap(self, data, method, order=None, Nrep=10, alpha=0.05, fs=1, verbose=True, **params):
         resolution = 100
         if params.has_key('resolution') and params['resolution']:
             resolution = params['resolution']
         for i in xrange(Nrep):
-            print '.',
+            if verbose: print '.',
             if i==0:
                 tmpsig = self.__calc_multitrial(data, method, order, fs, resolution)
                 fres, k, k = tmpsig.shape
@@ -414,17 +414,17 @@ class ConnectAR(Connect):
                 signi[i] = tmpsig
             else:
                 signi[i] = self.__calc_multitrial(data, method, order, fs, resolution)
-        print '|'
+        if verbose: print '|'
         return self.levels(signi, alpha, k)
 
-    def surrogate(self, data, method, Nrep = 10, alpha=0.05, order=None, fs=1, **params):
+    def surrogate(self, data, method, Nrep = 10, alpha=0.05, order=None, fs=1, verbose=True, **params):
         shdata = data.copy()
         k, N = data.shape
         resolution = 100
         if params.has_key('resolution') and params['resolution']:
             resolution = params['resolution']
         for i in xrange(Nrep):
-            print '.',
+            if verbose: print '.',
             map(np.random.shuffle, shdata)
             ar, vr = Mvar().fit(shdata, order, method)
             if i==0:
@@ -433,7 +433,7 @@ class ConnectAR(Connect):
                 reskeeper[i] = rtmp
                 continue
             reskeeper[i] = self.calculate(ar, vr, fs, resolution)
-        print '|'
+        if verbose: print '|'
         return self.levels(reskeeper, alpha, k)
 
 ############################

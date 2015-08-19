@@ -199,7 +199,7 @@ class Data(object):
         self._parameters["no"] = no
         return self.__shtimest
 
-    def significance(self, Nrep=100, alpha=0.05, **params):
+    def significance(self, Nrep=100, alpha=0.05, verbose=True, **params):
         '''
         Statistical significance values of connectivity estimation method.
         
@@ -208,6 +208,8 @@ class Data(object):
             number of resamples
           *alpha* = 0.05 : float
             type I error rate (significance level)
+          *verbose* = True : bool
+            if True it prints dot on every realization
         Returns:
           *signi*: numpy.array
             matrix in shape of (k, k) with values for each pair of
@@ -221,21 +223,25 @@ class Data(object):
             if isinstance(connobj,ConnectAR):
                 self.__signific = connobj.surrogate(self.__data, Nrep=Nrep, alpha=alpha, 
                                                     method=self._parameters["mvarmethod"],\
-                                                    fs=self.__fs, order=self._parameters["p"], **newparams)
+                                                    fs=self.__fs, order=self._parameters["p"],\
+                                                    verbose=verbose, **newparams)
             else:
                 self.__signific = connobj.surrogate(self.__data, Nrep=Nrep,\
-                                                    alpha=alpha, **newparams)
+                                                    alpha=alpha, verbose=verbose,\
+                                                    **newparams)
         else:
             if isinstance(connobj,ConnectAR):
                 self.__signific = connobj.bootstrap(self.__data, Nrep=Nrep, alpha=alpha, 
                                                     method=self._parameters["mvarmethod"],\
-                                                    fs=self.__fs, order=self._parameters["p"], **newparams)
+                                                    fs=self.__fs, order=self._parameters["p"],\
+                                                    verbose=verbose, **newparams)
             else:
                 self.__signific = connobj.bootstrap(self.__data, Nrep=Nrep,\
-                                                    alpha=alpha, **newparams)
+                                                    alpha=alpha, verbose=verbose,\
+                                                    **newparams)
         return self.__signific
     
-    def short_time_significance(self, Nrep=100, alpha=0.05, nfft=None, no=None, **params):
+    def short_time_significance(self, Nrep=100, alpha=0.05, nfft=None, no=None, verbose=True, **params):
         '''
         Statistical significance values of short-time version of
         connectivity estimation method.
@@ -251,6 +257,8 @@ class Data(object):
           *no* = None : int
             number of data points in overlap; if None, it is taken from
             *short_time_conn* method.
+          *verbose* = True : bool
+            if True it prints dot on every realization
         Returns:
           *signi*: numpy.array
             matrix in shape of (k, k) with values for each pair of
@@ -268,11 +276,11 @@ class Data(object):
             self.__st_signific = connobj.short_time_significance(self.__data, Nrep=Nrep, alpha=alpha, 
                                                               method=self._parameters["mvarmethod"],\
                                                               fs=self.__fs, order=self._parameters["p"],
-                                                              nfft=nfft, no=no, **newparams)
+                                                              nfft=nfft, no=no, verbose=verbose, **newparams)
         else:
             self.__st_signific = connobj.short_time_significance(self.__data, Nrep=Nrep,\
                                                               nfft=nfft, no=no,\
-                                                              alpha=alpha, **newparams)
+                                                              alpha=alpha, verbose=verbose, **newparams)
         return self.__st_signific
 
     def plot_data(self, trial=0, show=True):
