@@ -21,13 +21,17 @@ Visit [ReadTheDocs](http://connectivipy.readthedocs.org/).
 
 Option 1: using GIT
 
-``` bash git clone https://github.com/dokato/connectivipy.git
+```
+git clone https://github.com/dokato/connectivipy.git
 cd connectivipy
-python setup.py install```
+python setup.py install
+```
 
 Option 2: Download ZIP from the menu on the right, unzip it and go
 in terminal to that folder. Than just execute:
-``` bash  python setup install ```
+```
+python setup install 
+```
 
 ###Changelog
 
