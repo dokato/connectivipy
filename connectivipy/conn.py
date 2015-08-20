@@ -186,6 +186,33 @@ class Connect(object):
 
     def short_time_significance(self, data, Nrep=10, alpha=0.05,\
                                         nfft=None, no=None, verbose=True, **params):
+        """
+        Significance of short-tme versions of estimators. It base on
+        bootstrap :func:`Connect.bootstrap` for multitrial case and 
+        surrogate data :func:`Connect.surrogate` for one trial.
+        Args:
+          *data* : numpy.array
+              data matrix
+          *Nrep* = 100 : int
+            number of resamples
+          *alpha* = 0.05 : float
+            type I error rate (significance level)
+          *nfft* = None : int 
+              window length (if None it's N/5)
+          *no* = None : int
+              overlap length (if None it's N/10)
+          *verbose* = True : bool
+            if True it prints dot on every realization, if False it's
+            quiet.
+          *params* :
+              additional parameters specific for chosen estimator
+        Returns:
+          *signi_st* : numpy.array
+              short time significance values in shape of
+              - (tp, k, k) for one sided estimator
+              - (tp, 2, k, k) for two sided
+              where k is number of channels and tp number of time points
+        """
         assert nfft>no, "overlap must be smaller than window"
         if len(data.shape)>2:
             k, N, trls = data.shape
@@ -213,6 +240,26 @@ class Connect(object):
         return signi_st
         
     def significance(self, data, Nrep=10, alpha=0.05, verbose=True, **params):
+        """
+        Significance of connectivity estimators. It base on
+        bootstrap :func:`Connect.bootstrap` for multitrial case and 
+        surrogate data :func:`Connect.surrogate` for one trial.
+        Args:
+          *data* : numpy.array
+              data matrix
+          *Nrep* = 100 : int
+            number of resamples
+          *alpha* = 0.05 : float
+            type I error rate (significance level)
+          *verbose* = True : bool
+            if True it prints dot on every realization, if False it's
+            quiet.
+          *params* :
+              additional parameters specific for chosen estimator
+        Returns:
+          *signific* : numpy.array
+              significance values, check :func:`Connect.levels`
+        """
         if len(data.shape)>2:
             signific = self.bootstrap(data, Nrep=10, alpha=alpha, verbose=verbose, **params)
         else:
@@ -226,13 +273,17 @@ class Connect(object):
           *signi* : numpy.array
               bootstraped values of each channel
           *alpha* : float 
-              type I error rate (significance level)
+              type I error rate (significance level) - from 0 to 1
+              - (1-*alpha*) for onesided estimators (e.g. class:`DTF`)
+              - *alpha* and (1-*alpha*) for twosided (e.g. class:`PSI`)
           *k* : int
               number of channels
         Returns:
           *ficance* : numpy.array
               maximal value throughout frequency of score at percentile
               at level 1-*alpha*
+              - (k, k) for one sided estimator
+              - (2, k, k) for two sided
         """
         if self.two_sided:
             ficance = np.zeros((2, k, k))
@@ -248,6 +299,7 @@ class Connect(object):
         return ficance
         
     def __calc_multitrial(self, data, **params):
+        "Calc multitrial averaged estimator for :func:`Connect.bootstrap`"
         trials = data.shape[2]
         chosen = np.random.randint(trials,size=trials)
         bc = np.bincount(chosen)
@@ -263,7 +315,25 @@ class Connect(object):
                 rescalc += self.calculate(trdata, **params)*occurence
         return rescalc/trials
 
-    def bootstrap(self, data, Nrep=10, alpha=0.05, verbose=True, **params):
+    def bootstrap(self, data, Nrep=100, alpha=0.05, verbose=True, **params):
+        """
+        Bootstrap - random sampling with replacement of trials.
+        Args:
+          *data* : numpy.array
+              multichannel data matrix
+          *Nrep* = 100 : int
+            number of resamples
+          *alpha* = 0.05 : float
+            type I error rate (significance level)
+          *verbose* = True : bool
+            if True it prints dot on every realization, if False it's
+            quiet.
+          *params* :
+              additional parameters specific for chosen estimator
+        Returns:
+          *levelsigni* : numpy.array
+              significance values, check :func:`Connect.levels`
+        """
         for i in xrange(Nrep):
             if verbose: print '.',
             if i==0:
@@ -276,7 +346,26 @@ class Connect(object):
         if verbose: print '|'
         return self.levels(signi, alpha, k)
 
-    def surrogate(self, data, Nrep = 10, alpha=0.05, verbose=True, **params):
+    def surrogate(self, data, Nrep=100, alpha=0.05, verbose=True, **params):
+        """
+        Surrogate data testing. Mixing data points in each channel.
+        Significance level in calculated over all *Nrep* surrogate sets.
+        Args:
+          *data* : numpy.array
+              multichannel data matrix
+          *Nrep* = 100 : int
+            number of resamples
+          *alpha* = 0.05 : float
+            type I error rate (significance level)
+          *verbose* = True : bool
+            if True it prints dot on every realization, if False it's
+            quiet.
+          *params* :
+              additional parameters specific for chosen estimator
+        Returns:
+          *levelsigni* : numpy.array
+              significance values, check :func:`Connect.levels`
+        """
         k, N = data.shape
         shdata = data.copy()
         for i in xrange(Nrep):
@@ -363,6 +452,41 @@ class ConnectAR(Connect):
     def short_time_significance(self, data, Nrep=100, alpha=0.05, method='yw',\
                                 order=None, fs=1, resolution=None,\
                                 nfft=None, no=None, verbose=True, **params):
+        """
+        Significance of short-tme versions of estimators. It base on
+        bootstrap :func:`ConnectAR.bootstrap` for multitrial case and 
+        surrogate data :func:`ConnectAR.surrogate` for one trial.
+        Args:
+          *data* : numpy.array
+              data matrix
+          *Nrep* = 100 : int
+            number of resamples
+          *alpha* = 0.05 : float
+            type I error rate (significance level)
+          *method* = 'yw': str
+            method of MVAR parametersestimation
+          *order* = None : int
+            MVAR model order, if None, it's chosen using default criterion
+          *fs* = 1 : int 
+              sampling frequency
+          *resolution* = None : int 
+              resolution (if None, it's 100 points)
+          *nfft* = None : int 
+              window length (if None it's N/5)
+          *no* = None : int
+              overlap length (if None it's N/10)
+          *verbose* = True : bool
+            if True it prints dot on every realization, if False it's
+            quiet.
+          *params* :
+              additional parameters specific for chosen estimator
+        Returns:
+          *signi_st* : numpy.array
+              short time significance values in shape of
+              - (tp, k, k) for one sided estimator
+              - (tp, 2, k, k) for two sided
+              where k is number of channels and tp number of time points
+        """
         assert nfft>no, "overlap must be smaller than window"
         if len(data.shape)>2:
             k, N, trls = data.shape
@@ -388,6 +512,7 @@ class ConnectAR(Connect):
         return signi_st
 
     def __calc_multitrial(self, data, method='yw', order=None, fs=1, resolution=None, **params):
+        "Calc multitrial averaged estimator for :func:`ConnectAR.bootstrap`"
         trials = data.shape[0]
         chosen = np.random.randint(trials,size=trials)
         ar, vr = Mvar().fit(data[:,:,chosen], order, method)
@@ -395,6 +520,32 @@ class ConnectAR(Connect):
         return rescalc
 
     def significance(self, data, method, order=None, resolution=None, Nrep=10, alpha=0.05, verbose=True, **params):
+        """
+        Significance of connectivity estimators. It base on
+        bootstrap :func:`ConnectAR.bootstrap` for multitrial case and 
+        surrogate data :func:`ConnectAR.surrogate` for one trial.
+        Args:
+          *data* : numpy.array
+              data matrix
+          *method* = 'yw': str
+            method of MVAR parametersestimation
+          *order* = None : int
+            MVAR model order, if None, it's chosen using default criterion
+          *Nrep* = 100 : int
+            number of resamples
+          *alpha* = 0.05 : float
+            type I error rate (significance level)
+          *resolution* = None : int 
+              resolution (if None, it's 100 points)
+          *verbose* = True : bool
+            if True it prints dot on every realization, if False it's
+            quiet.
+          *params* :
+              additional parameters specific for chosen estimator
+        Returns:
+          *signi_st* : numpy.array
+              significance values, check :func:`Connect.levels`
+        """
         if len(data.shape)>2:
             signific = self.bootstrap(data, method, order=order, resolution=resolution, Nrep=Nrep, alpha=alpha, verbose=verbose, **params)
         else:
@@ -402,6 +553,28 @@ class ConnectAR(Connect):
         return signific
 
     def bootstrap(self, data, method, order=None, Nrep=10, alpha=0.05, fs=1, verbose=True, **params):
+        """
+        Bootstrap - random sampling with replacement of trials for *ConnectAR*.
+        Args:
+          *data* : numpy.array
+              multichannel data matrix
+          *method* : str
+            method of MVAR parametersestimation
+          *Nrep* = 100 : int
+            number of resamples
+          *alpha* = 0.05 : float
+            type I error rate (significance level)
+          *order* = None : int
+            MVAR model order, if None, it's chosen using default criterion
+          *verbose* = True : bool
+            if True it prints dot on every realization, if False it's
+            quiet.
+          *params* :
+              additional parameters specific for chosen estimator
+        Returns:
+          *levelsigni* : numpy.array
+              significance values, check :func:`Connect.levels`
+        """
         resolution = 100
         if params.has_key('resolution') and params['resolution']:
             resolution = params['resolution']
@@ -417,7 +590,30 @@ class ConnectAR(Connect):
         if verbose: print '|'
         return self.levels(signi, alpha, k)
 
-    def surrogate(self, data, method, Nrep = 10, alpha=0.05, order=None, fs=1, verbose=True, **params):
+    def surrogate(self, data, method, Nrep=10, alpha=0.05, order=None, fs=1, verbose=True, **params):
+        """
+        Surrogate data testing for *ConnectAR* . Mixing data points in each channel.
+        Significance level in calculated over all *Nrep* surrogate sets.
+        Args:
+          *data* : numpy.array
+              multichannel data matrix
+          *method* : str
+            method of MVAR parametersestimation
+          *Nrep* = 100 : int
+            number of resamples
+          *alpha* = 0.05 : float
+            type I error rate (significance level)
+          *order* = None : int
+            MVAR model order, if None, it's chosen using default criterion
+          *verbose* = True : bool
+            if True it prints dot on every realization, if False it's
+            quiet.
+          *params* :
+              additional parameters specific for chosen estimator
+        Returns:
+          *levelsigni* : numpy.array
+              significance values, check :func:`Connect.levels`
+        """
         shdata = data.copy()
         k, N = data.shape
         resolution = 100
