@@ -426,11 +426,14 @@ class Data(object):
         if show:
             plt.show()
 
-    def export_trans3d(self, filename='conn_trnas3d.dat', freq_band=[]):
+    def export_trans3d(self, mod=0, filename='conntrans3d.dat', freq_band=[]):
         '''
         Export connectivity data to trans3D data file in order to make
         3D arrow plots.
         Args:
+          *mod* = 0 : int
+            0 - :func:`Data.conn` results
+            1 - :func:`Data.short_time_conn` results
           *filename* = 'conn_trnas3d.dat' : str
             title of the plot
           *freq_band* = [] : list
@@ -451,9 +454,18 @@ class Data(object):
         else:
             ind1 = np.where(freqs>=freq_band[0])[0][0]
             ind2 = np.where(freqs>=freq_band[1])[0][0]
-        cnest = np.mean(self.__estim[ind1:ind2,:,:], axis=0)
-        for i in xrange(self.__chans):
-            content+= "  " + "\t".join([ str(x) for x in cnest[i]]) + "\r\n" 
+        if mod==0:
+            assert hasattr(self,'_Data__estim')==True, "No valid data! Use calculation method first."
+            cnest = np.mean(self.__estim[ind1:ind2,:,:], axis=0)
+            for i in xrange(self.__chans):
+                content+= "  " + "   ".join([ '{:.4f}'.format(x) for x in cnest[i]]) + "\r\n" 
+        elif mod==1:
+            assert hasattr(self,'_Data__shtimest')==True, "No valid data! Use calculation method first."
+            for k in xrange(self.__shtimest.shape[0]):
+                cnest = np.mean(self.__shtimest[k,ind1:ind2,:,:], axis=0)
+                for i in xrange(self.__chans):
+                    content+= "  " + "   ".join([ '{:.4f}'.format(x) for x in cnest[i]]) + "\r\n" 
+                content += "\r\n"
         with open(filename,'wb') as fl:
             fl.write(content)
     

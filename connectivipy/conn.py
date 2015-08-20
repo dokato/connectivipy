@@ -11,21 +11,6 @@ import scipy.stats as st
 # Spectrum functions:
 ########################################################################
 
-def spectrumft(acoef, vcoef, fs=1, resolution=None):
-    "not ready to use"
-    p, k, k = acoef.shape 
-    if resolution == None:
-        freqs=np.linspace(0,fs/2,512)
-    A_z=np.zeros((len(freqs),k,k),complex)
-    H_z=np.zeros((len(freqs),k,k),complex)
-    S_z=np.zeros((len(freqs),k,k),complex)
-    A_z[1:p + 1] = acoef
-    A_z = np.eye(k) - np.fft.rfft(A_z, axis=0)
-    for i in xrange(len(freqs)):
-        H_z[i] = np.linalg.inv(A_z[i])
-        S_z[i] = np.dot(np.dot(H_z[i],vcoef), H_z[i].T.conj())
-    return A_z, H_z, S_z
-
 def spectrum(acoef, vcoef, fs=1, resolution=100):
     """
     Generating data point from matrix *A* with MVAR coefficients.
