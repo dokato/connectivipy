@@ -13,21 +13,21 @@ Project blog is [here](http://dokato.github.io/connpy-blog/).
 ## License
 BSD 2-clause
 
-## Installation
+## Documentation
 
-Documentation on [ReadTheDocs](http://connectivipy.readthedocs.org/).
+Visit [ReadTheDocs](http://connectivipy.readthedocs.org/).
 
 ## Installation
 
 Option 1: using GIT
 
-> git clone https://github.com/dokato/connectivipy.git
-> cd connectivipy
-> python setup.py install
+``` bash git clone https://github.com/dokato/connectivipy.git
+cd connectivipy
+python setup.py install```
 
 Option 2: Download ZIP from the menu on the right, unzip it and go
 in terminal to that folder. Than just execute:
-> python setup install
+``` bash  python setup install ```
 
 ###Changelog
 
