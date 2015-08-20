@@ -294,7 +294,6 @@ class Data(object):
           *show* = True : boolean
             show the plot or not
         '''
-
         time = np.arange(0,self.__length)*1./self.__fs
         if self.__multitrial:
             plotdata = self.__data[:,:,trial]
@@ -437,13 +436,12 @@ class Data(object):
           *freq_band* = [] : list
             frequency range [from_value, to_value] in Hz.            
         '''
-        trdef_str = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -8, 0, 0, 0, 1]
-        tr_str = [0.0051, 0.0074, -3.4523, 0., -2.7277, 2.1161, 0.0005, 0., 2.1161, 2.7276, 0., -8., 0., 0., 0., 1.]
         content = ";electrodes = " + " ".join(self.__channames)
         content += "\r\n;start = -0.500000\r\n"
         content += ";samplerate = 12\r\n"
-        content += ";transform_default = " + " ".join([ str(x) for x in trdef_str[:self.__chans]]) + "\r\n"
-        content += ";transform = " + " ".join([ str(x) for x in tr_str[:self.__chans]]) + "\r\n"
+        # two following lines define initial position of head model
+        content += ";transform_default = 1 0 0 0 0 1 0 0 0 0 1 -8 0 0 0 1\r\n"
+        content += ";transform = 0.005148315144289768 0.007407087180879943 -3.4522594293647604 0.0 -2.727691946877633 2.116098522619611 0.000472475639 0.0 2.1160923126171305 2.7276819307525173 0.009008154977586572 -8.0 0.000000 0.000000 0.000000 1.000000\r\n"
         content += "\r\n"
         # integrate value of estimator in given frequency band
         freqs = np.linspace(0, int(self.__fs/2), self.__estim.shape[0])
@@ -460,7 +458,6 @@ class Data(object):
             fl.write(content)
     
     # auxiliary methods:
-
     def __make_params_dict(self, args):
         """
         Making list of parameters from *self._parameters*

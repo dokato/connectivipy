@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import connectivipy as cp
-from connectivipy.mvar.fitting import mvar_gen
+from connectivipy import mvar_gen
 
 fs = 256.
 acf = np.zeros((3,3,3))
-# matrix shape meaning (p,k,k) k - number of channels,
+# matrix shape meaning 
+# (p,k,k) k - number of channels,
 # p - order of mvar parameters
 
 acf[0,0,0] = 0.3
@@ -22,7 +23,7 @@ y = mvar_gen(acf,int(10e4))
 # assign static class cp.Mvar to variable mv
 mv = cp.Mvar
 
-# find best model order
+# find best model order using Vieira-Morf algorithm
 best, crit = mv.order_akaike(y,15,'vm')
 plt.plot(1+np.arange(len(crit)),crit,'g')
 plt.show()
