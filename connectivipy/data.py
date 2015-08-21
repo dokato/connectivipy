@@ -29,10 +29,12 @@ class Data(object):
           other information about the data
     '''
     def __init__(self, data, fs=1., chan_names=[], data_info=''):
-        self.__data = self._load_file(data, data_info)
         self.__fs = fs
+        self.__data = self._load_file(data, data_info)
         if self.__data.shape[0]==len(chan_names):
             self.__channames = chan_names
+        elif hasattr(self,'_Data__fs'):
+            pass
         else:
             self.__channames = ["x"+str(i) for i in range(self.__chans)]
         self.data_info = data_info
@@ -46,9 +48,7 @@ class Data(object):
         Args:
           *data_what* : str/numpy.array
               path to file with appropieate format or numpy data array
-          *dt_type* : str
-              file extension (mat,)
-          *dt_type* = '' : str
+          *data_info* = '' : str
               additional file with data settings if needed
         Returns:
           *data* : np.array
@@ -57,15 +57,18 @@ class Data(object):
         if dt_type == np.ndarray:
             data = data_what
         elif dt_type == str:
+            dt_type = data_what.split('.')[-1] # catch extension of file
             if dt_type == 'mat':
                 mat_dict = si.loadmat(data_what)
                 if data_info:
                     key = data_info
                 else:
-                    key = data.split('.')[0]
+                    key = data_what[:-4].split('/')[-1]
                 data = mat_dict[key]
-            if data_info=='sml':
-                data, sml = signalml_loader(data_what.split('.')[0])
+            if dt_type=='raw' and data_info=='sml':
+                data, sml = signalml_loader(data_what[:-4])
+                self.__fs = sml['samplingFrequency']
+                self.__channames = sml['channelNames']
                 self.smldict = sml # here SignalML data is stored
         else:
             return False

@@ -40,6 +40,11 @@ python setup install
 
 ###Changelog
 
+#### 0.36
+* bug fixing
+* data loading improved
+* better plotting
+
 #### 0.34
 * short-time statistics
 * documentation in sphinx ready on readthedocs

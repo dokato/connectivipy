@@ -43,7 +43,15 @@ Ains[2, 4, 3] = -0.3
 Ains[3, 4, 2] = 0.6
 
 class DataTest(unittest.TestCase):
-    "test data class"
+    "test Data class"
+    #def test_loading(self):
+        #dt = cp.Data('test_data/testsml.raw',data_info='sml')
+        #self.assertEquals(dt.fs,256)
+        #self.assertEquals(len(dt.channelnames),2)
+        #dd = cp.Data('test_data/m.mat' ,data_info='m')
+        #self.assertEquals(dd.data.shape[0],3)
+        #self.assertEquals(dd.data.shape[1],5)
+
     def test_resample(self):
         do = cp.Data(np.random.randn(3,100, 4), fs=10)
         do.resample(5)
@@ -65,7 +73,7 @@ class DataTest(unittest.TestCase):
 
 class MvarTest(unittest.TestCase):
     def test_fitting(self):
-        "test mvar fitting"
+        "test MVAR fitting"
         ys = mvar_gen(A,10**4)
         avm,vvm = vieiramorf(ys,2)
         ans,vns = nutallstrand(ys,2)
@@ -90,6 +98,8 @@ class MvarTest(unittest.TestCase):
         self.assertEqual(crmin, 2)
 
 class ConnTest(unittest.TestCase):
+    "test connectivity class Conn"
+    
     def test_spectrum(self):
         ys = mvar_gen(A,10**4)
         avm,vvm = vieiramorf(ys,2)

@@ -14,6 +14,29 @@ The easiest way is to use *GIT* and just execute:
     $ cd connectivipy
     $ python setup.py install
 
+Loading data
+########
+
+.. code-block:: python
+
+    import connectivipy as cp
+    
+    # for numpy.array simply put that array in the first argument
+    # fs means sampling frequency
+    # chan_names is a list with channel names (length of list must be
+    #            the same as first dimension of data)
+    # data_info - additional infromation about the data
+    dt = Data(numpy_array_data, fs=32., chan_names=['Fp1','O1'], data_info='sml')
+
+    # Matlab data we can read giving a path to a matlab file
+    # and in data_info we put variable name as a string
+    dd = Data('adata.mat' ,data_info='bdata')
+
+    # similarly for SignalML data, but in data_info you need to point out
+    # that you want to read 'sml' data from *.raw and *.xml files of the
+    # same name 
+    dt = Data('cdata.raw',data_info='sml')
+
 Data class example
 ########
 

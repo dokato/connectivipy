@@ -57,5 +57,4 @@ def give_xml_info(path):
         calibr_coef.append(float(calibr_gain.getElementsByTagName('rs:'+'calibrationParam')[j].childNodes[0].data))
     xml_data['channelNames'] = chann_names 
     xml_data['calibrationCoef'] = calibr_coef 
-
     return xml_data
