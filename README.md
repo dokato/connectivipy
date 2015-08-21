@@ -6,7 +6,7 @@ Project blog is [here](http://dokato.github.io/connpy-blog/).
 
 ## Content
 
-* Data - wrapper of your data
+* Data - data wrapper
 * Connectivity - classes with connectivity estimators
 * Mvar fitting - this submodule includes some MVAR algorithms
 
@@ -29,9 +29,14 @@ python setup.py install
 
 Option 2: Download ZIP from the menu on the right, unzip it and go
 in terminal to that folder. Than just execute:
+
 ```
 python setup install 
 ```
+
+## Authors
+* Dominik Krzemiński
+* Maciej Kamiński (scientific lead)
 
 ###Changelog
 

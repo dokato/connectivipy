@@ -33,4 +33,8 @@ Tutorials:
 .. toctree::
     tutorial
 
+Credits:
+######
 
+* Dominik Krzemiński
+* Maciej Kamiński - scientific lead

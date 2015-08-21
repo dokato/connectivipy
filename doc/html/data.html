@@ -81,10 +81,12 @@ connectivity estimators.</p>
 </li>
 </ul>
 </dd>
-<dt><em>fs</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dt><em>fs</em> = 1: int</dt>
 <dd>sampling frequency</dd>
-<dt><em>chan_names</em>: list</dt>
+<dt><em>chan_names</em> = []: list</dt>
 <dd>names of channels</dd>
+<dt><em>data_info</em> = &#8216;&#8217;: string</dt>
+<dd>other information about the data</dd>
 </dl>
 </dd>
 </dl>
@@ -128,7 +130,8 @@ connectivity estimators.</p>
 <dt><em>p</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>estimation order, default None</dd>
 <dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str {&#8216;yw&#8217;, &#8216;ns&#8217;, &#8216;vm&#8217;}</span></dt>
-<dd>method of estimation</dd>
+<dd>method of MVAR parameters estimation
+all avaiable methods you can find in <em>fitting_algorithms</em></dd>
 </dl>
 </dd>
 </dl>
@@ -143,8 +146,9 @@ connectivity estimators.</p>
 <dd><dl class="first last docutils">
 <dt><em>p</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>estimation order, default None</dd>
-<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str {&#8216;yw&#8217;, &#8216;ns&#8217;, &#8216;vm&#8217;}</span></dt>
-<dd>method of estimation</dd>
+<dt><em>method</em> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>method of connectivity estimation
+all avaiable methods you can find in <em>conn_estim_dc</em></dd>
 </dl>
 </dd>
 </dl>
@@ -158,8 +162,8 @@ connectivity estimators.</p>
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
 <dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str {&#8216;yw&#8217;, &#8216;ns&#8217;, &#8216;vm&#8217;}</span></dt>
-<dd>method of estimation, for full list please type:
-connectivipy.mvar_methods</dd>
+<dd>method of estimation
+all avaiable methods you can find in <em>fitting_algorithms</em></dd>
 <dt><em>nfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>number of data points in window; if None, it is signal length
 N/5.</dd>
@@ -175,7 +179,7 @@ N/10.</dd>
 
 <dl class="method">
 <dt id="data.Data.significance">
-<code class="descname">significance</code><span class="sig-paren">(</span><em>Nrep=100</em>, <em>alpha=0.05</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.significance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">significance</code><span class="sig-paren">(</span><em>Nrep=100</em>, <em>alpha=0.05</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.significance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Statistical significance values of connectivity estimation method.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -184,6 +188,8 @@ N/10.</dd>
 <dd>number of resamples</dd>
 <dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>type I error rate (significance level)</dd>
+<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True it prints dot on every realization</dd>
 </dl>
 </dd>
 <dt>Returns:</dt>
@@ -198,7 +204,7 @@ channels</dd>
 
 <dl class="method">
 <dt id="data.Data.short_time_significance">
-<code class="descname">short_time_significance</code><span class="sig-paren">(</span><em>Nrep=100</em>, <em>alpha=0.05</em>, <em>nfft=None</em>, <em>no=None</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.short_time_significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.short_time_significance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">short_time_significance</code><span class="sig-paren">(</span><em>Nrep=100</em>, <em>alpha=0.05</em>, <em>nfft=None</em>, <em>no=None</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.short_time_significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.short_time_significance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Statistical significance values of short-time version of
 connectivity estimation method.</p>
 <dl class="docutils">
@@ -214,6 +220,8 @@ connectivity estimation method.</p>
 <dt><em>no</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>number of data points in overlap; if None, it is taken from
 <em>short_time_conn</em> method.</dd>
+<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True it prints dot on every realization</dd>
 </dl>
 </dd>
 <dt>Returns:</dt>
@@ -290,12 +298,15 @@ significance calculation using <em>short_time_significance</em></dd>
 
 <dl class="method">
 <dt id="data.Data.export_trans3d">
-<code class="descname">export_trans3d</code><span class="sig-paren">(</span><em>filename='conn_trnas3d.dat'</em>, <em>freq_band=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.export_trans3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.export_trans3d" title="Permalink to this definition">¶</a></dt>
+<code class="descname">export_trans3d</code><span class="sig-paren">(</span><em>mod=0</em>, <em>filename='conntrans3d.dat'</em>, <em>freq_band=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data.html#Data.export_trans3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data.Data.export_trans3d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export connectivity data to trans3D data file in order to make
 3D arrow plots.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
+<dt><em>mod</em> = 0 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>0 - <a class="reference internal" href="#data.Data.conn" title="data.Data.conn"><code class="xref py py-func docutils literal"><span class="pre">Data.conn()</span></code></a> results
+1 - <a class="reference internal" href="#data.Data.short_time_conn" title="data.Data.short_time_conn"><code class="xref py py-func docutils literal"><span class="pre">Data.short_time_conn()</span></code></a> results</dd>
 <dt><em>filename</em> = &#8216;conn_trnas3d.dat&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>title of the plot</dd>
 <dt><em>freq_band</em> = [] <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
@@ -405,7 +416,7 @@ without using <em>Data</em> class.</p>
 frequency, k - number of channels</dd>
 <dt><em>name</em> = &#8216;&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>title of the plot</dd>
-<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;int</span></dt>
+<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>sampling frequency</dd>
 <dt><em>ylim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
 <dd>range of y-axis values shown, e.g. [0,1]
@@ -437,7 +448,7 @@ into account</dd>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Plot</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorials</a></li>
 </ul>
 
           <div role="search">

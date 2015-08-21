@@ -316,7 +316,11 @@
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pmax</span><span class="p">):</span>
         <span class="n">acof</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_solved</span><span class="p">[</span><span class="n">p</span><span class="o">*</span><span class="n">chn</span><span class="p">:(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">chn</span><span class="p">,:]</span><span class="o">.</span><span class="n">T</span>
         <span class="n">var</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">acof</span><span class="p">[</span><span class="n">p</span><span class="p">],</span><span class="n">rr_b</span><span class="p">[:,:,</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">acof</span><span class="p">,</span> <span class="n">var</span></div>
+    <span class="k">return</span> <span class="n">acof</span><span class="p">,</span> <span class="n">var</span>
+</div>
+<span class="n">fitting_algorithms</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;yw&#39;</span><span class="p">:</span> <span class="n">yulewalker</span><span class="p">,</span>
+                      <span class="s">&#39;ns&#39;</span><span class="p">:</span> <span class="n">nutallstrand</span><span class="p">,</span>
+                      <span class="s">&#39;vm&#39;</span><span class="p">:</span> <span class="n">vieiramorf</span><span class="p">}</span>
 </pre></div>
 
           </div>
@@ -332,7 +336,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Plot</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorials</a></li>
 </ul>
 
           <div role="search">

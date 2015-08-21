@@ -66,9 +66,7 @@
 <span class="sd">    acronym of algorithm and value is a function from *mvar.fitting*.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="n">fit_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;yw&#39;</span><span class="p">:</span> <span class="n">yulewalker</span><span class="p">,</span>
-                <span class="s">&#39;ns&#39;</span><span class="p">:</span> <span class="n">nutallstrand</span><span class="p">,</span>
-                <span class="s">&#39;vm&#39;</span><span class="p">:</span> <span class="n">vieiramorf</span><span class="p">}</span>
+    <span class="n">fit_dict</span> <span class="o">=</span> <span class="n">fitting_algorithms</span>
 
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="Mvar.fit"><a class="viewcode-back" href="../mvar.html#mvarmodel.Mvar.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;yw&#39;</span><span class="p">):</span>
@@ -82,6 +80,7 @@
 <span class="sd">              akaike order criteria.</span>
 <span class="sd">          *method* = &#39;yw&#39;: str</span>
 <span class="sd">              name of mvar fitting algorithm, default Yule-Walker</span>
+<span class="sd">              all avaiable methods you can find in *fitting_algorithms*</span>
 <span class="sd">        Returns:</span>
 <span class="sd">          *Av* : numpy.array</span>
 <span class="sd">              model coefficients (kXkXorder)</span>
@@ -246,7 +245,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../plot.html">Plot</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorials</a></li>
 </ul>
 
           <div role="search">

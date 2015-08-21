@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tutorial &mdash; ConnectiviPy 0.34a documentation</title>
+    <title>Tutorials &mdash; ConnectiviPy 0.34a documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -54,19 +54,38 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="tutorial">
-<span id="id1"></span><h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-<p>All examples and tutorial will go here.</p>
+  <div class="section" id="tutorials">
+<span id="tutorial"></span><h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>The easiest way is to use <em>GIT</em> and just execute:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>git clone https://github.com/dokato/connectivipy.git
+<span class="nv">$ </span><span class="nb">cd </span>connectivipy
+<span class="nv">$ </span>python setup.py install
+</pre></div>
+</div>
+</div>
 <div class="section" id="data-class-example">
 <h2>Data class example<a class="headerlink" href="#data-class-example" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Example 1</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">connectivipy</span> <span class="kn">as</span> <span class="nn">cp</span>
-<span class="kn">from</span> <span class="nn">connectivipy.mvar.fitting</span> <span class="kn">import</span> <span class="n">mvar_gen</span>
+<span class="kn">from</span> <span class="nn">connectivipy</span> <span class="kn">import</span> <span class="n">mvar_gen</span>
 
-<span class="c"># MVAR model coefficients</span>
+<span class="c">### MVAR model coefficients</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">MVAR parameters taken from:</span>
+<span class="sd">Sameshima K. &amp; Baccala L. A., Partial directed coherence : a new</span>
+<span class="sd">concept in neural structure determination. Biol. Cybern. (2001)</span>
+<span class="sd">You can compare results with Fig. 3. from that article.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># let&#39;s build mvar model matrix</span>
 <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="c"># 2 - first dimension is model order</span>
+<span class="c"># 5 - second and third dimensions mean number of channels</span>
 <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.95</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="mf">0.5</span>
 <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.9025</span>
 <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
@@ -77,34 +96,35 @@
 <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.25</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="mf">0.5</span>
 <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="mf">0.5</span>
 
-<span class="c"># multitrial signal generation</span>
-<span class="n">ysig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
-<span class="n">ysig</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">ysig</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">ysig</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">ysig</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">ysig</span><span class="p">[:,:,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+<span class="c"># multitrial signal generation from a matrix above</span>
+<span class="c"># let&#39;s generate 5-channel signal with 1000 data points</span>
+<span class="c"># and 5 trials using function mvar_gen</span>
+<span class="n">ysig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ysig</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ysig</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ysig</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ysig</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ysig</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
 
-<span class="c"># connectivity analysis</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="n">ysig</span><span class="p">,</span><span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;Fp1&quot;</span><span class="p">,</span> <span class="s">&quot;Fp2&quot;</span><span class="p">,</span><span class="s">&quot;Cz&quot;</span><span class="p">,</span> <span class="s">&quot;O1&quot;</span><span class="p">,</span><span class="s">&quot;O2&quot;</span><span class="p">])</span>
+<span class="c">#### connectivity analysis</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="n">ysig</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;Fp1&quot;</span><span class="p">,</span> <span class="s">&quot;Fp2&quot;</span><span class="p">,</span> <span class="s">&quot;Cz&quot;</span><span class="p">,</span> <span class="s">&quot;O1&quot;</span><span class="p">,</span> <span class="s">&quot;O2&quot;</span><span class="p">])</span>
 
-<span class="c"># you may want to plot data (in multitrial case average along trials</span>
-<span class="c"># is shown)</span>
+<span class="c"># you may want to plot data (in multitrial case only one trial is shown)</span>
 <span class="n">data</span><span class="o">.</span><span class="n">plot_data</span><span class="p">()</span>
 
-<span class="c"># fit mvar using specific algorithm</span>
-<span class="n">data</span><span class="o">.</span><span class="n">fit_mvar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s">&#39;yw&#39;</span><span class="p">)</span>
+<span class="c"># fit mvar using Yule-Walker algorithm and order 2</span>
+<span class="n">data</span><span class="o">.</span><span class="n">fit_mvar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s">&#39;yw&#39;</span><span class="p">)</span>
 
 <span class="c"># you can capture fitted parameters and residual matrix</span>
 <span class="n">ar</span><span class="p">,</span> <span class="n">vr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">mvar_coefficients</span>
 
-<span class="c"># connectivity estimators</span>
+<span class="c"># now we investigate connectivity using gDTF</span>
 <span class="n">gdtf_values</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">conn</span><span class="p">(</span><span class="s">&#39;gdtf&#39;</span><span class="p">)</span>
-<span class="c">#gdtf_significance = data.significance(Nrep=200, alpha=0.05)</span>
+<span class="n">gdtf_significance</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">significance</span><span class="p">(</span><span class="n">Nrep</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
 <span class="n">data</span><span class="o">.</span><span class="n">plot_conn</span><span class="p">(</span><span class="s">&#39;gDTF&#39;</span><span class="p">)</span>
 
 <span class="c"># short time version with default parameters</span>
-<span class="n">pdc_shorttime</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">short_time_conn</span><span class="p">(</span><span class="s">&#39;pdc&#39;</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">pdc_shorttime</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">short_time_conn</span><span class="p">(</span><span class="s">&#39;pdc&#39;</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">data</span><span class="o">.</span><span class="n">plot_short_time_conn</span><span class="p">(</span><span class="s">&quot;PDC&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -114,30 +134,37 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Example 2</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">connectivipy</span> <span class="kn">as</span> <span class="nn">cp</span>
+<span class="kn">from</span> <span class="nn">connectivipy</span> <span class="kn">import</span> <span class="n">mvar_gen</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">In this example we don&#39;t use Data class</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">fs</span> <span class="o">=</span> <span class="mf">256.</span>
-<span class="n">acf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="c"># matrix shape meaning (p,k,k) k - number of channels,</span>
+<span class="n">acf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="c"># matrix shape meaning</span>
+<span class="c"># (p,k,k) k - number of channels,</span>
 <span class="c"># p - order of mvar parameters</span>
 
-<span class="n">acf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
-<span class="n">acf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>
-<span class="n">acf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span>
-<span class="n">acf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span>
-<span class="n">acf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>
-<span class="n">acf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span>
-<span class="n">acf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.4</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">acf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.4</span>
 
 <span class="c"># generate 3-channel signal from matrix above</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">mvar_gen</span><span class="p">(</span><span class="n">acf</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">mvar_gen</span><span class="p">(</span><span class="n">acf</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
 
 <span class="c"># assign static class cp.Mvar to variable mv</span>
 <span class="n">mv</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Mvar</span>
 
-<span class="c"># find best model order</span>
-<span class="n">best</span><span class="p">,</span> <span class="n">crit</span> <span class="o">=</span> <span class="n">mv</span><span class="o">.</span><span class="n">_order_akaike</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="s">&#39;vm&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">crit</span><span class="p">)),</span><span class="n">crit</span><span class="p">,</span><span class="s">&#39;g&#39;</span><span class="p">)</span>
+<span class="c"># find best model order using Vieira-Morf algorithm</span>
+<span class="n">best</span><span class="p">,</span> <span class="n">crit</span> <span class="o">=</span> <span class="n">mv</span><span class="o">.</span><span class="n">order_akaike</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="s">&#39;vm&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">crit</span><span class="p">)),</span> <span class="n">crit</span><span class="p">,</span> <span class="s">&#39;g&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="k">print</span> <span class="n">best</span>
 <span class="c"># here we know that this is 3 but in real-life cases</span>
@@ -155,7 +182,7 @@
 <span class="c"># all possible methods are visible in that dictionary:</span>
 <span class="k">print</span> <span class="n">cp</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">conn_estim_dc</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
-<span class="n">cp</span><span class="o">.</span><span class="n">plot_conn</span><span class="p">(</span><span class="n">dtfval</span><span class="p">,</span><span class="s">&#39;DTF values&#39;</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+<span class="n">cp</span><span class="o">.</span><span class="n">plot_conn</span><span class="p">(</span><span class="n">dtfval</span><span class="p">,</span> <span class="s">&#39;DTF values&#39;</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -165,44 +192,45 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">connectivipy</span> <span class="kn">as</span> <span class="nn">cp</span>
 
-<span class="c"># this example reproduce simulation from article:</span>
-<span class="c"># Erla S et all (2009) &quot;Multivariate autoregressive model with</span>
-<span class="c">#                      instantaneous effects to improve brain</span>
-<span class="c">#                      connectivity estimation&quot;</span>
-
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This example reproduce simulation from article:</span>
+<span class="sd">Erla S et all (2009) &quot;Multivariate autoregressive model with</span>
+<span class="sd">                      instantaneous effects to improve brain</span>
+<span class="sd">                      connectivity estimation&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c"># let&#39;s make a matrix from original article</span>
 
-<span class="n">bcf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
-<span class="c"># matrix shape meaning (k,k,p) k - number of channels,</span>
+<span class="n">bcf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="c"># matrix shape meaning (k, k, p) k - number of channels,</span>
 <span class="c"># p - order of mvar parameters</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.58</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.81</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.01</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.6</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.8</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.25</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.6</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.3</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.3</span>
-<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.58</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.81</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.01</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.6</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.8</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.25</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.6</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.3</span>
+<span class="n">bcf</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>
 
 <span class="c"># now we build a corresponding MVAR process without instantenous effect</span>
 <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">-</span><span class="n">bcf</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">acf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">acf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-    <span class="n">acf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">bcf</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">acf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">bcf</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
 
 <span class="c"># generate 5-channel signals from matrix above</span>
-<span class="n">signal_inst</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">mvar_gen_inst</span><span class="p">(</span><span class="n">bcf</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
-<span class="n">signal</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">mvar_gen</span><span class="p">(</span><span class="n">acf</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
+<span class="n">signal_inst</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">mvar_gen_inst</span><span class="p">(</span><span class="n">bcf</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
+<span class="n">signal</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">mvar_gen</span><span class="p">(</span><span class="n">acf</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mf">10e4</span><span class="p">))</span>
 
 <span class="c"># fit MVAR parameters</span>
 <span class="n">bv</span><span class="p">,</span> <span class="n">vfb</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Mvar</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">signal_inst</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s">&#39;yw&#39;</span><span class="p">)</span>
@@ -224,7 +252,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">xlim</span><span class="p">:</span>
         <span class="n">xlim</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">freqs</span><span class="p">)]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ylim</span><span class="p">:</span>
-            <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
             <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">values_b</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;red&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -257,7 +285,7 @@
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Plot</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Tutorials</a></li>
 </ul>
 
           <div role="search">

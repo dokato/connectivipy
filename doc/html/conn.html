@@ -61,22 +61,16 @@
 <span id="conn"></span><h1>Connectvity<a class="headerlink" href="#connectvity" title="Permalink to this headline">¶</a></h1>
 <p>Connectivity methods classes.</p>
 <span class="target" id="module-conn"></span><dl class="function">
-<dt id="conn.spectrumft">
-<code class="descclassname">conn.</code><code class="descname">spectrumft</code><span class="sig-paren">(</span><em>acoef</em>, <em>vcoef</em>, <em>fs=1</em>, <em>resolution=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#spectrumft"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.spectrumft" title="Permalink to this definition">¶</a></dt>
-<dd><p>not ready to use</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="conn.spectrum">
 <code class="descclassname">conn.</code><code class="descname">spectrum</code><span class="sig-paren">(</span><em>acoef</em>, <em>vcoef</em>, <em>fs=1</em>, <em>resolution=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generating data point from matrix <em>A</em> with MVAR coefficients.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>acoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>array of shape (k, k, p) where <em>k</em> is number of channels and
 <em>p</em> is a model order.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>vcoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>prediction error matrix (k, k)</dd>
 <dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>sampling rate</dd>
@@ -111,11 +105,11 @@ into account zero-lag effects.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>acoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>array of shape (k, k, p+1) where <em>k</em> is number of channels and
-<em>p</em> is a model order. Acf[0] - is (k, k) matrix for zero lag,
-Acf[1] for one data point lag and so on.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<em>p</em> is a model order. acoef[0] - is (k, k) matrix for zero lag,
+acoef[1] for one data point lag and so on.</dd>
+<dt><em>vcoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>prediction error matrix (k, k)</dd>
 <dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>sampling rate</dd>
@@ -185,6 +179,168 @@ is number of channels</dd>
 </dl>
 </dd></dl>
 
+<dl class="method">
+<dt id="conn.Connect.short_time_significance">
+<code class="descname">short_time_significance</code><span class="sig-paren">(</span><em>data</em>, <em>Nrep=10</em>, <em>alpha=0.05</em>, <em>nfft=None</em>, <em>no=None</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Connect.short_time_significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Connect.short_time_significance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Significance of short-tme versions of estimators. It base on
+bootstrap <a class="reference internal" href="#conn.Connect.bootstrap" title="conn.Connect.bootstrap"><code class="xref py py-func docutils literal"><span class="pre">Connect.bootstrap()</span></code></a> for multitrial case and 
+surrogate data <a class="reference internal" href="#conn.Connect.surrogate" title="conn.Connect.surrogate"><code class="xref py py-func docutils literal"><span class="pre">Connect.surrogate()</span></code></a> for one trial.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>data matrix</dd>
+<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>type I error rate (significance level)</dd>
+<dt><em>nfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int </span></dt>
+<dd>window length (if None it&#8217;s N/5)</dd>
+<dt><em>no</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>overlap length (if None it&#8217;s N/10)</dd>
+<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True it prints dot on every realization, if False it&#8217;s
+quiet.</dd>
+<dt><em>params</em> :</dt>
+<dd>additional parameters specific for chosen estimator</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>signi_st</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>short time significance values in shape of
+- (tp, k, k) for one sided estimator
+- (tp, 2, k, k) for two sided
+where k is number of channels and tp number of time points</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="conn.Connect.significance">
+<code class="descname">significance</code><span class="sig-paren">(</span><em>data</em>, <em>Nrep=10</em>, <em>alpha=0.05</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Connect.significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Connect.significance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Significance of connectivity estimators. It base on
+bootstrap <a class="reference internal" href="#conn.Connect.bootstrap" title="conn.Connect.bootstrap"><code class="xref py py-func docutils literal"><span class="pre">Connect.bootstrap()</span></code></a> for multitrial case and 
+surrogate data <a class="reference internal" href="#conn.Connect.surrogate" title="conn.Connect.surrogate"><code class="xref py py-func docutils literal"><span class="pre">Connect.surrogate()</span></code></a> for one trial.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>data matrix</dd>
+<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>type I error rate (significance level)</dd>
+<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True it prints dot on every realization, if False it&#8217;s
+quiet.</dd>
+<dt><em>params</em> :</dt>
+<dd>additional parameters specific for chosen estimator</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>signific</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>significance values, check <a class="reference internal" href="#conn.Connect.levels" title="conn.Connect.levels"><code class="xref py py-func docutils literal"><span class="pre">Connect.levels()</span></code></a></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="conn.Connect.levels">
+<code class="descname">levels</code><span class="sig-paren">(</span><em>signi</em>, <em>alpha</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Connect.levels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Connect.levels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Levels of significance
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>signi</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>bootstraped values of each channel</dd>
+<dt><em>alpha</em> <span class="classifier-delimiter">:</span> <span class="classifier">float </span></dt>
+<dd>type I error rate (significance level) - from 0 to 1
+- (1-<em>alpha</em>) for onesided estimators (e.g. class:<cite>DTF</cite>)
+- <em>alpha</em> and (1-<em>alpha</em>) for twosided (e.g. class:<cite>PSI</cite>)</dd>
+<dt><em>k</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of channels</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>ficance</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>maximal value throughout frequency of score at percentile
+at level 1-<em>alpha</em>
+- (k, k) for one sided estimator
+- (2, k, k) for two sided</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="conn.Connect.bootstrap">
+<code class="descname">bootstrap</code><span class="sig-paren">(</span><em>data</em>, <em>Nrep=100</em>, <em>alpha=0.05</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Connect.bootstrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Connect.bootstrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bootstrap - random sampling with replacement of trials.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>multichannel data matrix</dd>
+<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>type I error rate (significance level)</dd>
+<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True it prints dot on every realization, if False it&#8217;s
+quiet.</dd>
+<dt><em>params</em> :</dt>
+<dd>additional parameters specific for chosen estimator</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>levelsigni</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>significance values, check <a class="reference internal" href="#conn.Connect.levels" title="conn.Connect.levels"><code class="xref py py-func docutils literal"><span class="pre">Connect.levels()</span></code></a></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="conn.Connect.surrogate">
+<code class="descname">surrogate</code><span class="sig-paren">(</span><em>data</em>, <em>Nrep=100</em>, <em>alpha=0.05</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Connect.surrogate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Connect.surrogate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Surrogate data testing. Mixing data points in each channel.
+Significance level in calculated over all <em>Nrep</em> surrogate sets.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>multichannel data matrix</dd>
+<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>type I error rate (significance level)</dd>
+<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True it prints dot on every realization, if False it&#8217;s
+quiet.</dd>
+<dt><em>params</em> :</dt>
+<dd>additional parameters specific for chosen estimator</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>levelsigni</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>significance values, check <a class="reference internal" href="#conn.Connect.levels" title="conn.Connect.levels"><code class="xref py py-func docutils literal"><span class="pre">Connect.levels()</span></code></a></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -210,7 +366,10 @@ Args:</p>
 <dt><em>no</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>overlap length (if None it&#8217;s N/10)</dd>
 <dt><em>mvarmethod</em> = &#8216;yw&#8217; :</dt>
-<dd>MVAR parameters estimation method</dd>
+<dd><blockquote class="first">
+<div>MVAR parameters estimation method</div></blockquote>
+<p class="last">all avaiable methods you can find in <em>fitting_algorithms</em></p>
+</dd>
 <dt><em>order</em> = None:</dt>
 <dd>MVAR model order; it None, it is set automatically basing
 on default criterion.</dd>
@@ -231,6 +390,164 @@ is number of channels</dd>
 </dl>
 </dd></dl>
 
+<dl class="method">
+<dt id="conn.ConnectAR.short_time_significance">
+<code class="descname">short_time_significance</code><span class="sig-paren">(</span><em>data</em>, <em>Nrep=100</em>, <em>alpha=0.05</em>, <em>method='yw'</em>, <em>order=None</em>, <em>fs=1</em>, <em>resolution=None</em>, <em>nfft=None</em>, <em>no=None</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#ConnectAR.short_time_significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.ConnectAR.short_time_significance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Significance of short-tme versions of estimators. It base on
+bootstrap <a class="reference internal" href="#conn.ConnectAR.bootstrap" title="conn.ConnectAR.bootstrap"><code class="xref py py-func docutils literal"><span class="pre">ConnectAR.bootstrap()</span></code></a> for multitrial case and 
+surrogate data <a class="reference internal" href="#conn.ConnectAR.surrogate" title="conn.ConnectAR.surrogate"><code class="xref py py-func docutils literal"><span class="pre">ConnectAR.surrogate()</span></code></a> for one trial.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>data matrix</dd>
+<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>type I error rate (significance level)</dd>
+<dt><em>method</em> = &#8216;yw&#8217;: str</dt>
+<dd>method of MVAR parameters estimation
+all avaiable methods you can find in <em>fitting_algorithms</em></dd>
+<dt><em>order</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>MVAR model order, if None, it&#8217;s chosen using default criterion</dd>
+<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int </span></dt>
+<dd>sampling frequency</dd>
+<dt><em>resolution</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int </span></dt>
+<dd>resolution (if None, it&#8217;s 100 points)</dd>
+<dt><em>nfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int </span></dt>
+<dd>window length (if None it&#8217;s N/5)</dd>
+<dt><em>no</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>overlap length (if None it&#8217;s N/10)</dd>
+<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True it prints dot on every realization, if False it&#8217;s
+quiet.</dd>
+<dt><em>params</em> :</dt>
+<dd>additional parameters specific for chosen estimator</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>signi_st</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>short time significance values in shape of
+- (tp, k, k) for one sided estimator
+- (tp, 2, k, k) for two sided
+where k is number of channels and tp number of time points</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="conn.ConnectAR.significance">
+<code class="descname">significance</code><span class="sig-paren">(</span><em>data</em>, <em>method</em>, <em>order=None</em>, <em>resolution=None</em>, <em>Nrep=10</em>, <em>alpha=0.05</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#ConnectAR.significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.ConnectAR.significance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Significance of connectivity estimators. It base on
+bootstrap <a class="reference internal" href="#conn.ConnectAR.bootstrap" title="conn.ConnectAR.bootstrap"><code class="xref py py-func docutils literal"><span class="pre">ConnectAR.bootstrap()</span></code></a> for multitrial case and 
+surrogate data <a class="reference internal" href="#conn.ConnectAR.surrogate" title="conn.ConnectAR.surrogate"><code class="xref py py-func docutils literal"><span class="pre">ConnectAR.surrogate()</span></code></a> for one trial.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>data matrix</dd>
+<dt><em>method</em> = &#8216;yw&#8217;: str</dt>
+<dd>method of MVAR parametersestimation
+all avaiable methods you can find in <em>fitting_algorithms</em></dd>
+<dt><em>order</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>MVAR model order, if None, it&#8217;s chosen using default criterion</dd>
+<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>type I error rate (significance level)</dd>
+<dt><em>resolution</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int </span></dt>
+<dd>resolution (if None, it&#8217;s 100 points)</dd>
+<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True it prints dot on every realization, if False it&#8217;s
+quiet.</dd>
+<dt><em>params</em> :</dt>
+<dd>additional parameters specific for chosen estimator</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>signi_st</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>significance values, check <a class="reference internal" href="#conn.Connect.levels" title="conn.Connect.levels"><code class="xref py py-func docutils literal"><span class="pre">Connect.levels()</span></code></a></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="conn.ConnectAR.bootstrap">
+<code class="descname">bootstrap</code><span class="sig-paren">(</span><em>data</em>, <em>method</em>, <em>order=None</em>, <em>Nrep=10</em>, <em>alpha=0.05</em>, <em>fs=1</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#ConnectAR.bootstrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.ConnectAR.bootstrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bootstrap - random sampling with replacement of trials for <em>ConnectAR</em>.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>multichannel data matrix</dd>
+<dt><em>method</em> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>method of MVAR parametersestimation
+all avaiable methods you can find in <em>fitting_algorithms</em></dd>
+<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>type I error rate (significance level)</dd>
+<dt><em>order</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>MVAR model order, if None, it&#8217;s chosen using default criterion</dd>
+<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True it prints dot on every realization, if False it&#8217;s
+quiet.</dd>
+<dt><em>params</em> :</dt>
+<dd>additional parameters specific for chosen estimator</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>levelsigni</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>significance values, check <a class="reference internal" href="#conn.Connect.levels" title="conn.Connect.levels"><code class="xref py py-func docutils literal"><span class="pre">Connect.levels()</span></code></a></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="conn.ConnectAR.surrogate">
+<code class="descname">surrogate</code><span class="sig-paren">(</span><em>data</em>, <em>method</em>, <em>Nrep=10</em>, <em>alpha=0.05</em>, <em>order=None</em>, <em>fs=1</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#ConnectAR.surrogate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.ConnectAR.surrogate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Surrogate data testing for <em>ConnectAR</em> . Mixing data points in each channel.
+Significance level in calculated over all <em>Nrep</em> surrogate sets.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>multichannel data matrix</dd>
+<dt><em>method</em> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>method of MVAR parameters estimation
+all avaiable methods you can find in <em>fitting_algorithms</em></dd>
+<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>type I error rate (significance level)</dd>
+<dt><em>order</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>MVAR model order, if None, it&#8217;s chosen using default criterion</dd>
+<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True it prints dot on every realization, if False it&#8217;s
+quiet.</dd>
+<dt><em>params</em> :</dt>
+<dd>additional parameters specific for chosen estimator</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt><em>levelsigni</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dd>significance values, check <a class="reference internal" href="#conn.Connect.levels" title="conn.Connect.levels"><code class="xref py py-func docutils literal"><span class="pre">Connect.levels()</span></code></a></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="function">
@@ -240,10 +557,10 @@ is number of channels</dd>
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Acoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>array of shape (k, k, p) where <em>k</em> is number of channels and
 <em>p</em> is a model order.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Vcoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>prediction error matrix (k, k)</dd>
 <dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>sampling rate</dd>
@@ -274,10 +591,10 @@ Args:</p>
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Acoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>array of shape (k, k, p) where <em>k</em> is number of channels and
 <em>p</em> is a model order.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Vcoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>prediction error matrix (k, k)</dd>
 <dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>sampling rate</dd>
@@ -314,10 +631,10 @@ Args:</p>
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Acoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>array of shape (k, k, p) where <em>k</em> is number of channels and
 <em>p</em> is a model order.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Vcoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>prediction error matrix (k, k)</dd>
 <dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>sampling rate</dd>
@@ -408,10 +725,10 @@ parameters.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Acoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>array of shape (k, k, p) where <em>k</em> is number of channels and
 <em>p</em> is a model order.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Vcoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>prediction error matrix (k, k)</dd>
 <dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>sampling rate</dd>
@@ -452,10 +769,10 @@ Patrial Coherence.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Acoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>array of shape (k, k, p) where <em>k</em> is number of channels and
 <em>p</em> is a model order.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Vcoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>prediction error matrix (k, k)</dd>
 <dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>sampling rate</dd>
@@ -495,10 +812,10 @@ parameters.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Acoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>array of shape (k, k, p+1) where <em>k</em> is number of channels and
 <em>p</em> is a model order. It&#8217;s zero lag case.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Vcoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>prediction error matrix (k, k)</dd>
 <dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>sampling rate</dd>
@@ -538,10 +855,10 @@ parameters.
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>Acf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Acoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>array of shape (k, k, p+1) where <em>k</em> is number of channels and
 <em>p</em> is a model order. It&#8217;s zero lag case.</dd>
-<dt><em>Vcf</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
+<dt><em>Vcoef</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>prediction error matrix (k, k)</dd>
 <dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>sampling rate</dd>
@@ -575,7 +892,7 @@ Int. J. Bioelectromagn. 11, 74–79 (2009).</div></blockquote>
 <a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method and <em>values_range</em> attribute.</p>
 <dl class="method">
 <dt id="conn.Coherency.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>cnfft=None</em>, <em>cno=None</em>, <em>window=&lt;function hanning at 0x0000000003A735F8&gt;</em>, <em>im=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Coherency.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Coherency.calculate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>cnfft=None</em>, <em>cno=None</em>, <em>window=&lt;function hanning at 0x0000000003EBA5F8&gt;</em>, <em>im=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#Coherency.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.Coherency.calculate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coherency calculation using FFT mehtod.
 Args:</p>
 <blockquote>
@@ -616,7 +933,7 @@ Args:</p>
 <a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
 <dl class="method">
 <dt id="conn.PSI.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>band_width=4</em>, <em>psinfft=None</em>, <em>psino=0</em>, <em>window=&lt;function hanning at 0x0000000003A735F8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#PSI.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PSI.calculate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>band_width=4</em>, <em>psinfft=None</em>, <em>psino=0</em>, <em>window=&lt;function hanning at 0x0000000003EBA5F8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#PSI.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.PSI.calculate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Phase Slope Index calculation using FFT mehtod.
 Args:</p>
 <blockquote>
@@ -657,7 +974,7 @@ Args:</p>
 <a class="reference internal" href="#conn.Connect.calculate" title="conn.Connect.calculate"><code class="xref py py-func docutils literal"><span class="pre">Connect.calculate()</span></code></a> method.</p>
 <dl class="method">
 <dt id="conn.GCI.calculate">
-<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>method='yw'</em>, <em>order=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#GCI.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.GCI.calculate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>data</em>, <em>gcimethod='yw'</em>, <em>gciorder=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/conn.html#GCI.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#conn.GCI.calculate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Granger Causality Index calculation from MVAR model.
 Args:</p>
 <blockquote>
@@ -665,9 +982,9 @@ Args:</p>
 <dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
 <dd>array of shape (k, N) where <em>k</em> is number of channels and
 <em>N</em> is number of data points.</dd>
-<dt><em>method</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dt><em>gcimethod</em> = &#8216;yw&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>MVAR parameters estimation model</dd>
-<dt><em>order</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dt><em>gciorder</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>model order, if None appropiate value is chosen basic
 on default criterion</dd>
 </dl>
@@ -704,7 +1021,7 @@ on default criterion</dd>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Plot</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorials</a></li>
 </ul>
 
           <div role="search">
