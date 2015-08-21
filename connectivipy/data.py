@@ -113,7 +113,8 @@ class Data(object):
           *p* = None : int
             estimation order, default None
           *method* = 'yw' : str {'yw', 'ns', 'vm'}
-            method of estimation
+            method of MVAR parameters estimation
+            all avaiable methods you can find in *fitting_algorithms*
         '''
         self.__Ar, self.__Vr = Mvar().fit(self.__data, p, method)
         self._parameters["mvar"] = True
@@ -127,8 +128,9 @@ class Data(object):
         Args:
           *p* = None : int
             estimation order, default None
-          *method* = 'yw' : str {'yw', 'ns', 'vm'}
-            method of estimation
+          *method* : str
+            method of connectivity estimation
+            all avaiable methods you can find in *conn_estim_dc*
         '''
         connobj = conn_estim_dc[method]()
         if isinstance(connobj,ConnectAR):
@@ -154,8 +156,8 @@ class Data(object):
         
         Args:
           *method* = 'yw' : str {'yw', 'ns', 'vm'}
-            method of estimation, for full list please type:
-            connectivipy.mvar_methods
+            method of estimation
+            all avaiable methods you can find in *fitting_algorithms*
           *nfft* = None : int
             number of data points in window; if None, it is signal length
             N/5.
@@ -401,17 +403,21 @@ class Data(object):
         for i in xrange(self.__chans):
             mask[:,:,i,i] = 1
         masked_shtimest = np.ma.array(shtvalues, mask=mask)
-        dtmax = np.max(masked_shtimest)*percmax
-        dtmin = np.min(masked_shtimest)
+        dtmax = np.nanmax(masked_shtimest)*percmax
+        dtmin = np.nanmin(masked_shtimest)
+        eps = np.spacing(0.0) # very small float
+        cmap = plt.get_cmap('rainbow')
+        cmap.set_bad(color='w', alpha=1)
         for i in xrange(self.__chans):
             for j in xrange(self.__chans):
                 if self.__channames and i==0:
                     axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
                 if self.__channames and j==0:
                     axes[i, j].set_ylabel(self.__channames[i])
-                img = axes[i, j].imshow(shtvalues[:,:,i,j].T, aspect='auto',\
-                                       extent=[0,self.__length/self.__fs,0,self.__fs//2], \
-                                       interpolation='none', origin='lower', vmin=dtmin, vmax=dtmax)
+                img = axes[i, j].imshow(shtvalues[:,:,i,j].T, cmap=cmap, aspect='auto',\
+                                       extent=[0,self.__length/self.__fs,0,self.__fs//2],\
+                                       interpolation='none', origin='lower',\
+                                       vmin=dtmin, vmax=dtmax)
                 if i!=self.__chans-1:
                     axes[i,j].get_xaxis().set_visible(False)
                 if j!=0:
@@ -506,7 +512,7 @@ class Data(object):
         '''
         tm, fr, k, k = values.shape
         for i in xrange(fr):
-            values[:,i,:,:][values[:,i,:,:]<borders] = 0
+            values[:,i,:,:][values[:,i,:,:]<borders] = np.nan
         return values
     
     # accessors:

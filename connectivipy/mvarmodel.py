@@ -11,9 +11,7 @@ class Mvar(object):
     acronym of algorithm and value is a function from *mvar.fitting*.
     """
     
-    fit_dict = {'yw': yulewalker,
-                'ns': nutallstrand,
-                'vm': vieiramorf}
+    fit_dict = fitting_algorithms
 
     @classmethod
     def fit(cls, data, order=None, method='yw'):
@@ -27,6 +25,7 @@ class Mvar(object):
               akaike order criteria.
           *method* = 'yw': str
               name of mvar fitting algorithm, default Yule-Walker
+              all avaiable methods you can find in *fitting_algorithms*
         Returns:
           *Av* : numpy.array
               model coefficients (kXkXorder)

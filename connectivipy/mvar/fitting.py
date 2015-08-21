@@ -262,3 +262,7 @@ def yulewalker(y,pmax=1):
         acof[p] = a_solved[p*chn:(p+1)*chn,:].T
         var -= np.dot(acof[p],rr_b[:,:,p+1].T)
     return acof, var
+
+fitting_algorithms = {'yw': yulewalker,
+                      'ns': nutallstrand,
+                      'vm': vieiramorf}

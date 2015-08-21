@@ -377,7 +377,7 @@ class ConnectAR(Connect):
     def __init__(self):
         super(ConnectAR, self).__init__()
         self.values_range = [0, 1]
-        
+    
     def short_time(self, data, nfft=None, no=None, mvarmethod='yw',\
                                           order=None, resol=None, fs=1):
         """
@@ -394,6 +394,7 @@ class ConnectAR(Connect):
               overlap length (if None it's N/10)
           *mvarmethod* = 'yw' :
               MVAR parameters estimation method
+            all avaiable methods you can find in *fitting_algorithms*
           *order* = None:
               MVAR model order; it None, it is set automatically basing
               on default criterion.
@@ -449,7 +450,8 @@ class ConnectAR(Connect):
           *alpha* = 0.05 : float
             type I error rate (significance level)
           *method* = 'yw': str
-            method of MVAR parametersestimation
+            method of MVAR parameters estimation
+            all avaiable methods you can find in *fitting_algorithms*
           *order* = None : int
             MVAR model order, if None, it's chosen using default criterion
           *fs* = 1 : int 
@@ -514,6 +516,7 @@ class ConnectAR(Connect):
               data matrix
           *method* = 'yw': str
             method of MVAR parametersestimation
+            all avaiable methods you can find in *fitting_algorithms*
           *order* = None : int
             MVAR model order, if None, it's chosen using default criterion
           *Nrep* = 100 : int
@@ -545,6 +548,7 @@ class ConnectAR(Connect):
               multichannel data matrix
           *method* : str
             method of MVAR parametersestimation
+            all avaiable methods you can find in *fitting_algorithms*
           *Nrep* = 100 : int
             number of resamples
           *alpha* = 0.05 : float
@@ -583,7 +587,8 @@ class ConnectAR(Connect):
           *data* : numpy.array
               multichannel data matrix
           *method* : str
-            method of MVAR parametersestimation
+            method of MVAR parameters estimation
+            all avaiable methods you can find in *fitting_algorithms*
           *Nrep* = 100 : int
             number of resamples
           *alpha* = 0.05 : float

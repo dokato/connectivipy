@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 #! /usr/bin/env python
 
-import numpy as np 
+import numpy as np
 import connectivipy as cp
 from connectivipy import mvar_gen
 
 ### MVAR model coefficients
+
+"""
+MVAR parameters taken from:
+Sameshima K. & Baccala L. A., Partial directed coherence : a new
+concept in neural structure determination. Biol. Cybern. (2001)
+You can compare results with Fig. 3. from that article.
+"""
 
 # let's build mvar model matrix
 A = np.zeros((2, 5, 5))
@@ -25,24 +32,23 @@ A[0, 4, 4] = 0.25 * 2**0.5
 # let's generate 5-channel signal with 1000 data points
 # and 5 trials using function mvar_gen
 ysig = np.zeros((5, 10**3, 5))
-ysig[:,:,0] = mvar_gen(A,10**3)
-ysig[:,:,1] = mvar_gen(A,10**3)
-ysig[:,:,2] = mvar_gen(A,10**3)
-ysig[:,:,3] = mvar_gen(A,10**3)
-ysig[:,:,4] = mvar_gen(A,10**3)
+ysig[:, :, 0] = mvar_gen(A, 10**3)
+ysig[:, :, 1] = mvar_gen(A, 10**3)
+ysig[:, :, 2] = mvar_gen(A, 10**3)
+ysig[:, :, 3] = mvar_gen(A, 10**3)
+ysig[:, :, 4] = mvar_gen(A, 10**3)
 
 #### connectivity analysis
-
-data = cp.Data(ysig,128, ["Fp1", "Fp2","Cz", "O1","O2"])
+data = cp.Data(ysig, 128, ["Fp1", "Fp2", "Cz", "O1", "O2"])
 
 # you may want to plot data (in multitrial case only one trial is shown)
 data.plot_data()
 
 # fit mvar using Yule-Walker algorithm and order 2
-data.fit_mvar(2,'yw')
+data.fit_mvar(2, 'yw')
 
 # you can capture fitted parameters and residual matrix
-ar, vr = data.mvar_coefficients 
+ar, vr = data.mvar_coefficients
 
 # now we investigate connectivity using gDTF
 gdtf_values = data.conn('gdtf')
