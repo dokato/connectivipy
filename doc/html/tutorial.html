@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tutorials &mdash; ConnectiviPy 0.34a documentation</title>
+    <title>Tutorials &mdash; ConnectiviPy 0.36a documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.34a',
+        VERSION:     '0.36a',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="ConnectiviPy 0.34a documentation" href="index.html" />
+    <link rel="top" title="ConnectiviPy 0.36a documentation" href="index.html" />
     <link rel="prev" title="Plot" href="plot.html" /> 
   </head>
   <body role="document">
@@ -34,7 +34,7 @@
             <img class="logo" src="_static/connpy.png" alt="Logo"/>
           </a></p>
         <div class="headertitle"><a
-          href="index.html">ConnectiviPy 0.34a documentation</a></div>
+          href="index.html">ConnectiviPy 0.36a documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="plot.html" title="Plot"
              accesskey="P">previous</a> |
@@ -62,6 +62,32 @@
 <div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>git clone https://github.com/dokato/connectivipy.git
 <span class="nv">$ </span><span class="nb">cd </span>connectivipy
 <span class="nv">$ </span>python setup.py install
+</pre></div>
+</div>
+</div>
+<div class="section" id="loading-data">
+<h2>Loading data<a class="headerlink" href="#loading-data" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">connectivipy</span> <span class="kn">as</span> <span class="nn">cp</span>
+
+<span class="c"># remember that data should be in a shape (k, N, R),</span>
+<span class="c"># where k - number of channels, N - data points, R - number of trials</span>
+
+<span class="c"># for numpy.array simply put that array as a first argument</span>
+<span class="c"># when initializing Data class</span>
+<span class="c"># fs means sampling frequency</span>
+<span class="c"># chan_names is a list with channel names (length of list must be</span>
+<span class="c">#            the same as first dimension of data)</span>
+<span class="c"># data_info - additional infromation about the data</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="n">numpy_array_data</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mf">32.</span><span class="p">,</span> <span class="n">chan_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Fp1&#39;</span><span class="p">,</span><span class="s">&#39;O1&#39;</span><span class="p">],</span> <span class="n">data_info</span><span class="o">=</span><span class="s">&#39;sml&#39;</span><span class="p">)</span>
+
+<span class="c"># Matlab data we can read giving a path to a matlab file</span>
+<span class="c"># and in data_info we put Matlab variable name as a string</span>
+<span class="n">dd</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s">&#39;adata.mat&#39;</span><span class="p">,</span> <span class="n">data_info</span><span class="o">=</span><span class="s">&#39;bdata&#39;</span><span class="p">)</span>
+
+<span class="c"># similarly for SignalML data, but in data_info you need to point out</span>
+<span class="c"># that you want to read &#39;sml&#39; data from *.raw and *.xml files with the</span>
+<span class="c"># same name</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s">&#39;cdata.raw&#39;</span><span class="p">,</span> <span class="n">data_info</span><span class="o">=</span><span class="s">&#39;sml&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

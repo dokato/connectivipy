@@ -21,21 +21,25 @@ Loading data
 
     import connectivipy as cp
     
-    # for numpy.array simply put that array in the first argument
+    # remember that data should be in a shape (k, N, R),
+    # where k - number of channels, N - data points, R - number of trials
+    
+    # for numpy.array simply put that array as a first argument
+    # when initializing Data class
     # fs means sampling frequency
     # chan_names is a list with channel names (length of list must be
     #            the same as first dimension of data)
     # data_info - additional infromation about the data
-    dt = Data(numpy_array_data, fs=32., chan_names=['Fp1','O1'], data_info='sml')
+    dt = cp.Data(numpy_array_data, fs=32., chan_names=['Fp1','O1'], data_info='sml')
 
     # Matlab data we can read giving a path to a matlab file
-    # and in data_info we put variable name as a string
-    dd = Data('adata.mat' ,data_info='bdata')
+    # and in data_info we put Matlab variable name as a string
+    dd = cp.Data('adata.mat', data_info='bdata')
 
     # similarly for SignalML data, but in data_info you need to point out
-    # that you want to read 'sml' data from *.raw and *.xml files of the
+    # that you want to read 'sml' data from *.raw and *.xml files with the
     # same name 
-    dt = Data('cdata.raw',data_info='sml')
+    dt = cp.Data('cdata.raw', data_info='sml')
 
 Data class example
 ########

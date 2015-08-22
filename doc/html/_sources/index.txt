@@ -37,4 +37,4 @@ Credits:
 ######
 
 * Dominik Krzemiński
-* Maciej Kamiński - scientific lead
+* Maciej Kamiński (scientific lead)
