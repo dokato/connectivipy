@@ -7,7 +7,7 @@ from mvar.fitting import *
 class Mvar(object):
     """
     Static class *Mvar* to multivariete autoregressive model
-    fitting. Possible methods are in `fit_dict` where key is
+    fitting. Possible methods are in *fitting_algorithms* where key is
     acronym of algorithm and value is a function from *mvar.fitting*.
     """
     
@@ -33,7 +33,7 @@ class Mvar(object):
               reflection matrix (kXk)
         """
         if order == None:
-            order, crit_val = cls.order_hq(data, p_max=None, method=method)        
+            order, crit_val = cls.order_hq(data, p_max=None, method=method)
         return cls.fit_dict[method](data,order)
     
     @classmethod
@@ -46,7 +46,7 @@ class Mvar(object):
               multichannel data in shape (k, n) for one trial case and
               (k, n, tr) for multitrial
               k - nr of channels, n -data points, tr - nr of trials
-          *p_max* = 5 : int 
+          *p_max* = 5 : int
               maximal model order
           *method* = 'yw' : str
               name of the mvar calculation method
@@ -69,7 +69,7 @@ class Mvar(object):
         for p in range(p_max):
             (a_coef, v_r) = cls.fit(data, p+1, method)
             crit[p] = N*np.log(np.linalg.det(v_r))+2.*((p+1)*chn*(1+chn))
-        return np.argmin(crit)+1, crit 
+        return np.argmin(crit)+1, crit
 
     @classmethod
     def order_hq(cls, data, p_max=None, method='yw'):
@@ -81,7 +81,7 @@ class Mvar(object):
               multichannel data in shape (k, n) for one trial case and
               (k, n, tr) for multitrial
               k - nr of channels, n -data points, tr - nr of trials
-          *p_max* = 5 : int 
+          *p_max* = 5 : int
               maximal model order
           *method* = 'yw' : str
               name of the mvar calculation method
@@ -151,7 +151,7 @@ class Mvar(object):
               multichannel data in shape (k, n) for one trial case and
               (k, n, tr) for multitrial
               k - nr of channels, n -data points, tr - nr of trials
-          *p_max* = 5 : int 
+          *p_max* = 5 : int
               maximal model order
           *method* = 'yw' : str
               name of the mvar calculation method

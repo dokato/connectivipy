@@ -33,7 +33,7 @@ class Data(object):
         self.__data = self._load_file(data, data_info)
         if self.__data.shape[0]==len(chan_names):
             self.__channames = chan_names
-        elif hasattr(self,'_Data__fs'):
+        elif hasattr(self, '_Data__fs'):
             pass
         else:
             self.__channames = ["x"+str(i) for i in range(self.__chans)]
@@ -86,14 +86,14 @@ class Data(object):
         *filtfilt* from *scipy.signal*.
 
         Args:
-          *b,a* : np.array 
+          *b, a* : np.array 
             Numerator *b*  / denominator *a* polynomials of the IIR filter.
         '''
         if self.__multitrial:
             for r in xrange(self.__multitrial):
-                self.__data[:,:,r] = ss.filtfilt(b,a,self.__data[:,:,r])
+                self.__data[:, :, r] = ss.filtfilt(b, a, self.__data[:, :, r])
         else:
-            self.__data = ss.filtfilt(b,a,self.__data)
+            self.__data = ss.filtfilt(b, a, self.__data)
 
     def resample(self, fs_new):
         '''
@@ -136,17 +136,17 @@ class Data(object):
             all avaiable methods you can find in *conn_estim_dc*
         '''
         connobj = conn_estim_dc[method]()
-        if isinstance(connobj,ConnectAR):
-            self.__estim = connobj.calculate(self.__Ar,self.__Vr, self.__fs, **params)
+        if isinstance(connobj, ConnectAR):
+            self.__estim = connobj.calculate(self.__Ar, self.__Vr, self.__fs, **params)
         else:
             if not self.__multitrial:
                 self.__estim = connobj.calculate(self.__data, **params)
             else:
                 for r in xrange(self.__multitrial):
                     if r==0:
-                        self.__estim = connobj.calculate(self.__data[:,:,r], **params)
+                        self.__estim = connobj.calculate(self.__data[:, :, r], **params)
                         continue
-                    self.__estim += connobj.calculate(self.__data[:,:,r], **params)
+                    self.__estim += connobj.calculate(self.__data[:, :, r], **params)
                 self.__estim = self.__estim/self.__multitrial
         self._parameters["method"] = method
         self._parameters["y_lim"] = connobj.values_range
@@ -185,7 +185,7 @@ class Data(object):
             no = int(self.__length/10)
         if not self._parameters.has_key("resolution"):
             self._parameters["resolution"] = 100
-        if isinstance(connobj,ConnectAR):
+        if isinstance(connobj, ConnectAR):
             self.__shtimest = connobj.short_time(self.__data, nfft=nfft, no=no,\
                                                  fs=self.__fs, order=self._parameters["p"],\
                                                  resol=self._parameters["resolution"])
@@ -193,9 +193,9 @@ class Data(object):
             if self.__multitrial:
                 for r in xrange(self.__multitrial):
                     if r==0:
-                        self.__shtimest = connobj.short_time(self.__data[:,:,r], nfft=nfft, no=no, **newparams)
+                        self.__shtimest = connobj.short_time(self.__data[:, :, r], nfft=nfft, no=no, **newparams)
                         continue
-                    self.__shtimest += connobj.short_time(self.__data[:,:,r], nfft=nfft, no=no, **newparams)
+                    self.__shtimest += connobj.short_time(self.__data[:, :, r], nfft=nfft, no=no, **newparams)
                 self.__shtimest/=self.__multitrial
             else:
                 self.__shtimest = connobj.short_time(self.__data, nfft=nfft, no=no, **newparams)
@@ -277,7 +277,7 @@ class Data(object):
         self._parameters.update(params)
         arg = inspect.getargspec(connobj.calculate)
         newparams = self.__make_params_dict(arg[0])
-        if isinstance(connobj,ConnectAR):
+        if isinstance(connobj, ConnectAR):
             self.__st_signific = connobj.short_time_significance(self.__data, Nrep=Nrep, alpha=alpha, 
                                                               method=self._parameters["mvarmethod"],\
                                                               fs=self.__fs, order=self._parameters["p"],
@@ -299,14 +299,14 @@ class Data(object):
           *show* = True : boolean
             show the plot or not
         '''
-        time = np.arange(0,self.__length)*1./self.__fs
+        time = np.arange(0, self.__length)*1./self.__fs
         if self.__multitrial:
-            plotdata = self.__data[:,:,trial]
+            plotdata = self.__data[:, :, trial]
         else:
             plotdata = self.__data
         fig, axes = plt.subplots(self.__chans, 1)
         for i in xrange(self.__chans):
-            axes[i].plot(time, plotdata[i,:], 'g')
+            axes[i].plot(time, plotdata[i, :], 'g')
             if self.__channames:
                 axes[i].set_title(self.__channames[i])
         if show:
@@ -330,7 +330,7 @@ class Data(object):
           *show* = True : boolean
             show the plot or not            
         '''
-        assert hasattr(self,'_Data__estim')==True, "No valid data!, Use calculation method first."
+        assert hasattr(self, '_Data__estim')==True, "No valid data!, Use calculation method first."
         fig, axes = plt.subplots(self.__chans, self.__chans)
         freqs = np.linspace(0, self.__fs//2, self.__estim.shape[0])
         if not xlim:
@@ -342,7 +342,7 @@ class Data(object):
             if ylim[1] == None:
                 ylim[1] = np.max(self.__estim)
         two_sides = False
-        if signi and hasattr(self,'_Data__signific'):
+        if signi and hasattr(self, '_Data__signific'):
             flag_sig = True
             if len(self.__signific.shape)>2:
                 two_sides = True
@@ -357,8 +357,8 @@ class Data(object):
                 axes[i, j].fill_between(freqs, self.__estim[:, i, j], 0)
                 if flag_sig:
                     if two_sides:
-                        l_u = axes[i, j].axhline(y=self.__signific[0,i,j], color='r')
-                        l_d = axes[i, j].axhline(y=self.__signific[1,i,j], color='r')
+                        l_u = axes[i, j].axhline(y=self.__signific[0, i, j], color='r')
+                        l_d = axes[i, j].axhline(y=self.__signific[1, i, j], color='r')
                     else:
                         l = axes[i, j].axhline(y=self.__signific[i,j], color='r')
                 axes[i, j].set_xlim(xlim)
@@ -388,14 +388,14 @@ class Data(object):
           *show* = True : boolean
             show the plot or not            
         '''
-        assert hasattr(self,'_Data__shtimest')==True, "No valid data! Use calculation method first."
+        assert hasattr(self, '_Data__shtimest')==True, "No valid data! Use calculation method first."
         shtvalues = self.__shtimest
-        if signi and hasattr(self,'_Data__st_signific'):
+        if signi and hasattr(self, '_Data__st_signific'):
             if len(self.__st_signific.shape)>3:
-                shtvalues = self.fill_nans(shtvalues,self.__st_signific[:,0,:,:])
-                shtvalues = self.fill_nans(shtvalues,self.__st_signific[:,1,:,:])
+                shtvalues = self.fill_nans(shtvalues, self.__st_signific[:, 0, :, :])
+                shtvalues = self.fill_nans(shtvalues, self.__st_signific[:, 1, :, :])
             else:
-                shtvalues = self.fill_nans(shtvalues,self.__st_signific)
+                shtvalues = self.fill_nans(shtvalues, self.__st_signific)
         fig, axes = plt.subplots(self.__chans, self.__chans)
         freqs = np.linspace(0, self.__fs//2, 4)
         time = np.linspace(0, self.__length/self.__fs, 5)
@@ -417,16 +417,16 @@ class Data(object):
                     axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
                 if self.__channames and j==0:
                     axes[i, j].set_ylabel(self.__channames[i])
-                img = axes[i, j].imshow(shtvalues[:,:,i,j].T, cmap=cmap, aspect='auto',\
-                                       extent=[0,self.__length/self.__fs,0,self.__fs//2],\
+                img = axes[i, j].imshow(shtvalues[:, :, i, j].T, cmap=cmap, aspect='auto',\
+                                       extent=[0, self.__length/self.__fs, 0, self.__fs//2],\
                                        interpolation='none', origin='lower',\
                                        vmin=dtmin, vmax=dtmax)
                 if i!=self.__chans-1:
-                    axes[i,j].get_xaxis().set_visible(False)
+                    axes[i, j].get_xaxis().set_visible(False)
                 if j!=0:
-                    axes[i,j].get_yaxis().set_visible(False)
-                xt  = np.array(axes[i,j].get_xticks())/self.__fs
-        plt.suptitle(name,y=0.98)
+                    axes[i, j].get_yaxis().set_visible(False)
+                xt  = np.array(axes[i, j].get_xticks())/self.__fs
+        plt.suptitle(name, y=0.98)
         plt.tight_layout()
         fig.subplots_adjust(top=0.92, right=0.91)
         cbar_ax = fig.add_axes([0.93, 0.1, 0.02, 0.7])
@@ -465,13 +465,13 @@ class Data(object):
             ind2 = np.where(freqs>=freq_band[1])[0][0]
         if mod==0:
             assert hasattr(self,'_Data__estim')==True, "No valid data! Use calculation method first."
-            cnest = np.mean(self.__estim[ind1:ind2,:,:], axis=0)
+            cnest = np.mean(self.__estim[ind1:ind2, :, :], axis=0)
             for i in xrange(self.__chans):
-                content+= "  " + "   ".join([ '{:.4f}'.format(x) for x in cnest[i]]) + "\r\n" 
+                content+= "  " + "   ".join([ '{:.4f}'.format(x) for x in cnest[i]]) + "\r\n"
         elif mod==1:
             assert hasattr(self,'_Data__shtimest')==True, "No valid data! Use calculation method first."
             for k in xrange(self.__shtimest.shape[0]):
-                cnest = np.mean(self.__shtimest[k,ind1:ind2,:,:], axis=0)
+                cnest = np.mean(self.__shtimest[k, ind1:ind2, :, :], axis=0)
                 for i in xrange(self.__chans):
                     content+= "  " + "   ".join([ '{:.4f}'.format(x) for x in cnest[i]]) + "\r\n" 
                 content += "\r\n"
@@ -515,14 +515,14 @@ class Data(object):
         '''
         tm, fr, k, k = values.shape
         for i in xrange(fr):
-            values[:,i,:,:][values[:,i,:,:]<borders] = np.nan
+            values[:, i, :, :][values[:, i, :, :]<borders] = np.nan
         return values
     
     # accessors:
     @property
     def mvar_coefficients(self):
         "Returns mvar coefficients if calculated"
-        if hasattr(self,'_Data__Ar') and hasattr(self,'_Data__Vr'):
+        if hasattr(self, '_Data__Ar') and hasattr(self, '_Data__Vr'):
             return (self.__Ar, self.__Vr)
         else:
             return (None, None)

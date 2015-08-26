@@ -36,14 +36,13 @@ def spectrum(acoef, vcoef, fs=1, resolution=100):
            and information flow in multivariate processes”
            Physical Review E 70, 050902.
     """
-    p, k, k = acoef.shape 
+    p, k, k = acoef.shape
     freqs=np.linspace(0,fs*0.5,resolution)
     A_z=np.zeros((len(freqs),k,k),complex)
     H_z=np.zeros((len(freqs),k,k),complex)
     S_z=np.zeros((len(freqs),k,k),complex)
     
     I = np.eye(k,dtype=complex)
-    
     for e,f in enumerate(freqs):
         epot = np.zeros((p,1),complex)
         ce = np.exp(-2.j*np.pi*f*(1./fs))
@@ -79,10 +78,10 @@ def spectrum_inst(acoef, vcoef, fs=1, resolution=100):
           spectrum matrix (*resolution*, k, k)
     References:
     .. [1] Erla S. et all, Multivariate Autoregressive Model with 
-           Instantaneous Effects to Improve Brain Connectivity Estimation, 
+           Instantaneous Effects to Improve Brain Connectivity Estimation,
            Int. J. Bioelectromagn. 11, 74–79 (2009).
     """
-    p, k, k = acoef.shape 
+    p, k, k = acoef.shape
     freqs=np.linspace(0,fs/2,resolution)
     A_z=np.zeros((len(freqs),k,k),complex)
     B_z=np.zeros((len(freqs),k,k),complex)
@@ -131,7 +130,7 @@ class Connect(object):
         Args:
           *data* : numpy.array
               data matrix
-          *nfft* = None : int 
+          *nfft* = None : int
               window length (if None it's N/5)
           *no* = None : int
               overlap length (if None it's N/10)
@@ -173,7 +172,7 @@ class Connect(object):
                                         nfft=None, no=None, verbose=True, **params):
         """
         Significance of short-tme versions of estimators. It base on
-        bootstrap :func:`Connect.bootstrap` for multitrial case and 
+        bootstrap :func:`Connect.bootstrap` for multitrial case and
         surrogate data :func:`Connect.surrogate` for one trial.
         Args:
           *data* : numpy.array
@@ -182,7 +181,7 @@ class Connect(object):
             number of resamples
           *alpha* = 0.05 : float
             type I error rate (significance level)
-          *nfft* = None : int 
+          *nfft* = None : int
               window length (if None it's N/5)
           *no* = None : int
               overlap length (if None it's N/10)
@@ -227,7 +226,7 @@ class Connect(object):
     def significance(self, data, Nrep=10, alpha=0.05, verbose=True, **params):
         """
         Significance of connectivity estimators. It base on
-        bootstrap :func:`Connect.bootstrap` for multitrial case and 
+        bootstrap :func:`Connect.bootstrap` for multitrial case and
         surrogate data :func:`Connect.surrogate` for one trial.
         Args:
           *data* : numpy.array
@@ -257,7 +256,7 @@ class Connect(object):
         Args:
           *signi* : numpy.array
               bootstraped values of each channel
-          *alpha* : float 
+          *alpha* : float
               type I error rate (significance level) - from 0 to 1
               - (1-*alpha*) for onesided estimators (e.g. class:`DTF`)
               - *alpha* and (1-*alpha*) for twosided (e.g. class:`PSI`)
@@ -294,7 +293,7 @@ class Connect(object):
             if occurence>0:
                 trdata = data[:,:,num]
                 if flag:
-                    rescalc = self.calculate(trdata, **params)*occurence                    
+                    rescalc = self.calculate(trdata, **params)*occurence
                     flag = False
                     continue
                 rescalc += self.calculate(trdata, **params)*occurence
@@ -440,7 +439,7 @@ class ConnectAR(Connect):
                                 nfft=None, no=None, verbose=True, **params):
         """
         Significance of short-tme versions of estimators. It base on
-        bootstrap :func:`ConnectAR.bootstrap` for multitrial case and 
+        bootstrap :func:`ConnectAR.bootstrap` for multitrial case and
         surrogate data :func:`ConnectAR.surrogate` for one trial.
         Args:
           *data* : numpy.array
@@ -454,11 +453,11 @@ class ConnectAR(Connect):
             all avaiable methods you can find in *fitting_algorithms*
           *order* = None : int
             MVAR model order, if None, it's chosen using default criterion
-          *fs* = 1 : int 
+          *fs* = 1 : int
               sampling frequency
           *resolution* = None : int 
               resolution (if None, it's 100 points)
-          *nfft* = None : int 
+          *nfft* = None : int
               window length (if None it's N/5)
           *no* = None : int
               overlap length (if None it's N/10)
@@ -509,7 +508,7 @@ class ConnectAR(Connect):
     def significance(self, data, method, order=None, resolution=None, Nrep=10, alpha=0.05, verbose=True, **params):
         """
         Significance of connectivity estimators. It base on
-        bootstrap :func:`ConnectAR.bootstrap` for multitrial case and 
+        bootstrap :func:`ConnectAR.bootstrap` for multitrial case and
         surrogate data :func:`ConnectAR.surrogate` for one trial.
         Args:
           *data* : numpy.array
@@ -523,7 +522,7 @@ class ConnectAR(Connect):
             number of resamples
           *alpha* = 0.05 : float
             type I error rate (significance level)
-          *resolution* = None : int 
+          *resolution* = None : int
               resolution (if None, it's 100 points)
           *verbose* = True : bool
             if True it prints dot on every realization, if False it's
@@ -535,9 +534,11 @@ class ConnectAR(Connect):
               significance values, check :func:`Connect.levels`
         """
         if len(data.shape)>2:
-            signific = self.bootstrap(data, method, order=order, resolution=resolution, Nrep=Nrep, alpha=alpha, verbose=verbose, **params)
+            signific = self.bootstrap(data, method, order=order, resolution=resolution,\
+                                      Nrep=Nrep, alpha=alpha, verbose=verbose, **params)
         else:
-            signific = self.surrogate(data, method, order=order, resolution=resolution, Nrep=Nrep, alpha=alpha, verbose=verbose, **params)
+            signific = self.surrogate(data, method, order=order, resolution=resolution,\
+                                      Nrep=Nrep, alpha=alpha, verbose=verbose, **params)
         return signific
 
     def bootstrap(self, data, method, order=None, Nrep=10, alpha=0.05, fs=1, verbose=True, **params):
@@ -647,7 +648,7 @@ def dtf_fun(Acoef, Vcoef, fs, resolution, generalized=False):
     .. [1] M. Kaminski, K.J. Blinowska. A new method of the description
            of the information flow. Biol.Cybern. 65:203-210, (1991).
     """
-    A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
+    A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution)
     res, k, k = A_z.shape
     DTF = np.zeros((res,k,k))
     if generalized:
@@ -678,7 +679,7 @@ def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
       *PDC* : numpy.array
           matrix with estimation results (*resolution*, k, k)
     References:
-    .. [1] Sameshima, K., Baccala, L. A., Partial directed 
+    .. [1] Sameshima, K., Baccala, L. A., Partial directed
            coherence: a new concept in neural structure determination.,
            2001, Biol. Cybern. 84, 463–474.
     """
@@ -718,7 +719,7 @@ class PartialCoh(ConnectAR):
         .. [1] G. M. Jenkins, D. G. Watts. Spectral Analysis and its 
                Applications. Holden-Day, USA, 1969
         """
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution=resolution) 
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution=resolution)
         res, k, k = A_z.shape
         PC = np.zeros((res,k,k))
         before = np.ones((k,k))
@@ -792,11 +793,11 @@ class ffDTF(ConnectAR):
           *ffDTF* : numpy.array
               matrix with estimation results (*resolution*, k, k)
         References:
-        .. [1] Korzeniewska, A.et. all. Determination of information flow direction 
-               among brain structures by a modified directed transfer function (dDTF) 
+        .. [1] Korzeniewska, A.et. all. Determination of information flow direction
+               among brain structures by a modified directed transfer function (dDTF)
                method. J. Neurosci. Methods 125, 195–207 (2003).
         """
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution)
         res, k, k = A_z.shape
         mH = np.zeros((res,k,k))
         for i in xrange(res):
@@ -833,11 +834,11 @@ class dDTF(ConnectAR):
           *dDTF* : numpy.array
               matrix with estimation results (*resolution*, k, k)
         References:
-        .. [1] Korzeniewska, A.et. all. Determination of information flow direction 
-               among brain structures by a modified directed transfer function (dDTF) 
+        .. [1] Korzeniewska, A.et. all. Determination of information flow direction
+               among brain structures by a modified directed transfer function (dDTF)
                method. J. Neurosci. Methods 125, 195–207 (2003).
         """
-        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution) 
+        A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution = resolution)
         res, k, k = A_z.shape
         mH = np.zeros((res,k,k))
         for i in xrange(res):
@@ -881,10 +882,10 @@ class iPDC(ConnectAR):
               matrix with estimation results (*resolution*, k, k)
         References:
         .. [1] Erla, S. et all Multivariate Autoregressive Model with Instantaneous
-               Effects to Improve Brain Connectivity Estimation. 
+               Effects to Improve Brain Connectivity Estimation.
                Int. J. Bioelectromagn. 11, 74–79 (2009).
         """
-        B_z = spectrum_inst(Acoef, Vcoef, fs, resolution = resolution) 
+        B_z = spectrum_inst(Acoef, Vcoef, fs, resolution = resolution)
         res, k, k = B_z.shape
         PDC = np.zeros((res,k,k))
         sigma = np.diag(Vcoef)
@@ -919,10 +920,10 @@ class iDTF(ConnectAR):
               matrix with estimation results (*resolution*, k, k)
         References:
         .. [1] Erla, S. et all, Multivariate Autoregressive Model with Instantaneous
-               Effects to Improve Brain Connectivity Estimation. 
+               Effects to Improve Brain Connectivity Estimation.
                Int. J. Bioelectromagn. 11, 74–79 (2009).
         """
-        B_z = spectrum_inst(Acoef, Vcoef, fs, resolution = resolution) 
+        B_z = spectrum_inst(Acoef, Vcoef, fs, resolution = resolution)
         res, k, k = B_z.shape
         DTF = np.zeros((res,k,k))
         for i in xrange(res):
