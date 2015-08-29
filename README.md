@@ -1,8 +1,9 @@
 ConnectiviPy
 =========================
-Python connectivity module.
-It is a part of [GSOC 2015](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/dokato/5649050225344512) project.
-Project blog is [here](http://dokato.github.io/connpy-blog/).
+Python module for connectivity analysis. You may find here implementation
+of MVAR based estimators like DTF, PDC and others like Coherency, PSI.
+Project was supported by [GSOC 2015](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/dokato/5649050225344512)
+and made under [INCF](http://incf.org/) wings.
 
 ## Content
 
@@ -31,45 +32,9 @@ Option 2: Download ZIP from the menu on the right, unzip it and go
 in terminal to that folder. Than just execute:
 
 ```
-python setup install 
+python setup.py install 
 ```
 
 ## Authors
 * Dominik Krzemiński
 * Maciej Kamiński (scientific lead)
-
-###Changelog
-
-#### 0.36
-* bug fixing
-* data loading improved
-* better plotting
-
-#### 0.34
-* short-time statistics
-* documentation in sphinx ready on readthedocs
-* visualization improved
-* conversion to trans3d
-* more examples
-
-#### 0.31
-* connectivity methods: gDTF, gPDC, Coherency, PSI, GCI
-* new mvar estimation criterion: FPE
-* statistics for multitrial (bootstrap) and normal case (surrogate data)
-* fitting mvar for multitrial
-* short-time versions of estimation
-* data plotting
-* working example
-
-#### 0.2
-* connectivity methods: DTF, PDC, Partial Coherence, iPDC
-* mvar estimation criterions
-* mvar class static
-
-#### 0.1
-* data class with simple preprocessing methods
-* mvar class almost done
-
-#### 0.05
-* project structure
-* basic fitting
