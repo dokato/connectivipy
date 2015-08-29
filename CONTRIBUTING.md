@@ -14,10 +14,10 @@ create new issue. Each issue should inlcude:
 
 * Your operating system name and version.
 * Version of `connectivipy`.
-
+```
     >> import connectivipy
     >> connectivipy.__version__
-    
+```    
 * Any details about your local setup that might be helpful in troubleshooting.
 * Detailed steps to reproduce the bug.
 
