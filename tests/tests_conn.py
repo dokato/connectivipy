@@ -42,66 +42,12 @@ Ains[2, 4, 0] = 0.9
 Ains[2, 4, 3] = -0.3
 Ains[3, 4, 2] = 0.6
 
-class DataTest(unittest.TestCase):
-    "test Data class"
-    #def test_loading(self):
-        #dt = cp.Data('test_data/testsml.raw',data_info='sml')
-        #self.assertEquals(dt.fs,256)
-        #self.assertEquals(len(dt.channelnames),2)
-        #dd = cp.Data('test_data/m.mat' ,data_info='m')
-        #self.assertEquals(dd.data.shape[0],3)
-        #self.assertEquals(dd.data.shape[1],5)
-
-    def test_resample(self):
-        do = cp.Data(np.random.randn(3,100, 4), fs=10)
-        do.resample(5)
-        self.assertEquals(do.fs,5)
-
-    def test_conn(self):
-        ys = mvar_gen(A,10**3)
-        dat = cp.Data(ys)
-        with self.assertRaises(AttributeError):
-            dat.conn('dtf')
-
-    def test_conn2(self):
-        ys = mvar_gen(A,10**3)
-        dat = cp.Data(ys)
-        dat.fit_mvar(2,'vm')
-        estm = dat.short_time_conn('dtf', nfft=100, no=10)
-        stst = dat.short_time_significance(Nrep=100,alpha=0.5, verbose=False)
-        self.assertTrue(np.all(stst<=1))
-
-class MvarTest(unittest.TestCase):
-    def test_fitting(self):
-        "test MVAR fitting"
-        ys = mvar_gen(A,10**4)
-        avm,vvm = vieiramorf(ys,2)
-        ans,vns = nutallstrand(ys,2)
-        ayw,vyw = yulewalker(ys,2)
-        #check dimesions
-        self.assertEquals(A.shape,avm.shape)
-        self.assertEquals(A.shape,ans.shape)
-        self.assertEquals(A.shape,ayw.shape)
-        #check values
-        self.assertTrue(np.allclose(A,avm,rtol=1e-01, atol=1e-01))
-        self.assertTrue(np.allclose(A,ayw,rtol=1e-01, atol=1e-01))
-        self.assertTrue(np.allclose(A,ans,rtol=1e-01, atol=0.5))
-    
-    def test_orders(self):
-        m = Mvar()
-        ys = mvar_gen(A,10**4)
-        crmin,critpl = m.order_schwartz(ys, p_max=20, method='yw')
-        self.assertEqual(crmin, 2)
-        crmin,critpl = m.order_akaike(ys, p_max=20, method='yw')
-        self.assertEqual(crmin, 2)
-        crmin,critpl = m.order_hq(ys, p_max=20, method='yw')
-        self.assertEqual(crmin, 2)
+ys = mvar_gen(A,10**4)
 
 class ConnTest(unittest.TestCase):
     "test connectivity class Conn"
     
     def test_spectrum(self):
-        ys = mvar_gen(A,10**4)
         avm,vvm = vieiramorf(ys,2)
         a,h,s = spectrum(avm,vvm,512)
         s13 = np.abs(s[:,1,3])
@@ -109,23 +55,27 @@ class ConnTest(unittest.TestCase):
         self.assertAlmostEqual(fq[np.argmax(s13)],65, delta=1.0)
 
     def test_dtf(self):
-        ys = mvar_gen(A,10**4)
         ans,vns = nutallstrand(ys,2)
         dt = DTF() 
         dtf = dt.calculate(ans,vns, 128)
         self.assertTrue(np.allclose(np.sum(np.abs(dtf)**2,axis=2),1))
 
+    def test_idtf(self):
+        ys = mvar_gen_inst(Ains,10**4)
+        ans, vns = yulewalker(ys,4)
+        dt = iDTF() 
+        idtf = dt.calculate(ans,vns, 128)
+        self.assertTrue(np.allclose(np.sum(np.abs(idtf)**2,axis=2),1))
+
     def test_pdc(self):
-        ys = mvar_gen(A,10**4)
         ans,vns = vieiramorf(ys,2)
         dt = PDC() 
         pdc = dt.calculate(ans,vns, 128)
         self.assertTrue(np.allclose(np.sum(np.abs(pdc)**2,axis=1),1))
 
     def test_gpdc(self):
-        ys = mvar_gen(A,10**4)
         ans,vns = vieiramorf(ys,2)
-        dt = gPDC() 
+        dt = gPDC()
         pdc = dt.calculate(ans,vns, 128)
         self.assertTrue(np.allclose(np.sum(np.abs(pdc)**2,axis=1),1))
 
@@ -135,6 +85,27 @@ class ConnTest(unittest.TestCase):
         dt = iPDC() 
         ipdc = dt.calculate(ans,vns, 128)
         self.assertTrue(np.allclose(np.sum(np.abs(ipdc)**2,axis=1),1))
+
+    def test_coherency(self):
+        fs = 128.
+        ch = Coherency()
+        chv = ch.calculate(ys, cnfft=100 , cno=10)
+        fr = np.linspace(0, int(fs/2), chv.shape[0])
+        self.assertTrue(10<fr[np.argmax(chv[:,0,1])]<20)
+
+    def test_psi(self):
+        fs = 128.
+        ps = PSI()
+        psval = ps.calculate(ys, psinfft=200, psino=10)
+        self.assertTrue(np.sum(psval[:, 0, 1])==-np.sum(psval[:, 1, 0]))
+        self.assertTrue(np.sum(psval[:, 0, 2])==-np.sum(psval[:, 2, 0]))
+
+    def test_gci(self):
+        gc = GCI()
+        gcval = gc.calculate(ys)
+        gc_d = abs(gcval[:,1,0][0])+abs(gcval[:,2,0][0])+abs(gcval[:,2,1][0])
+        gc_u = abs(gcval[:,0,1][0])+abs(gcval[:,0,2][0])+abs(gcval[:,1,2][0])
+        self.assertTrue(gc_d > gc_u)
 
     def test_twosided(self):
         gci = GCI()
