@@ -61,7 +61,7 @@ In few simple steps you can set up `connectivipy` on your machine:
 
 5. Submit a pull request through the GitHub website.
 
-Remeber about writing test and validating your changes i.e. using
+Remember about writing test and validating your changes i.e. using
 nosetests. To run a subset of tests just type:
 
 	$ nosetests tests
@@ -76,4 +76,4 @@ Before you submit a pull request, check that it meets these guidelines:
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring. Remember about
-   completeing CHANGELOG.md with your contribution.
+   completing CHANGELOG.md with your contribution.

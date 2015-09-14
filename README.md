@@ -1,7 +1,9 @@
 ConnectiviPy
 =========================
 Python module for connectivity analysis. You may find here implementation
-of MVAR based estimators like DTF, PDC and others like Coherency, PSI.
+of MVAR based estimators like DTF, PDC and also Coherency, PSI. For more
+information visit documentation page.
+
 Project was supported by [GSOC 2015](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/dokato/5649050225344512)
 and made under [INCF](http://incf.org/) wings.
 
@@ -16,7 +18,8 @@ BSD 2-clause
 
 ## Documentation
 
-Visit [ReadTheDocs](http://connectivipy.readthedocs.org/).
+Visit [ReadTheDocs](http://connectivipy.readthedocs.org/) for detailed
+documentation and tutorials.
 
 ## Installation
 
