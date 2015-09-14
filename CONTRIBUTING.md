@@ -59,7 +59,7 @@ In few simple steps you can set up `connectivipy` on your machine:
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-5. Check yout code style using flake8.
+5. Check your code style using flake8.
 
 6. Submit a pull request through the GitHub website.
 

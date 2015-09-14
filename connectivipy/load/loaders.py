@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import print_function
 import numpy as np
 from xml.dom.minidom import parse
+from six.moves import range
 
 def signalml_loader(file_name):
     '''
@@ -42,7 +45,7 @@ def give_xml_info(path):
     try:
         doc = parse(path)
     except IOError or xml.parsers.expat.ExpatError:
-        print 'Give a right path'
+        print('Give a right path')
     info = ['samplingFrequency','channelCount', 'firstSampleTimestamp','sampleCount']
     xml_data = {}
 
@@ -52,7 +55,7 @@ def give_xml_info(path):
     chann_names, calibr_coef = [], []
     chann_lab = doc.getElementsByTagName('rs:'+'channelLabels')[0]
     calibr_gain = doc.getElementsByTagName('rs:'+'calibrationGain')[0]
-    for j in xrange(int(xml_data['channelCount'])):
+    for j in range(int(xml_data['channelCount'])):
         chann_names.append(chann_lab.getElementsByTagName('rs:'+'label')[j].childNodes[0].data)
         calibr_coef.append(float(calibr_gain.getElementsByTagName('rs:'+'calibrationParam')[j].childNodes[0].data))
     xml_data['channelNames'] = chann_names 

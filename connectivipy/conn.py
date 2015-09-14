@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 #! /usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import numpy as np
 from abc import ABCMeta, abstractmethod
-from mvar.comp import ldl
-from mvarmodel import Mvar
+from .mvar.comp import ldl
+from .mvarmodel import Mvar
 import scipy.stats as st
+from six.moves import map
+import six
+from six.moves import range
+from six.moves import zip
 
 ########################################################################
 # Spectrum functions:
@@ -48,7 +54,7 @@ def spectrum(acoef, vcoef, fs=1, resolution=100):
         epot = np.zeros((p, 1), complex)
         ce = np.exp(-2.j*np.pi*f*(1./fs))
         epot[0] = ce
-        for k in xrange(1, p):
+        for k in range(1, p):
             epot[k] = epot[k-1]*ce
         A_z[e] = I - np.sum([epot[x]*acoef[x] for x in range(p)], axis=0)
         H_z[e] = np.linalg.inv(A_z[e])
@@ -95,7 +101,7 @@ def spectrum_inst(acoef, vcoef, fs=1, resolution=100):
         epot = np.zeros((p, 1), complex)
         ce = np.exp(-2.j*np.pi*f*(1./fs))
         epot[0] = ce
-        for k in xrange(1, p):
+        for k in range(1, p):
             epot[k] = epot[k-1]*ce
         B_z[e] = I - b0 - np.sum([epot[x]*bcoef[x] for x in range(p)], axis=0)
     return B_z
@@ -105,13 +111,12 @@ def spectrum_inst(acoef, vcoef, fs=1, resolution=100):
 ########################################################################
 
 
-class Connect(object):
+class Connect(six.with_metaclass(ABCMeta, object)):
     """
     Abstract class governing calculation of various connectivity estimators
     with concrete methods: *short_time*, *significance* and
     abstract *calculate*.
     """
-    __metaclass__ = ABCMeta
 
     def __init__(self):
         self.values_range = [None, None]  # normalization bands
@@ -152,7 +157,7 @@ class Connect(object):
             nfft = int(N/5)
         if not no:
             no = int(N/10)
-        slices = xrange(0, N, int(nfft-no))
+        slices = range(0, N, int(nfft-no))
         for e, i in enumerate(slices):
             if i+nfft >= N:
                 if trls:
@@ -208,7 +213,7 @@ class Connect(object):
             nfft = int(N/5)
         if not no:
             no = int(N/10)
-        slices = xrange(0, N, int(nfft-no))
+        slices = range(0, N, int(nfft-no))
         if self.two_sided:
             signi_st = np.zeros((len(slices), 2, k, k))
         else:
@@ -320,9 +325,9 @@ class Connect(object):
           *levelsigni* : numpy.array
               significance values, check :func:`Connect.levels`
         """
-        for i in xrange(Nrep):
+        for i in range(Nrep):
             if verbose:
-                print '.',
+                print('.', end=' ')
             if i == 0:
                 tmpsig = self.__calc_multitrial(data, **params)
                 fres, k, k = tmpsig.shape
@@ -331,7 +336,7 @@ class Connect(object):
             else:
                 signi[i] = self.__calc_multitrial(data, **params)
         if verbose:
-            print '|'
+            print('|')
         return self.levels(signi, alpha, k)
 
     def surrogate(self, data, Nrep=100, alpha=0.05, verbose=True, **params):
@@ -356,10 +361,10 @@ class Connect(object):
         """
         k, N = data.shape
         shdata = data.copy()
-        for i in xrange(Nrep):
+        for i in range(Nrep):
             if verbose:
-                print '.',
-            map(np.random.shuffle, shdata)
+                print('.', end=' ')
+            list(map(np.random.shuffle, shdata))
             if i == 0:
                 rtmp = self.calculate(data, **params)
                 reskeeper = np.zeros((Nrep, rtmp.shape[0], k, k))
@@ -367,18 +372,16 @@ class Connect(object):
                 continue
             reskeeper[i] = self.calculate(data, **params)
         if verbose:
-            print '|'
+            print('|')
         return self.levels(reskeeper, alpha, k)
 
 
-class ConnectAR(Connect):
+class ConnectAR(six.with_metaclass(ABCMeta, Connect)):
     """
     Inherits from *Connect* class and governs calculation of various
     connectivity estimators basing on MVAR model methods. It overloads
     *short_time*, *significance* methods but *calculate* remains abstract.
     """
-
-    __metaclass__ = ABCMeta
 
     def __init__(self):
         super(ConnectAR, self).__init__()
@@ -423,7 +426,7 @@ class ConnectAR(Connect):
             nfft = int(N/5)
         if not no:
             no = int(N/10)
-        slices = xrange(0, N, int(nfft-no))
+        slices = range(0, N, int(nfft-no))
         for e, i in enumerate(slices):
             if i+nfft >= N:
                 if trls:
@@ -490,7 +493,7 @@ class ConnectAR(Connect):
             nfft = int(N/5)
         if not no:
             no = int(N/10)
-        slices = xrange(0, N, int(nfft-no))
+        slices = range(0, N, int(nfft-no))
         signi_st = np.zeros((len(slices), k, k))
         for e, i in enumerate(slices):
             if i+nfft >= N:
@@ -575,9 +578,9 @@ class ConnectAR(Connect):
         resolution = 100
         if 'resolution' in params and params['resolution']:
             resolution = params['resolution']
-        for i in xrange(Nrep):
+        for i in range(Nrep):
             if verbose:
-                print '.',
+                print('.', end=' ')
             if i == 0:
                 tmpsig = self.__calc_multitrial(data, method, order, fs, resolution)
                 fres, k, k = tmpsig.shape
@@ -586,7 +589,7 @@ class ConnectAR(Connect):
             else:
                 signi[i] = self.__calc_multitrial(data, method, order, fs, resolution)
         if verbose:
-            print '|'
+            print('|')
         return self.levels(signi, alpha, k)
 
     def surrogate(self, data, method, Nrep=10, alpha=0.05, order=None, fs=1, verbose=True, **params):
@@ -619,10 +622,10 @@ class ConnectAR(Connect):
         resolution = 100
         if 'resolution' in params and params['resolution']:
             resolution = params['resolution']
-        for i in xrange(Nrep):
+        for i in range(Nrep):
             if verbose:
-                print '.',
-            map(np.random.shuffle, shdata)
+                print('.', end=' ')
+            list(map(np.random.shuffle, shdata))
             ar, vr = Mvar().fit(shdata, order, method)
             if i == 0:
                 rtmp = self.calculate(ar, vr, fs, resolution)
@@ -631,7 +634,7 @@ class ConnectAR(Connect):
                 continue
             reskeeper[i] = self.calculate(ar, vr, fs, resolution)
         if verbose:
-            print '|'
+            print('|')
         return self.levels(reskeeper, alpha, k)
 
 ############################
@@ -667,7 +670,7 @@ def dtf_fun(Acoef, Vcoef, fs, resolution, generalized=False):
         sigma = np.diag(Vcoef)
     else:
         sigma = np.ones(k)
-    for i in xrange(res):
+    for i in range(res):
         mH = sigma*np.dot(H_z[i], H_z[i].T.conj()).real
         DTF[i] = (np.sqrt(sigma)*np.abs(H_z[i]))/np.sqrt(np.diag(mH)).reshape((k, 1))
     return DTF
@@ -700,7 +703,7 @@ def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
     res, k, k = A_z.shape
     PDC = np.zeros((res, k, k))
     sigma = np.diag(Vcoef)
-    for i in xrange(res):
+    for i in range(res):
         mA = (1./sigma[:, None])*np.dot(A_z[i].T.conj(), A_z[i]).real
         PDC[i] = np.abs(A_z[i]/np.sqrt(sigma))/np.sqrt(np.diag(mA))
     return PDC
@@ -739,7 +742,7 @@ class PartialCoh(ConnectAR):
         before = np.ones((k, k))
         before[0::2, :] *= -1
         before[:, 0::2] *= -1
-        for i in xrange(res):
+        for i in range(res):
             D_z = np.linalg.inv(S_z[i])
             dd = np.tile(np.diag(D_z), (k, 1))
             mD = (dd*dd.T).real
@@ -819,11 +822,11 @@ class ffDTF(ConnectAR):
         A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution=resolution)
         res, k, k = A_z.shape
         mH = np.zeros((res, k, k))
-        for i in xrange(res):
+        for i in range(res):
             mH[i] = np.abs(np.dot(H_z[i], H_z[i].T.conj()))
         mHsum = np.sum(mH, axis=0)
         ffDTF = np.zeros((res, k, k))
-        for i in xrange(res):
+        for i in range(res):
             ffDTF[i] = (np.abs(H_z[i]).T/np.sqrt(np.diag(mHsum))).T
         return ffDTF
 
@@ -861,14 +864,14 @@ class dDTF(ConnectAR):
         A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution=resolution)
         res, k, k = A_z.shape
         mH = np.zeros((res, k, k))
-        for i in xrange(res):
+        for i in range(res):
             mH[i] = np.abs(np.dot(H_z[i], H_z[i].T.conj()))
         mHsum = np.sum(mH, axis=0)
         dDTF = np.zeros((res, k, k))
         before = np.ones((k, k))
         before[0::2, :] *= -1
         before[:, 0::2] *= -1
-        for i in xrange(res):
+        for i in range(res):
             D_z = np.linalg.inv(S_z[i])
             dd = np.tile(np.diag(D_z), (k, 1))
             mD = (dd*dd.T).real
@@ -909,7 +912,7 @@ class iPDC(ConnectAR):
         B_z = spectrum_inst(Acoef, Vcoef, fs, resolution=resolution)
         res, k, k = B_z.shape
         PDC = np.zeros((res, k, k))
-        for i in xrange(res):
+        for i in range(res):
             mB = np.dot(B_z[i].T.conj(), B_z[i]).real
             PDC[i] = np.abs(B_z[i])/np.sqrt(np.diag(mB))
         return PDC
@@ -947,7 +950,7 @@ class iDTF(ConnectAR):
         B_z = spectrum_inst(Acoef, Vcoef, fs, resolution=resolution)
         res, k, k = B_z.shape
         DTF = np.zeros((res, k, k))
-        for i in xrange(res):
+        for i in range(res):
             Hb_z = np.linalg.inv(B_z[i])
             mH = np.dot(Hb_z, Hb_z.T.conj()).real
             DTF[i] = np.abs(Hb_z)/np.sqrt(np.diag(mH)).reshape((k, 1))
@@ -994,7 +997,7 @@ class Coherency(Connect):
         if cno is None:
             cno = int(N/10)
         winarr = window(cnfft)
-        slices = xrange(0, N, int(cnfft-cno))
+        slices = range(0, N, int(cnfft-cno))
         ftsliced = np.zeros((len(slices), k, int(cnfft/2)+1), complex)
         for e, i in enumerate(slices):
             if i+cnfft >= N:
@@ -1005,7 +1008,7 @@ class Coherency(Connect):
                 ftsliced[e] = np.fft.rfft(data[:, i:i+cnfft]*winarr, axis=1)
         ctop = np.zeros((len(slices), k, k, int(cnfft/2)+1), complex)
         cdown = np.zeros((len(slices), k, int(cnfft/2)+1))
-        for i in xrange(len(slices)):
+        for i in range(len(slices)):
             c1 = ftsliced[i, :, :].reshape((k, 1, int(cnfft/2)+1))
             c2 = ftsliced[i, :, :].conj().reshape((1, k, int(cnfft/2)+1))
             ctop[i] = c1*c2
@@ -1058,7 +1061,7 @@ class PSI(Connect):
         cohval = coh.calculate(data, cnfft=psinfft, cno=psino, window=window, im=True)
         fq_bands = np.arange(0, int(psinfft/2)+1, band_width)
         psi = np.zeros((len(fq_bands)-1, k, k))
-        for f in xrange(len(fq_bands)-1):
+        for f in range(len(fq_bands)-1):
             ctmp = cohval[fq_bands[f]:fq_bands[f+1], :, :]
             psi[f] = np.imag(np.sum(ctmp[:-1, :, :].conj()*ctmp[1:, :, :], axis=0))
         return psi
@@ -1095,8 +1098,8 @@ class GCI(Connect):
         k, N = data.shape
         arfull, vrfull = Mvar().fit(data, gciorder, gcimethod)
         gcval = np.zeros((k, k))
-        for i in xrange(k):
-            arix = [j for j in xrange(k) if i != j]
+        for i in range(k):
+            arix = [j for j in range(k) if i != j]
             ar_i, vr_i = Mvar().fit(data[arix, :], gciorder, gcimethod)
             for e, c in enumerate(arix):
                 gcval[c, i] = np.log(vrfull[i, i]/vr_i[e, e])

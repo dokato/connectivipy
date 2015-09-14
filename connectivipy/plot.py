@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 #! /usr/bin/env python
 
+from __future__ import absolute_import
 import numpy as np
 import matplotlib.pyplot as plt
+from six.moves import range
 
 # plain plotting from values
 def plot_conn(values, name='', fs=1, ylim=None, xlim=None, show=True):
@@ -34,12 +36,12 @@ def plot_conn(values, name='', fs=1, ylim=None, xlim=None, show=True):
         xlim = [0, np.max(freqs)]
     if not ylim:
             ylim = [np.min(values), np.max(values)]
-    for i in xrange(k):
-        for j in xrange(k):
+    for i in range(k):
+        for j in range(k):
             axes[i, j].fill_between(freqs, values[:, i, j], 0)
             axes[i, j].set_xlim(xlim)
             axes[i, j].set_ylim(ylim)
-    plt.suptitle(name,y=0.98)
+    plt.suptitle(name, y=0.98)
     plt.tight_layout()
     plt.subplots_adjust(top=0.92)
     if show:

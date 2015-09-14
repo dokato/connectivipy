@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 #! /usr/bin/env python
 
+from __future__ import absolute_import
 import numpy as np
+from six.moves import range
 
 
 def mvar_gen(Acf, npoints, omit=500):
@@ -23,7 +25,7 @@ def mvar_gen(Acf, npoints, omit=500):
     mu = np.zeros(chn)
     for i in range(p, npoints+omit):
         eps = np.random.multivariate_normal(mu, sigma)
-        for k in xrange(0, p):
+        for k in range(0, p):
             yt = y[:, i-k-1].reshape((chn, 1))
             y[:, i] += np.squeeze(np.dot(Acf[k], yt))
         y[:, i] += eps
@@ -51,7 +53,7 @@ def mvar_gen_inst(Acf, npoints, omit=500):
     mu = np.zeros(chn)
     for i in range(p, npoints+omit):
         eps = np.random.multivariate_normal(mu, sigma)
-        for k in xrange(0, p):
+        for k in range(0, p):
             yt = y[:, i-k].reshape((chn, 1))
             y[:, i] += np.squeeze(np.dot(Acf[k], yt))
         y[:, i] += eps
@@ -77,7 +79,7 @@ def meanncov(x, y=[], p=0, norm=True):
           covariance matrix
     """
     chn, N, trls = x.shape
-    for tr in xrange(trls):
+    for tr in range(trls):
         if tr == 0:
             if not len(y):
                 mcov = ncov(x[:, :, tr], p=p, norm=norm)
@@ -261,8 +263,8 @@ def yulewalker(y, pmax=1):
     q = np.zeros((pmax*chn, pmax*chn))
     acof = np.empty((pmax, chn, chn))
     for p in range(pmax):
-        q[p*chn:(p+1)*chn, :] = np.hstack([rr_f[:, :, x].T if x >= 0 else rr_b[:, :, abs(x)].T for x in xrange(-1*p, pmax-p)])
-    req = np.vstack(rr_b[:, :, x].T for x in xrange(1, pmax+1))
+        q[p*chn:(p+1)*chn, :] = np.hstack([rr_f[:, :, x].T if x >= 0 else rr_b[:, :, abs(x)].T for x in range(-1*p, pmax-p)])
+    req = np.vstack(rr_b[:, :, x].T for x in range(1, pmax+1))
     a_solved = np.linalg.solve(q, req)
     var = np.copy(rr_f[:, :, 0])
     for p in range(pmax):

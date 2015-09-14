@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 #! /usr/bin/env python
 
+from __future__ import absolute_import
 import unittest
 import numpy as np 
 import connectivipy as cp
-from  connectivipy.mvar.fitting import *
-from  connectivipy.mvar.comp import ldl
-from  connectivipy.mvarmodel import Mvar
+from connectivipy.mvar.fitting import *
+from connectivipy.mvar.comp import ldl
+from connectivipy.mvarmodel import Mvar
 from connectivipy.conn import *
 
 #Parameters from Sameshima, Baccala (2001) Fig. 3a

@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 #! /usr/bin/env python
 
+from __future__ import absolute_import
 import inspect
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as si
 import scipy.signal as ss
-from load.loaders import signalml_loader
-from mvarmodel import Mvar
-from conn import *
+from .load.loaders import signalml_loader
+from .mvarmodel import Mvar
+from .conn import *
+from six.moves import range
 
 
 class Data(object):
@@ -91,7 +93,7 @@ class Data(object):
             the IIR filter.
         '''
         if self.__multitrial:
-            for r in xrange(self.__multitrial):
+            for r in range(self.__multitrial):
                 self.__data[:, :, r] = ss.filtfilt(b, a, self.__data[:, :, r])
         else:
             self.__data = ss.filtfilt(b, a, self.__data)
@@ -144,7 +146,7 @@ class Data(object):
             if not self.__multitrial:
                 self.__estim = connobj.calculate(self.__data, **params)
             else:
-                for r in xrange(self.__multitrial):
+                for r in range(self.__multitrial):
                     if r == 0:
                         self.__estim = connobj.calculate(self.__data[:, :, r], **params)
                         continue
@@ -193,7 +195,7 @@ class Data(object):
                                                  resol=self._parameters["resolution"])
         else:
             if self.__multitrial:
-                for r in xrange(self.__multitrial):
+                for r in range(self.__multitrial):
                     if r == 0:
                         self.__shtimest = connobj.short_time(self.__data[:, :, r], nfft=nfft, no=no, **newparams)
                         continue
@@ -308,7 +310,7 @@ class Data(object):
         else:
             plotdata = self.__data
         fig, axes = plt.subplots(self.__chans, 1)
-        for i in xrange(self.__chans):
+        for i in range(self.__chans):
             axes[i].plot(time, plotdata[i, :], 'g')
             if self.__channames:
                 axes[i].set_title(self.__channames[i])
@@ -352,8 +354,8 @@ class Data(object):
                 two_sides = True
         else:
             flag_sig = False
-        for i in xrange(self.__chans):
-            for j in xrange(self.__chans):
+        for i in range(self.__chans):
+            for j in range(self.__chans):
                 if self.__channames and i == 0:
                     axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
                 if self.__channames and j == 0:
@@ -409,15 +411,15 @@ class Data(object):
         # ticks_freqs = [0, self.__length//self.__fs]
         # mask diagonal values to not contaminate the plot
         mask = np.zeros(shtvalues.shape)
-        for i in xrange(self.__chans):
+        for i in range(self.__chans):
             mask[:, :, i, i] = 1
         masked_shtimest = np.ma.array(shtvalues, mask=mask)
         dtmax = np.nanmax(masked_shtimest)*percmax
         dtmin = np.nanmin(masked_shtimest)
         cmap = plt.get_cmap('rainbow')
         cmap.set_bad(color='w', alpha=1)
-        for i in xrange(self.__chans):
-            for j in xrange(self.__chans):
+        for i in range(self.__chans):
+            for j in range(self.__chans):
                 if self.__channames and i == 0:
                     axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
                 if self.__channames and j == 0:
@@ -471,13 +473,13 @@ class Data(object):
         if mod == 0:
             assert hasattr(self, '_Data__estim') is True, "No valid data! Use calculation method first."
             cnest = np.mean(self.__estim[ind1:ind2, :, :], axis=0)
-            for i in xrange(self.__chans):
+            for i in range(self.__chans):
                 content += "  " + "   ".join(['{:.4f}'.format(x) for x in cnest[i]]) + "\r\n"
         elif mod == 1:
             assert hasattr(self, '_Data__shtimest') is True, "No valid data! Use calculation method first."
-            for k in xrange(self.__shtimest.shape[0]):
+            for k in range(self.__shtimest.shape[0]):
                 cnest = np.mean(self.__shtimest[k, ind1:ind2, :, :], axis=0)
-                for i in xrange(self.__chans):
+                for i in range(self.__chans):
                     content += "  " + "   ".join(['{:.4f}'.format(x) for x in cnest[i]]) + "\r\n"
                 content += "\r\n"
         with open(filename, 'wb') as fl:
@@ -519,7 +521,7 @@ class Data(object):
             where values were less than appropieate value from *borders*
         '''
         tm, fr, k, k = values.shape
-        for i in xrange(fr):
+        for i in range(fr):
             values[:, i, :, :][values[:, i, :, :] < borders] = np.nan
         return values
 
