@@ -7,9 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as si
 import scipy.signal as ss
-from .load.loaders import signalml_loader
-from .mvarmodel import Mvar
-from .conn import *
+from mvarmodel import Mvar
+from conn import *
+from load.loaders import signalml_loader
 from six.moves import range
 
 

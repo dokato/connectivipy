@@ -3,13 +3,15 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+
 import numpy as np
-from abc import ABCMeta, abstractmethod
-from .mvar.comp import ldl
-from .mvarmodel import Mvar
 import scipy.stats as st
-from six.moves import map
+from abc import ABCMeta, abstractmethod
+from mvarmodel import Mvar
+from mvar.comp import ldl
+
 import six
+from six.moves import map
 from six.moves import range
 from six.moves import zip
 

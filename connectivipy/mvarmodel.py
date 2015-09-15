@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import
 import numpy as np
-from .mvar.fitting import *
+from mvar.fitting import *
 from six.moves import range
 
 
