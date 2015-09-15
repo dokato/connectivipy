@@ -18,6 +18,7 @@ opposite to other packages it allows you to work with all types of data,
 not only biomedical. Calculations base on numpy and scipy what provides
 good efficiency.*
 
+Tested under Python >=2.7 and >=3.3.
 
 Contents:
 ######
