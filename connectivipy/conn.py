@@ -7,8 +7,8 @@ from __future__ import print_function
 import numpy as np
 import scipy.stats as st
 from abc import ABCMeta, abstractmethod
-from mvarmodel import Mvar
-from mvar.comp import ldl
+from .mvar.comp import ldl
+from .mvarmodel import Mvar
 
 import six
 from six.moves import map
