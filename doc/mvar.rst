@@ -7,13 +7,13 @@ MVAR class
 ########
 *Tools for MVAR parameters fitting*
 
-.. automodule:: mvarmodel
+.. automodule:: connectivipy.mvarmodel
    :members:
 
 Algorithms
 ########
 
-.. automodule:: mvar.fitting
+.. automodule:: connectivipy.mvar.fitting
    :members:
 
 Additional
@@ -21,5 +21,5 @@ Additional
 
 *Additional tools*
 
-.. automodule:: mvar.comp
+.. automodule:: connectivipy.mvar.comp
    :members:

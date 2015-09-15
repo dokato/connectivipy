@@ -175,7 +175,7 @@ Instantaneous
     import connectivipy as cp
 
     """
-    This example reproduce simulation from article:
+    This example reproduces simulation from article:
     Erla S et all (2009) "Multivariate autoregressive model with
                           instantaneous effects to improve brain
                           connectivity estimation"

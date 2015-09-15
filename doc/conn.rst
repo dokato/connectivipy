@@ -5,5 +5,5 @@ Connectvity
 
 Connectivity methods classes.
 
-.. automodule:: conn
+.. automodule:: connectivipy.conn
    :members:
