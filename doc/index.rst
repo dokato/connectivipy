@@ -31,6 +31,9 @@ Contents:
 Tutorials:
 
 .. toctree::
+    :maxdepth: 1
+
+    install
     tutorial
 
 Credits:
