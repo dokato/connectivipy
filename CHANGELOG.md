@@ -1,6 +1,9 @@
 Changelog
 ===============
 
+#### 0.39
+* python3 support
+
 #### 0.36
 * bug fixing
 * data loading improved
