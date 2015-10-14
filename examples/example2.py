@@ -29,12 +29,14 @@ mv = cp.Mvar
 
 # find best model order using Vieira-Morf algorithm
 best, crit = mv.order_akaike(y, 15, 'vm')
-plt.plot(1+np.arange(len(crit)), crit, 'g')
+plt.plot(1+np.arange(len(crit[1:])), crit[1:], 'g')
 plt.show()
+print crit 
 print best
 # here we know that this is 3 but in real-life cases
 # we are always uncertain about it
 
+'''
 # now let's fit parameters to the signal
 av, vf = mv.fit(y, best, 'vm')
 
@@ -48,3 +50,4 @@ dtfval = dtf.calculate(av, vf, 128)
 print cp.conn.conn_estim_dc.keys()
 
 cp.plot_conn(dtfval, 'DTF values', fs)
+'''
