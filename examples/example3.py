@@ -35,7 +35,7 @@ bcf[3, 4, 2] = 0.6
 # now we build a corresponding MVAR process without instantenous effect
 L = np.linalg.inv(np.eye(5)-bcf[0])
 acf = np.zeros((3, 5, 5))
-for i in xrange(3):
+for i in range(3):
     acf[i] = np.dot(L, bcf[i+1])
 
 # generate 5-channel signals from matrix above
@@ -63,8 +63,8 @@ def plot_double_conn(values_a, values_b, name='', fs=1, ylim=None, xlim=None, sh
         xlim = [0, np.max(freqs)]
     if not ylim:
         ylim = [0, 1]
-    for i in xrange(k):
-        for j in xrange(k):
+    for i in range(k):
+        for j in range(k):
             axes[i, j].fill_between(freqs, values_b[:, i, j], 0, facecolor='red', alpha=0.5)
             axes[i, j].fill_between(freqs, values_a[:, i, j], 0, facecolor='black', alpha=0.5)
             axes[i, j].set_xlim(xlim)

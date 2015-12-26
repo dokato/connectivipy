@@ -31,7 +31,7 @@ mv = cp.Mvar
 best, crit = mv.order_akaike(y, 15, 'vm')
 plt.plot(1+np.arange(len(crit)), crit, 'g')
 plt.show()
-print best
+print(best)
 # here we know that this is 3 but in real-life cases
 # we are always uncertain about it
 
@@ -39,12 +39,12 @@ print best
 av, vf = mv.fit(y, best, 'vm')
 
 # and check whether values are correct +/- 0.01
-print np.allclose(acf, av, 0.01, 0.01)
+print(np.allclose(acf, av, 0.01, 0.01))
 
 # now we can calculate Directed Transfer Function from the data
 dtf = cp.conn.DTF()
 dtfval = dtf.calculate(av, vf, 128)
 # all possible methods are visible in that dictionary:
-print cp.conn.conn_estim_dc.keys()
+print(cp.conn.conn_estim_dc.keys())
 
 cp.plot_conn(dtfval, 'DTF values', fs)

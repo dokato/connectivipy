@@ -33,12 +33,9 @@ class Data(object):
     def __init__(self, data, fs=1., chan_names=[], data_info=''):
         self.__fs = fs
         self.__data = self._load_file(data, data_info)
+        self.__channames = ["x"+str(i) for i in range(self.__chans)]
         if self.__data.shape[0] == len(chan_names):
             self.__channames = chan_names
-        elif hasattr(self, '_Data__fs'):
-            pass
-        else:
-            self.__channames = ["x"+str(i) for i in range(self.__chans)]
         self.data_info = data_info
         self._parameters = {}
         self._parameters["mvar"] = False
