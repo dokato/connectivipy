@@ -7,6 +7,8 @@ information visit documentation page.
 Project was supported by [GSOC 2015](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/dokato/5649050225344512)
 and made under [INCF](http://incf.org/) wings.
 
+[![Build Status](https://travis-ci.org/dokato/connectivipy.svg?branch=master)](https://travis-ci.org/dokato/connectivipy)
+
 ## Content
 
 * Data - data wrapper
