@@ -8,7 +8,6 @@ import connectivipy as cp
 from  connectivipy.mvar.fitting import *
 from  connectivipy.mvarmodel import Mvar
 from connectivipy.conn import *
-import pylab as py
 
 #Parameters from Sameshima, Baccala (2001) Fig. 3a
 A = np.zeros((2, 5, 5))
@@ -34,10 +33,18 @@ class DataTest(unittest.TestCase):
         #self.assertEquals(dd.data.shape[0],3)
         #self.assertEquals(dd.data.shape[1],5)
 
+    def test_electrodes_selection(self):
+        dd = cp.Data(np.random.randn(5,100, 4), fs=10)
+        with self.assertRaises(ValueError):
+           dd.select_channels([0,2,5])
+        dd.select_channels([0,1,3])
+        self.assertEquals(dd.channelsnr, 3)
+        self.assertEquals(dd.data.shape[0], 3)
+
     def test_resample(self):
-        do = cp.Data(np.random.randn(3,100, 4), fs=10)
-        do.resample(5)
-        self.assertEquals(do.fs,5)
+        dd = cp.Data(np.random.randn(3,100, 4), fs=10)
+        dd.resample(5)
+        self.assertEquals(dd.fs,5)
 
     def test_conn(self):
         dat = cp.Data(ys)

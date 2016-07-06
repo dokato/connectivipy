@@ -89,11 +89,11 @@ class Data(object):
         Selecting channels to plot or further analysis.
 
         Args:
-          *channels* : list
+          *channels* : list(int)
             List of channel indices. If None all channels are taken
             into account.
         '''
-        if np.max(channels) > self.__chans_number_original:
+        if np.max(channels) >= self.__chans_number_original:
             raise ValueError("Indices are not correct")
         if channels is None:
             self._channels = np.arange(self.__chans_number_original)
@@ -608,5 +608,10 @@ class Data(object):
     def channelnames(self):
         return self.__channames
 
+    @property
     def channels(self):
         return self._channels
+
+    @property
+    def channelsnr(self):
+        return self.__chans_number
