@@ -476,19 +476,35 @@ class Data(object):
                 if self.__channames and i == 0:
                     axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
                 if self.__channames and j == 0:
-                    axes[i, j].set_ylabel(self.__channames[i])
+                    if i == self.__chans_number//2:
+                        axes[i, j].set_ylabel("f [Hz]\n" + self.__channames[i])
+                    else:
+                        axes[i, j].set_ylabel(self.__channames[i])
+                elif j == 0 and i == self.__chans_number//2:
+                    axes[i, j].set_ylabel("f [Hz]")
                 img = axes[i, j].imshow(shtvalues[:, :, i, j].T, cmap=cmap, aspect='auto',
                                         extent=[0, self.__length/self.__fs, 0, self.__fs//2],
                                         interpolation='none', origin='lower',
                                         vmin=dtmin, vmax=dtmax)
                 if i != self.__chans_number-1:
                     axes[i, j].get_xaxis().set_visible(False)
+                else:
+                    labels = axes[i, j].get_xticklabels()
+                    for label in labels[::2]:
+                        label.set_visible(False)
+                    if j == self.__chans_number//2:
+                        axes[i, j].set_xlabel("time [s]")
                 if j != 0:
                     axes[i, j].get_yaxis().set_visible(False)
+                else:
+                    labels = axes[i, j].get_yticklabels()
+                    for label in labels[::2]:
+                        label.set_visible(False)
                 # xt = np.array(axes[i, j].get_xticks())/self.__fs
         plt.suptitle(name, y=0.98)
         plt.tight_layout()
         fig.subplots_adjust(top=0.92, right=0.91, wspace=0.05, hspace=0.05)
+        axes
         cbar_ax = fig.add_axes([0.93, 0.1, 0.02, 0.7])
         cbar_ax.tick_params(labelsize=10)
         fig.colorbar(img, cax=cbar_ax)
