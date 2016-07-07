@@ -16,13 +16,13 @@ requirements = [
 setup(  name='connectivipy',
         version= connectivipy.__version__,
         description='Python Connectivity Module',
-        url='https://github.com/dokato',
         license='bsd',
         author='Dominik Krzeminski',
         install_requires=requirements,
         packages=['connectivipy', 'connectivipy.load', 'connectivipy.mvar'],
         include_package_data=True,
         platforms='any',
-        keywords=['connectivity','mvar'],
+        keywords=['connectivity','mvar', 'biosignals', 'eeg', 'autoregressive model', 'ar model'],
+        url = 'https://github.com/dokato/connectivipy',
+        download_url = 'https://github.com/dokato/connectivipy/releases/tag/v0.37'
      )
-
