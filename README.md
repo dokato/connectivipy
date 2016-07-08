@@ -25,7 +25,14 @@ documentation and tutorials.
 
 ## Installation
 
-Option 1: using GIT
+Option 1: PIP (stable release)
+
+```
+pip install connectivipy
+```
+
+
+Option 2: using GIT (the most recent version)
 
 ```
 git clone https://github.com/dokato/connectivipy.git
@@ -33,8 +40,9 @@ cd connectivipy
 python setup.py install
 ```
 
-Option 2: Download ZIP from the menu on the right, unzip it and go
-in terminal to that folder. Than just execute:
+Option 3: ZIP (the most recent version)
+
+Download ZIP from the menu on the right, unzip it and go in terminal to that folder. Than just execute:
 
 ```
 python setup.py install 
