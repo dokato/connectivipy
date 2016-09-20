@@ -59,6 +59,8 @@ def mvar_gen_inst(Acf, npoints, omit=500):
         y[:, i] += eps
     return y[:, omit:]
 
+def stability_mvar(Acf):
+    pass
 
 def meanncov(x, y=[], p=0, norm=True):
     """
