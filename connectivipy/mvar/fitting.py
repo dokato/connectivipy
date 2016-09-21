@@ -60,7 +60,20 @@ def mvar_gen_inst(Acf, npoints, omit=500):
     return y[:, omit:]
 
 def stability_mvar(Acf):
-    pass
+    if len(Acf.shape)==2:
+        p = 1
+        chans = Acf.shape[0]
+    else:
+        chans, chans, p = Acf.shape
+    am = np.zeros((chans*p, chans*p))
+    ii = np.eye(chans*(p-1),chans*(p-1))
+    for e,a in enumerate(Acf):
+        am[0:chans, e*chans:(e+1)*chans] = a
+    am[chans: , :chans*(p-1)] = ii
+    eigval, eigvec = np.linalg.eig(am)
+    evl = np.log(np.abs(eigval))
+    stable = np.all(evl<0)
+    return stable
 
 def meanncov(x, y=[], p=0, norm=True):
     """
