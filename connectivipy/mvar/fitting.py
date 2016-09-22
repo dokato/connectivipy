@@ -60,11 +60,24 @@ def mvar_gen_inst(Acf, npoints, omit=500):
     return y[:, omit:]
 
 def stability_mvar(Acf):
+    """
+    Checks stability of MVAR given its parameters matrix *Acf*.
+
+    ! Be careful when using ! not tested yet.
+
+    Args:
+      *Acf* : numpy.array
+          array in shape of (p,k,k) where *k* is number of channels and
+          *p* is a model order.
+    Returns:
+      *stable* : bool
+          stability flag - when True it is stable.
+    """
     if len(Acf.shape)==2:
         p = 1
         chans = Acf.shape[0]
     else:
-        chans, chans, p = Acf.shape
+        p, chans, chans = Acf.shape
     am = np.zeros((chans*p, chans*p))
     ii = np.eye(chans*(p-1),chans*(p-1))
     for e,a in enumerate(Acf):
