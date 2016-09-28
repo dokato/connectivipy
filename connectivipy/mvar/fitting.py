@@ -64,6 +64,9 @@ def stability_mvar(Acf):
     Checks stability of MVAR given its parameters matrix *Acf*.
 
     ! Be careful when using ! not tested yet.
+    
+    Implemented according to:
+    `https://sccn.ucsd.edu/wiki/Chapter_3.1._Stationarity_and_Stability`
 
     Args:
       *Acf* : numpy.array
