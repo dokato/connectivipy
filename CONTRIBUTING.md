@@ -87,3 +87,5 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring. Remember about
    completing CHANGELOG.md with your contribution.
+3. The pull request should work for Python 2.7, 3.3, 3.4. It will be automatically
+   tested with [Trivs CI](https://travis-ci.org/dokato/connectivipy/).
