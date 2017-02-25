@@ -103,7 +103,7 @@ class Data(object):
             self._channels = channels
             self.__chans_number = len(channels)
             self.__channames = [i for e, i in enumerate(self.__channames_original) if e in channels]
-        
+
     def filter(self, b, a):
         '''
         Filter each channel of data using forward-backward  filter
@@ -129,7 +129,7 @@ class Data(object):
           *fs_new* : int
             new sampling frequency
         '''
-        new_nr_samples = (self.__length*1./self.__fs)*fs_new
+        new_nr_samples = int((self.__length*1./self.__fs)*fs_new)
         self.__data = ss.resample(self.__data, new_nr_samples, axis=1)
         self.__fs = fs_new
 
@@ -423,7 +423,7 @@ class Data(object):
                              show=True):
         '''
         Plot short-time version of estimation results.
-        
+
         Args:
           *name* = '' : str
             title of the plot
@@ -433,7 +433,7 @@ class Data(object):
           *percmax* = 1. : float (0,1)
             percent of maximal value which is maximum on the color map
           *show* = True : boolean
-            show the plot or not            
+            show the plot or not
         '''
         assert hasattr(self, '_Data__shtimest') == True, "No valid data! Use calculation method first."
         shtvalues = self.__shtimest
@@ -553,7 +553,7 @@ class Data(object):
                 content += "\r\n"
         with open(filename, 'wb') as fl:
             fl.write(content)
-    
+
     # auxiliary methods:
     def __make_params_dict(self, args):
         """
@@ -577,7 +577,7 @@ class Data(object):
     def fill_nans(self, values, borders):
         '''
         Fill nans where *values* < *borders* (independent of frequency).
-        
+
         Args:
           *values* : numpy.array
             array of shape (time, freqs, channels, channels) to fill nans
