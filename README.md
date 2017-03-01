@@ -42,7 +42,7 @@ python setup.py install
 
 Option 3: ZIP (the most recent version)
 
-Download ZIP from the menu on the right, unzip it and go in terminal to that folder. Than just execute:
+Download ZIP file from the menu on the top, unzip it and go into the new folder. Then just execute in terminal:
 
 ```
 python setup.py install 
