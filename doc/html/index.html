@@ -1,33 +1,32 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ConnectiviPy documentation &mdash; ConnectiviPy 0.36a documentation</title>
-    
+    <title>ConnectiviPy documentation &#8212; ConnectiviPy 0.36a documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
         VERSION:     '0.36a',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="ConnectiviPy 0.36a documentation" href="#" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Data" href="data.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="header-wrapper" role="banner">
       <div class="header">
           <p class="logo"><a href="#">
@@ -59,12 +58,13 @@
 <p>Python connectivity module. It is a part of GSOC 2015 project.</p>
 <p>You can find it and download from <a class="reference external" href="https://github.com/dokato/connectivipy">GitHub</a>.</p>
 <p><em>Connectivity estimation is one of the most important problem in EEG/MEG
-studies. Many estimators work correctly in different applications, so it&#8217;s
+studies. Many estimators work correctly in different applications, so it’s
 convenient to have them all in one tool. ConnectiviPy
 is light and  extendable python module open for many data formats. In
 opposite to other packages it allows you to work with all types of data,
 not only biomedical. Calculations base on numpy and scipy what provides
 good efficiency.</em></p>
+<p>Tested under Python 2.7, 3.3 and 3.4.</p>
 <div class="section" id="contents">
 <h2>Contents:<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -81,22 +81,20 @@ good efficiency.</em></p>
 <li class="toctree-l2"><a class="reference internal" href="mvar.html#additional">Additional</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Plot</a></li>
 </ul>
 </div>
 <p>Tutorials:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#loading-data">Loading data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#data-class-example">Data class example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#how-to-use-specific-classes">How to use specific classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#instantaneous">Instantaneous</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Examples</a></li>
 </ul>
 </div>
+</div>
+<div class="section" id="questions-and-bug-reports">
+<h2>Questions and bug reports<a class="headerlink" href="#questions-and-bug-reports" title="Permalink to this headline">¶</a></h2>
+<p>If you have any questions or want to report a bug, the easiest way
+is to post a new issue on <a class="reference external" href="https://github.com/dokato/connectivipy/issues">GitHub issues</a>.</p>
 </div>
 <div class="section" id="credits">
 <h2>Credits:<a class="headerlink" href="#credits" title="Permalink to this headline">¶</a></h2>
@@ -118,10 +116,10 @@ good efficiency.</em></p>
 <li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="conn.html">Connectvity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mvar.html">Mvarmodel</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Plot</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Examples</a></li>
 </ul>
 
           <div role="search">
@@ -132,9 +130,6 @@ good efficiency.</em></p>
                 <input type="hidden" name="check_keywords" value="yes" />
                 <input type="hidden" name="area" value="default" />
             </form>
-            <p class="searchtip" style="font-size: 90%">
-                Enter search terms or a module, class or function name.
-            </p>
           </div>
         </div>
         <div class="clearer"></div>
@@ -154,7 +149,7 @@ good efficiency.</em></p>
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/index.txt"
+              <a href="_sources/index.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>
@@ -162,8 +157,8 @@ good efficiency.</em></p>
         <div class="right">
           
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2015, Dominik Krzeminski.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+        &#169; Copyright 2015, Dominik Krzeminski.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
         </div>
         <div class="clearer"></div>
