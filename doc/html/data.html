@@ -1,13 +1,16 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>Data &#8212; ConnectiviPy 0.36a documentation</title>
+    
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -21,13 +24,13 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Connectvity" href="conn.html" />
+    <link rel="next" title="Connectivity" href="conn.html" />
     <link rel="prev" title="ConnectiviPy documentation" href="index.html" /> 
   </head>
-  <body>
+  <body role="document">
     <div class="header-wrapper" role="banner">
       <div class="header">
           <p class="logo"><a href="index.html">
@@ -38,7 +41,7 @@
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="index.html" title="ConnectiviPy documentation"
              accesskey="P">previous</a> |
-          <a href="conn.html" title="Connectvity"
+          <a href="conn.html" title="Connectivity"
              accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |
@@ -68,8 +71,8 @@ connectivity estimators.</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>data</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array or str</span></dt>
-<dd><ul class="first last simple">
+<dt><em>data</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array or str</span><dd><ul class="first last simple">
 <li><dl class="first docutils">
 <dt>array with data (kXNxR, k - channels nr, N - data points,</dt>
 <dd>R - nr of trials)</dd>
@@ -82,7 +85,7 @@ connectivity estimators.</p>
 <dd>sampling frequency</dd>
 <dt><em>chan_names</em> = []: list</dt>
 <dd>names of channels</dd>
-<dt><em>data_info</em> = ‘’: string</dt>
+<dt><em>data_info</em> = &#8216;&#8217;: string</dt>
 <dd>other information about the data</dd>
 </dl>
 </dd>
@@ -94,8 +97,8 @@ connectivity estimators.</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>channels</em> <span class="classifier-delimiter">:</span> <span class="classifier">list(int)</span></dt>
-<dd>List of channel indices. If None all channels are taken
+<dt><em>channels</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">list(int)</span><dd>List of channel indices. If None all channels are taken
 into account.</dd>
 </dl>
 </dd>
@@ -110,8 +113,8 @@ into account.</dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>b, a</em> <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
-<dd>Numerator <em>b</em>  / denominator <em>a</em> polynomials of
+<dt><em>b, a</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span><dd>Numerator <em>b</em>  / denominator <em>a</em> polynomials of
 the IIR filter.</dd>
 </dl>
 </dd>
@@ -126,8 +129,8 @@ the IIR filter.</dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>fs_new</em> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>new sampling frequency</dd>
+<dt><em>fs_new</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>new sampling frequency</dd>
 </dl>
 </dd>
 </dl>
@@ -140,10 +143,10 @@ the IIR filter.</dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>p</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>estimation order, default None</dd>
-<dt><em>method</em> = ‘yw’ <span class="classifier-delimiter">:</span> <span class="classifier">str {‘yw’, ‘ns’, ‘vm’}</span></dt>
-<dd>method of MVAR parameters estimation
+<dt><em>p</em> = None</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>estimation order, default None</dd>
+<dt><em>method</em> = &#8216;yw&#8217;</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">str {&#8216;yw&#8217;, &#8216;ns&#8217;, &#8216;vm&#8217;}</span><dd>method of MVAR parameters estimation
 all avaiable methods you can find in <em>fitting_algorithms</em></dd>
 </dl>
 </dd>
@@ -157,10 +160,10 @@ all avaiable methods you can find in <em>fitting_algorithms</em></dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>p</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>estimation order, default None</dd>
-<dt><em>method</em> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>method of connectivity estimation
+<dt><em>p</em> = None</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>estimation order, default None</dd>
+<dt><em>method</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>method of connectivity estimation
 all avaiable methods you can find in <em>conn_estim_dc</em></dd>
 </dl>
 </dd>
@@ -174,14 +177,14 @@ all avaiable methods you can find in <em>conn_estim_dc</em></dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>method</em> = ‘yw’ <span class="classifier-delimiter">:</span> <span class="classifier">str {‘yw’, ‘ns’, ‘vm’}</span></dt>
-<dd>method of estimation
+<dt><em>method</em> = &#8216;yw&#8217;</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">str {&#8216;yw&#8217;, &#8216;ns&#8217;, &#8216;vm&#8217;}</span><dd>method of estimation
 all avaiable methods you can find in <em>fitting_algorithms</em></dd>
-<dt><em>nfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of data points in window; if None, it is signal length
+<dt><em>nfft</em> = None</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of data points in window; if None, it is signal length
 N/5.</dd>
-<dt><em>no</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of data points in overlap; if None, it is signal length
+<dt><em>no</em> = None</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of data points in overlap; if None, it is signal length
 N/10.</dd>
 <dt><em>params</em></dt>
 <dd>other parameters for specific estimator</dd>
@@ -197,12 +200,12 @@ N/10.</dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of resamples</dd>
-<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>type I error rate (significance level)</dd>
-<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>if True it prints dot on every realization</dd>
+<dt><em>Nrep</em> = 100</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">float</span><dd>type I error rate (significance level)</dd>
+<dt><em>verbose</em> = True</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">bool</span><dd>if True it prints dot on every realization</dd>
 </dl>
 </dd>
 <dt>Returns:</dt>
@@ -223,18 +226,18 @@ connectivity estimation method.</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>Nrep</em> = 100 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of resamples</dd>
-<dt><em>alpha</em> = 0.05 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>type I error rate (significance level)</dd>
-<dt><em>nfft</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of data points in window; if None, it is taken from
+<dt><em>Nrep</em> = 100</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of resamples</dd>
+<dt><em>alpha</em> = 0.05</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">float</span><dd>type I error rate (significance level)</dd>
+<dt><em>nfft</em> = None</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of data points in window; if None, it is taken from
 <a class="reference internal" href="#connectivipy.data.Data.short_time_conn" title="connectivipy.data.Data.short_time_conn"><code class="xref py py-func docutils literal"><span class="pre">Data.short_time_conn()</span></code></a> method.</dd>
-<dt><em>no</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of data points in overlap; if None, it is taken from
+<dt><em>no</em> = None</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of data points in overlap; if None, it is taken from
 <em>short_time_conn</em> method.</dd>
-<dt><em>verbose</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>if True it prints dot on every realization</dd>
+<dt><em>verbose</em> = True</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">bool</span><dd>if True it prints dot on every realization</dd>
 </dl>
 </dd>
 <dt>Returns:</dt>
@@ -254,11 +257,11 @@ channels</dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>trial</em> = 0 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>if there is multichannel data it should be a number of trial
+<dt><em>trial</em> = 0</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>if there is multichannel data it should be a number of trial
 you want to plot.</dd>
-<dt><em>show</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>show the plot or not</dd>
+<dt><em>show</em> = True</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>show the plot or not</dd>
 </dl>
 </dd>
 </dl>
@@ -271,18 +274,18 @@ you want to plot.</dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>name</em> = ‘’ <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>title of the plot</dd>
-<dt><em>ylim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd>range of y-axis values shown, e.g. [0,1]
+<dt><em>name</em> = &#8216;&#8217;</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>title of the plot</dd>
+<dt><em>ylim</em> = None</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">list</span><dd>range of y-axis values shown, e.g. [0,1]
 <em>None</em> means that default values of given estimator are taken
 into account</dd>
-<dt><em>xlim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list [from (int), to (int)]</span></dt>
-<dd>range of y-axis values shown, if None it is from 0 to Nyquist frequency</dd>
-<dt><em>signi</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>if significance levels are calculated they are shown in the plot</dd>
-<dt><em>show</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>show the plot or not</dd>
+<dt><em>xlim</em> = None</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">list [from (int), to (int)]</span><dd>range of y-axis values shown, if None it is from 0 to Nyquist frequency</dd>
+<dt><em>signi</em> = True</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>if significance levels are calculated they are shown in the plot</dd>
+<dt><em>show</em> = True</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>show the plot or not</dd>
 </dl>
 </dd>
 </dl>
@@ -295,15 +298,15 @@ into account</dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>name</em> = ‘’ <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>title of the plot</dd>
-<dt><em>signi</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>reset irrelevant values; it works only after short time
+<dt><em>name</em> = &#8216;&#8217;</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>title of the plot</dd>
+<dt><em>signi</em> = True</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>reset irrelevant values; it works only after short time
 significance calculation using <em>short_time_significance</em></dd>
-<dt><em>percmax</em> = 1. <span class="classifier-delimiter">:</span> <span class="classifier">float (0,1)</span></dt>
-<dd>percent of maximal value which is maximum on the color map</dd>
-<dt><em>show</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>show the plot or not</dd>
+<dt><em>percmax</em> = 1.</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">float (0,1)</span><dd>percent of maximal value which is maximum on the color map</dd>
+<dt><em>show</em> = True</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>show the plot or not</dd>
 </dl>
 </dd>
 </dl>
@@ -317,13 +320,13 @@ significance calculation using <em>short_time_significance</em></dd>
 Args:</p>
 <blockquote>
 <div><dl class="docutils">
-<dt><em>mod</em> = 0 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>0 - <a class="reference internal" href="#connectivipy.data.Data.conn" title="connectivipy.data.Data.conn"><code class="xref py py-func docutils literal"><span class="pre">Data.conn()</span></code></a> results
+<dt><em>mod</em> = 0</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>0 - <a class="reference internal" href="#connectivipy.data.Data.conn" title="connectivipy.data.Data.conn"><code class="xref py py-func docutils literal"><span class="pre">Data.conn()</span></code></a> results
 1 - <a class="reference internal" href="#connectivipy.data.Data.short_time_conn" title="connectivipy.data.Data.short_time_conn"><code class="xref py py-func docutils literal"><span class="pre">Data.short_time_conn()</span></code></a> results</dd>
-<dt><em>filename</em> = ‘conn_trnas3d.dat’ <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>title of the plot</dd>
-<dt><em>freq_band</em> = [] <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd>frequency range [from_value, to_value] in Hz.</dd>
+<dt><em>filename</em> = &#8216;conn_trnas3d.dat&#8217;</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>title of the plot</dd>
+<dt><em>freq_band</em> = []</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">list</span><dd>frequency range [from_value, to_value] in Hz.</dd>
 </dl>
 </div></blockquote>
 </dd></dl>
@@ -335,17 +338,17 @@ Args:</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>values</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (time, freqs, channels, channels) to fill nans</dd>
-<dt><em>borders</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (time, channels, channels) with limes
+<dt><em>values</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span><dd>array of shape (time, freqs, channels, channels) to fill nans</dd>
+<dt><em>borders</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span><dd>array of shape (time, channels, channels) with limes
 values</dd>
 </dl>
 </dd>
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
-<dt><em>values_nans</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>array of shape (time, freq, channels, channels) with nans
+<dt><em>values_nans</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span><dd>array of shape (time, freq, channels, channels) with nans
 where values were less than appropieate value from <em>borders</em></dd>
 </dl>
 </dd>
@@ -376,16 +379,16 @@ where values were less than appropieate value from <em>borders</em></dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>file_name</em> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>must be the same for .xml and .raw files.</dd>
+<dt><em>file_name</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>must be the same for .xml and .raw files.</dd>
 </dl>
 </dd>
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
 <dt><em>data</em>: np.array</dt>
 <dd>eeg data from raw file</dd>
-<dt><em>xmlinfo</em> <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
-<dd>dcitionary with keys: samplingFrequency, channelCount, firstSampleTimestamp,
+<dt><em>xmlinfo</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">dict</span><dd>dcitionary with keys: samplingFrequency, channelCount, firstSampleTimestamp,
 channelNames, calibrationCoef which means the same as in SML file</dd>
 </dl>
 </dd>
@@ -399,14 +402,14 @@ channelNames, calibrationCoef which means the same as in SML file</dd>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>path</em> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>SML file eg. ‘test.xml’</dd>
+<dt><em>path</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>SML file eg. &#8216;test.xml&#8217;</dd>
 </dl>
 </dd>
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
-<dt><em>xml_data</em> <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
-<dd>dcitionary with keys: samplingFrequency, channelCount, firstSampleTimestamp,
+<dt><em>xml_data</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">dict</span><dd>dcitionary with keys: samplingFrequency, channelCount, firstSampleTimestamp,
 channelNames, calibrationCoef which means the same as in SML file</dd>
 </dl>
 </dd>
@@ -425,21 +428,21 @@ without using <em>Data</em> class.</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd><dl class="first last docutils">
-<dt><em>values</em> <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span></dt>
-<dd>connectivity estimation values in shape (fq, k, k) where fq -
+<dt><em>values</em></dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span><dd>connectivity estimation values in shape (fq, k, k) where fq -
 frequency, k - number of channels</dd>
-<dt><em>name</em> = ‘’ <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>title of the plot</dd>
-<dt><em>fs</em> = 1 <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>sampling frequency</dd>
-<dt><em>ylim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd>range of y-axis values shown, e.g. [0,1]
+<dt><em>name</em> = &#8216;&#8217;</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>title of the plot</dd>
+<dt><em>fs</em> = 1</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>sampling frequency</dd>
+<dt><em>ylim</em> = None</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">list</span><dd>range of y-axis values shown, e.g. [0,1]
 <em>None</em> means that default values of given estimator are taken
 into account</dd>
-<dt><em>xlim</em> = None <span class="classifier-delimiter">:</span> <span class="classifier">list [from (int), to (int)]</span></dt>
-<dd>range of y-axis values shown, if None it is from 0 to Nyquist frequency</dd>
-<dt><em>show</em> = True <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>show the plot or not</dd>
+<dt><em>xlim</em> = None</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">list [from (int), to (int)]</span><dd>range of y-axis values shown, if None it is from 0 to Nyquist frequency</dd>
+<dt><em>show</em> = True</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>show the plot or not</dd>
 </dl>
 </dd>
 </dl>
@@ -461,7 +464,7 @@ into account</dd>
 <li class="toctree-l2"><a class="reference internal" href="#additional-functions">Additional functions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="conn.html">Connectvity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conn.html">Connectivity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mvar.html">Mvarmodel</a></li>
 </ul>
 <ul>
@@ -489,7 +492,7 @@ into account</dd>
           <div role="navigation" aria-label="related navigaton">
             <a href="index.html" title="ConnectiviPy documentation"
               >previous</a> |
-            <a href="conn.html" title="Connectvity"
+            <a href="conn.html" title="Connectivity"
               >next</a> |
             <a href="py-modindex.html" title="Python Module Index"
               >modules</a> |
@@ -507,7 +510,7 @@ into account</dd>
           
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015, Dominik Krzeminski.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
     </div>
         </div>
         <div class="clearer"></div>

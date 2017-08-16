@@ -1,6 +1,6 @@
 .. _conn:
 
-Connectvity
+Connectivity
 ==================
 
 Connectivity methods classes.
@@ -9,4 +9,4 @@ Connectivity methods classes.
    :members: spectrum, spectrum_inst,
             Connect, ConnectAR, spectrum, spectrum_inst, dtf_fun,
             pdc_fun, DTF, gDTF, ffDTF, dDTF, PDC, gPDC, ffPDC, dPDC,
-            PartialCoh, Coherency, GCI, PSI 
+            PartialCoh, Coherency, GCI, PSI
