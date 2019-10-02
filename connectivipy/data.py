@@ -370,12 +370,6 @@ class Data(object):
         freqs = np.linspace(0, self.__fs//2, self.__estim.shape[0])
         if not xlim:
             xlim = [0, np.max(freqs)]
-        if not ylim:
-            ylim = self._parameters["y_lim"]
-            if ylim[0] is None:
-                ylim[0] = np.min(self.__estim)
-            if ylim[1] is None:
-                ylim[1] = np.max(self.__estim)
         two_sides = False
         if signi and hasattr(self, '_Data__signific'):
             flag_sig = True
@@ -383,6 +377,16 @@ class Data(object):
                 two_sides = True
         else:
             flag_sig = False
+        if not ylim:
+            ylim = self._parameters["y_lim"]
+            if ylim[0] is None:
+                ylim[0] = np.min(self.__estim)
+                if flag_sig:
+                    ylim[0] = np.min((ylim[0], np.min(self.__signific)))
+            if ylim[1] is None:
+                ylim[1] = np.max(self.__estim)
+                if flag_sig:
+                    ylim[1] = np.max((ylim[1], np.max(self.__signific)))
         # selecting right channels
         if self.__estim.shape[-1] != self.__chans_number:
             estim = self.__estim[:, [[c] for c in self._channels], self._channels]

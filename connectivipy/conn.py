@@ -285,10 +285,11 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         for i in range(k):
             for j in range(k):
                 if self.two_sided:
-                    ficance[0][i][j] = np.max(st.scoreatpercentile(signi[:, :, i, j], alpha*100, axis=1))
-                    ficance[1][i][j] = np.max(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=1))
+                    ficance[0][i][j] = np.min(st.scoreatpercentile(signi[:, :, i, j], alpha*100, axis=0))
+                    ficance[1][i][j] = np.max(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=0))
                 else:
-                    ficance[i][j] = np.max(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=1))
+                    #import pdb; pdb.set_trace()
+                    ficance[i][j] = np.min(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=0))
         return ficance
 
     def __calc_multitrial(self, data, **params):
@@ -366,13 +367,14 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         for i in range(Nrep):
             if verbose:
                 print('.', end=' ')
-            list(map(np.random.shuffle, shdata))
+            for ch in range(k):
+                np.random.shuffle(shdata[ch,:])
             if i == 0:
-                rtmp = self.calculate(data, **params)
+                rtmp = self.calculate(shdata, **params)
                 reskeeper = np.zeros((Nrep, rtmp.shape[0], k, k))
                 reskeeper[i] = rtmp
                 continue
-            reskeeper[i] = self.calculate(data, **params)
+            reskeeper[i] = self.calculate(shdata, **params)
         if verbose:
             print('|')
         return self.levels(reskeeper, alpha, k)
@@ -1076,7 +1078,7 @@ class GCI(Connect):
     """
     def __init__(self):
         super(GCI, self).__init__()
-        self.two_sided = True
+        self.two_sided = False
 
     def calculate(self, data, gcimethod='yw', gciorder=None):
         """
