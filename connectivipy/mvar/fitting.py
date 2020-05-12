@@ -295,7 +295,7 @@ def yulewalker(y, pmax=1):
     acof = np.empty((pmax, chn, chn))
     for p in range(pmax):
         q[p*chn:(p+1)*chn, :] = np.hstack([rr_f[:, :, x].T if x >= 0 else rr_b[:, :, abs(x)].T for x in range(-1*p, pmax-p)])
-    req = np.vstack(rr_b[:, :, x].T for x in range(1, pmax+1))
+    req = np.vstack([rr_b[:, :, x].T for x in range(1, pmax+1)])
     a_solved = np.linalg.solve(q, req)
     var = np.copy(rr_f[:, :, 0])
     for p in range(pmax):

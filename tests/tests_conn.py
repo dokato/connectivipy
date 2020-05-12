@@ -114,7 +114,7 @@ class ConnTest(unittest.TestCase):
         gdtf = gDTF()
         ipdc = iPDC()
         self.assertTrue(psi.two_sided)
-        self.assertTrue(gci.two_sided)
+        self.assertFalse(gci.two_sided)
         self.assertFalse(gdtf.two_sided)
         self.assertFalse(ipdc.two_sided)
 

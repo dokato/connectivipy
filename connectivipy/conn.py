@@ -137,7 +137,8 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         parameters specific for estimator.
         Args:
           *data* : numpy.array
-              data matrix
+              data matrix (kXN) or (kXNxR) where k - channels,
+              N - data points, R - nr of trials
           *nfft* = None : int
               window length (if None it's N/5)
           *no* = None : int
@@ -184,7 +185,8 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         surrogate data :func:`Connect.surrogate` for one trial.
         Args:
           *data* : numpy.array
-              data matrix
+              data matrix (kXN) or (kXNxR) where k - channels,
+              N - data points, R - nr of trials
           *Nrep* = 100 : int
             number of resamples
           *alpha* = 0.05 : float
@@ -239,7 +241,8 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         surrogate data :func:`Connect.surrogate` for one trial.
         Args:
           *data* : numpy.array
-              data matrix
+              data matrix (kXN) or (kXNxR) where k - channels,
+              N - data points, R - nr of trials
           *Nrep* = 100 : int
             number of resamples
           *alpha* = 0.05 : float
@@ -400,7 +403,8 @@ class ConnectAR(six.with_metaclass(ABCMeta, Connect)):
         parameters specific for estimator.
         Args:
           *data* : numpy.array
-              data matrix
+              data matrix (kXN) or (kXNxR) where k - channels,
+              N - data points, R - nr of trials
           *nfft* = None : int
               window length (if None it's N/5)
           *no* = None : int
@@ -457,7 +461,8 @@ class ConnectAR(six.with_metaclass(ABCMeta, Connect)):
         surrogate data :func:`ConnectAR.surrogate` for one trial.
         Args:
           *data* : numpy.array
-              data matrix
+              data matrix (kXN) or (kXNxR) where k - channels,
+              N - data points, R - nr of trials
           *Nrep* = 100 : int
             number of resamples
           *alpha* = 0.05 : float
@@ -513,7 +518,7 @@ class ConnectAR(six.with_metaclass(ABCMeta, Connect)):
 
     def __calc_multitrial(self, data, method='yw', order=None, fs=1, resolution=None, **params):
         "Calc multitrial averaged estimator for :func:`ConnectAR.bootstrap`"
-        trials = data.shape[0]
+        trials = data.shape[2]
         chosen = np.random.randint(trials, size=trials)
         ar, vr = Mvar().fit(data[:, :, chosen], order, method)
         rescalc = self.calculate(ar, vr, fs, resolution)
