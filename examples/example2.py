@@ -32,7 +32,7 @@ best, crit = mv.order_akaike(y, 15, 'vm')
 plt.plot(1+np.arange(len(crit[1:])), crit[1:], 'g')
 plt.show()
 
-print best
+print('Best order', best)
 
 # now let's fit parameters to the signal
 av, vf = mv.fit(y, best, 'vm')
