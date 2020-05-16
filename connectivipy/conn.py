@@ -288,11 +288,10 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         for i in range(k):
             for j in range(k):
                 if self.two_sided:
-                    ficance[0][i][j] = np.min(st.scoreatpercentile(signi[:, :, i, j], alpha*100, axis=0))
-                    ficance[1][i][j] = np.max(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=0))
+                    ficance[0][i][j] = np.min(st.scoreatpercentile(signi[:, :, i, j], alpha*100, axis=1))
+                    ficance[1][i][j] = np.max(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=1))
                 else:
-                    #import pdb; pdb.set_trace()
-                    ficance[i][j] = np.min(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=0))
+                    ficance[i][j] = np.min(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=1))
         return ficance
 
     def __calc_multitrial(self, data, **params):
