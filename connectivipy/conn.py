@@ -1113,6 +1113,43 @@ class GCI(Connect):
                 gcval[c, i] = np.log(vrfull[i, i]/vr_i[e, e])
         return np.tile(gcval, (2, 1, 1))
 
+############################
+# Envelopes based methods:
+
+class AEC(Connect):
+    """
+    PSI - class inherits from :class:`Connect` and overloads
+    :func:`Connect.calculate` method.
+    """
+    def __init__(self):
+        super(AEC, self).__init__()
+        self.two_sided = False
+
+    def calculate(self, data, fs, bands = ['theta', 'alpha', 'beta', 'gamma'],
+                  filter = None):
+        """
+        Amplitude Envelope Correlations calculation.
+        Args:
+          *data* : numpy.array
+              array of shape (k, N) where *k* is number of channels and
+              *N* is number of data points.
+          *fs* : int
+              sampling rate
+          ...
+        Returns:
+          *aec* : numpy.array
+              matrix with estimation results (len(bands), k, k)
+        References:
+        .. [1] Bruns, A. et al., Amplitude envelope correlation detects 
+        coupling among incoherent brain signals. NeuroReport. 1509-1514 (2000).
+        """
+        k, N = data.shape
+        aecval = np.zeros((len(bands), k, k))
+        for i in range(k):
+
+        return aecval
+
+
 conn_estim_dc = {'dtf':   DTF,
                  'pdc':   PDC,
                  'ipdc':  iPDC,
