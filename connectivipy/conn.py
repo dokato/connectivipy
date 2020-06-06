@@ -9,6 +9,7 @@ import scipy.stats as st
 from abc import ABCMeta, abstractmethod
 from .mvar.comp import ldl
 from .mvarmodel import Mvar
+from .aec.utils import filter_band, calc_ampenv, FQ_BANDS
 
 import six
 from six.moves import map
@@ -998,7 +999,7 @@ class Coherency(Connect):
         .. [1] M. B. Priestley Spectral Analysis and Time Series.
                Academic Press Inc. (London) LTD., 1981
         """
-        assert cnfft>cno, "overlap must be smaller than window"
+        assert cnfft > cno, "overlap must be smaller than window"
         k, N = data.shape
         if not cnfft:
             cnfft = int(N/5)
@@ -1118,14 +1119,33 @@ class GCI(Connect):
 
 class AEC(Connect):
     """
-    PSI - class inherits from :class:`Connect` and overloads
+    AEC - class inherits from :class:`Connect` and overloads
     :func:`Connect.calculate` method.
     """
     def __init__(self):
         super(AEC, self).__init__()
-        self.two_sided = False
+        self._freq_bands = FQ_BANDS
+        self.two_sided = True
 
-    def calculate(self, data, fs, bands = ['theta', 'alpha', 'beta', 'gamma'],
+    def set_freq_bands(self, bands):
+        "Sets freqnecy bands"
+        problem = False
+        if type(bands) == list:
+            if np.any([len(b) != 2 for b in bands]):
+                problem = True
+        elif  type(bands) == np.ndarray:
+            if bands.shape[1] != 2:
+                problem = True
+        if problem:
+            raise ValueError("*bands must be list of pairs or numpy array shaped (n, 2)")
+        else:
+            self._freq_bands = bands
+
+    @property
+    def freq_bands(self):
+        return _freq_bands
+
+    def calculate(self, data, fs, bands = None,
                   filter = None):
         """
         Amplitude Envelope Correlations calculation.
@@ -1135,7 +1155,14 @@ class AEC(Connect):
               *N* is number of data points.
           *fs* : int
               sampling rate
-          ...
+          *bands* : numpy.array or list
+              frequency bands. It must be list of pairs or numpy array
+              shaped (n, 2). Default values are: 'theta': [6, 7], 'alpha': [8, 13],
+             'beta': [15, 25], 'low-gamma': [30, 45], 'high-gamma': [55, 70]}
+          *filter* : tuple
+               tuple (b, a) consisting of a numerator (b) and a denominator (a)
+               polynomials of the IIR filter. If None, a Butterworth filter of
+               order 4 is used.
         Returns:
           *aec* : numpy.array
               matrix with estimation results (len(bands), k, k)
@@ -1143,10 +1170,16 @@ class AEC(Connect):
         .. [1] Bruns, A. et al., Amplitude envelope correlation detects 
         coupling among incoherent brain signals. NeuroReport. 1509-1514 (2000).
         """
+        if not bands is None:
+             self.set_freq_bands(bands)
         k, N = data.shape
-        aecval = np.zeros((len(bands), k, k))
-        for i in range(k):
-
+        aecval = np.zeros((len(self._freq_bands), k, k))
+        for e, band in enumerate(self._freq_bands):
+            if type(band) == str:
+                band = FQ_BANDS[band]
+            filtdata = filter_band(data, fs, band, filter)
+            envelopes = calc_ampenv(filtdata)
+            aecval[e] = np.corrcoef(envelopes)
         return aecval
 
 
@@ -1160,4 +1193,5 @@ conn_estim_dc = {'dtf':   DTF,
                  'gpdc':  gPDC,
                  'pcoh':  PartialCoh,
                  'coh':   Coherency,
-                 'gci':   GCI, }
+                 'gci':   GCI, 
+                 'aec':   AEC}
