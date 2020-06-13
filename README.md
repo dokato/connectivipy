@@ -8,6 +8,8 @@ Project was supported by [GSOC 2015](http://www.google-melange.com/gsoc/project/
 and made under [INCF](http://incf.org/) wings.
 
 [![Build Status](https://travis-ci.org/dokato/connectivipy.svg?branch=master)](https://travis-ci.org/dokato/connectivipy)
+[![codecov](https://codecov.io/gh/dokato/connectivipy/branch/master/graph/badge.svg)](https://codecov.io/gh/dokato/connectivipy)
+
 
 ## Content
 
