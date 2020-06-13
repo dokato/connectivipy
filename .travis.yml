@@ -24,8 +24,12 @@ before_install:
 # Install packages
 install:
   - conda install --yes numpy scipy matplotlib nose pandas statsmodels
+  - conda install --yes coverage # for codecov
   - python setup.py install
 
 # Run test
 script:
-  - nosetests tests
+  - coverage run -m nosetests tests
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
