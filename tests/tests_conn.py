@@ -108,6 +108,13 @@ class ConnTest(unittest.TestCase):
         gc_u = abs(gcval[:,0,1][0])+abs(gcval[:,0,2][0])+abs(gcval[:,1,2][0])
         self.assertTrue(gc_d > gc_u)
 
+    def test_aec(self):
+        fs = 256.
+        aec = AEC()
+        aecval = aec.calculate(ys, fs)
+        self.assertTrue(all([all(np.diag(aecval[i])) for i in range(aecval.shape[0])]))
+        self.assertEqual(aecval, (5, 5, 5))
+
     def test_twosided(self):
         gci = GCI()
         psi = PSI()
