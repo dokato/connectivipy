@@ -4,7 +4,7 @@
  *
  * Sphinx stylesheet -- agogo theme.
  *
- * :copyright: Copyright 2007-2014 by the Sphinx team, see AUTHORS.
+ * :copyright: Copyright 2007-2021 by the Sphinx team, see AUTHORS.
  * :license: BSD, see LICENSE for details.
  *
  */
@@ -203,19 +203,18 @@ div.document .section:first-child {
 
 div.document div.highlight {
   padding: 3px;
-  background-color: #eeeeec;
   border-top: 2px solid #dddddd;
   border-bottom: 2px solid #dddddd;
   margin-top: .8em;
   margin-bottom: .8em;
 }
 
-div.document div.container {
+div.document div.literal-block-wrapper {
   margin-top: .8em;
   margin-bottom: .8em;
 }
 
-div.document div.container div.highlight {
+div.document div.literal-block-wrapper div.highlight {
   margin: 0;
 }
 
@@ -363,19 +362,25 @@ div.footer .left {
 
 /* Styles copied from basic theme */
 
-img.align-left, .figure.align-left, object.align-left {
+img.align-left, figure.align-left, .figure.align-left, object.align-left {
     clear: left;
     float: left;
     margin-right: 1em;
 }
 
-img.align-right, .figure.align-right, object.align-right {
+img.align-right, figure.align-right, .figure.align-right, object.align-right {
     clear: right;
     float: right;
     margin-left: 1em;
 }
 
-img.align-center, .figure.align-center, object.align-center {
+img.align-center, figure.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+img.align-default, figure.align-default, .figure.align-default {
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -400,11 +405,13 @@ table caption span.caption-number {
 table caption span.caption-text {
 }
 
-div.figure p.caption span.caption-number {
+div.figure p.caption span.caption-number,
+figcaption span.caption-number {
     font-style: italic;
 }
 
-div.figure p.caption span.caption-text {
+div.figure p.caption span.caption-text,
+figcaption span.caption-text {
 }
 
 /* -- search page ----------------------------------------------------------- */
@@ -462,9 +469,14 @@ table.indextable td {
     vertical-align: top;
 }
 
-table.indextable dl, table.indextable dd {
+table.indextable ul {
     margin-top: 0;
     margin-bottom: 0;
+    list-style-type: none;
+}
+
+table.indextable > tbody > tr > td > ul {
+    padding-left: 0em;
 }
 
 table.indextable tr.pcap {
@@ -480,6 +492,13 @@ img.toggler {
     margin-right: 3px;
     margin-top: 3px;
     cursor: pointer;
+}
+
+/* -- domain module index --------------------------------------------------- */
+
+table.modindextable td {
+    padding: 2px;
+    border-collapse: collapse;
 }
 
 /* -- viewcode extension ---------------------------------------------------- */
@@ -506,4 +525,14 @@ div.code-block-caption {
     color: #333;
     padding: 2px 5px;
     font-size: small;
+}
+
+/* -- math display ---------------------------------------------------------- */
+
+div.body div.math p {
+    text-align: center;
+}
+
+span.eqno {
+    float: right;
 }

@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
-#! /usr/bin/env python
-
-from __future__ import absolute_import
-from __future__ import print_function
 
 import numpy as np
 import scipy.stats as st
 from abc import ABCMeta, abstractmethod
 from .mvar.comp import ldl
 from .mvarmodel import Mvar
+from .aec.utils import filter_band, calc_ampenv, FQ_BANDS
 
 import six
 from six.moves import map
@@ -137,7 +134,8 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         parameters specific for estimator.
         Args:
           *data* : numpy.array
-              data matrix
+              data matrix (kXN) or (kXNxR) where k - channels,
+              N - data points, R - nr of trials
           *nfft* = None : int
               window length (if None it's N/5)
           *no* = None : int
@@ -184,7 +182,8 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         surrogate data :func:`Connect.surrogate` for one trial.
         Args:
           *data* : numpy.array
-              data matrix
+              data matrix (kXN) or (kXNxR) where k - channels,
+              N - data points, R - nr of trials
           *Nrep* = 100 : int
             number of resamples
           *alpha* = 0.05 : float
@@ -239,7 +238,8 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         surrogate data :func:`Connect.surrogate` for one trial.
         Args:
           *data* : numpy.array
-              data matrix
+              data matrix (kXN) or (kXNxR) where k - channels,
+              N - data points, R - nr of trials
           *Nrep* = 100 : int
             number of resamples
           *alpha* = 0.05 : float
@@ -285,10 +285,10 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         for i in range(k):
             for j in range(k):
                 if self.two_sided:
-                    ficance[0][i][j] = np.max(st.scoreatpercentile(signi[:, :, i, j], alpha*100, axis=1))
+                    ficance[0][i][j] = np.min(st.scoreatpercentile(signi[:, :, i, j], alpha*100, axis=1))
                     ficance[1][i][j] = np.max(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=1))
                 else:
-                    ficance[i][j] = np.max(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=1))
+                    ficance[i][j] = np.min(st.scoreatpercentile(signi[:, :, i, j], (1-alpha)*100, axis=1))
         return ficance
 
     def __calc_multitrial(self, data, **params):
@@ -366,13 +366,14 @@ class Connect(six.with_metaclass(ABCMeta, object)):
         for i in range(Nrep):
             if verbose:
                 print('.', end=' ')
-            list(map(np.random.shuffle, shdata))
+            for ch in range(k):
+                np.random.shuffle(shdata[ch,:])
             if i == 0:
-                rtmp = self.calculate(data, **params)
+                rtmp = self.calculate(shdata, **params)
                 reskeeper = np.zeros((Nrep, rtmp.shape[0], k, k))
                 reskeeper[i] = rtmp
                 continue
-            reskeeper[i] = self.calculate(data, **params)
+            reskeeper[i] = self.calculate(shdata, **params)
         if verbose:
             print('|')
         return self.levels(reskeeper, alpha, k)
@@ -398,7 +399,8 @@ class ConnectAR(six.with_metaclass(ABCMeta, Connect)):
         parameters specific for estimator.
         Args:
           *data* : numpy.array
-              data matrix
+              data matrix (kXN) or (kXNxR) where k - channels,
+              N - data points, R - nr of trials
           *nfft* = None : int
               window length (if None it's N/5)
           *no* = None : int
@@ -455,7 +457,8 @@ class ConnectAR(six.with_metaclass(ABCMeta, Connect)):
         surrogate data :func:`ConnectAR.surrogate` for one trial.
         Args:
           *data* : numpy.array
-              data matrix
+              data matrix (kXN) or (kXNxR) where k - channels,
+              N - data points, R - nr of trials
           *Nrep* = 100 : int
             number of resamples
           *alpha* = 0.05 : float
@@ -511,7 +514,7 @@ class ConnectAR(six.with_metaclass(ABCMeta, Connect)):
 
     def __calc_multitrial(self, data, method='yw', order=None, fs=1, resolution=None, **params):
         "Calc multitrial averaged estimator for :func:`ConnectAR.bootstrap`"
-        trials = data.shape[0]
+        trials = data.shape[2]
         chosen = np.random.randint(trials, size=trials)
         ar, vr = Mvar().fit(data[:, :, chosen], order, method)
         rescalc = self.calculate(ar, vr, fs, resolution)
@@ -992,7 +995,7 @@ class Coherency(Connect):
         .. [1] M. B. Priestley Spectral Analysis and Time Series.
                Academic Press Inc. (London) LTD., 1981
         """
-        assert cnfft>cno, "overlap must be smaller than window"
+        assert cnfft > cno, "overlap must be smaller than window"
         k, N = data.shape
         if not cnfft:
             cnfft = int(N/5)
@@ -1076,7 +1079,7 @@ class GCI(Connect):
     """
     def __init__(self):
         super(GCI, self).__init__()
-        self.two_sided = True
+        self.two_sided = False
 
     def calculate(self, data, gcimethod='yw', gciorder=None):
         """
@@ -1107,6 +1110,75 @@ class GCI(Connect):
                 gcval[c, i] = np.log(vrfull[i, i]/vr_i[e, e])
         return np.tile(gcval, (2, 1, 1))
 
+############################
+# Envelopes based methods:
+
+class AEC(Connect):
+    """
+    AEC - class inherits from :class:`Connect` and overloads
+    :func:`Connect.calculate` method.
+    """
+    def __init__(self):
+        super(AEC, self).__init__()
+        self._freq_bands = FQ_BANDS
+        self.two_sided = True
+
+    def set_freq_bands(self, bands):
+        "Sets freqnecy bands"
+        problem = False
+        if type(bands) == list:
+            if np.any([len(b) != 2 for b in bands]):
+                problem = True
+        elif  type(bands) == np.ndarray:
+            if bands.shape[1] != 2:
+                problem = True
+        if problem:
+            raise ValueError("*bands must be list of pairs or numpy array shaped (n, 2)")
+        else:
+            self._freq_bands = bands
+
+    @property
+    def freq_bands(self):
+        return _freq_bands
+
+    def calculate(self, data, fs, bands = None,
+                  filter = None):
+        """
+        Amplitude Envelope Correlations calculation.
+        Args:
+          *data* : numpy.array
+              array of shape (k, N) where *k* is number of channels and
+              *N* is number of data points.
+          *fs* : int
+              sampling rate
+          *bands* : numpy.array or list
+              frequency bands. It must be list of pairs or numpy array
+              shaped (n, 2). Default values are: 'theta': [6, 7], 'alpha': [8, 13],
+             'beta': [15, 25], 'low-gamma': [30, 45], 'high-gamma': [55, 70]}
+          *filter* : tuple
+               tuple (b, a) consisting of a numerator (b) and a denominator (a)
+               polynomials of the IIR filter. If None, a Butterworth filter of
+               order 4 is used.
+        Returns:
+          *aec* : numpy.array
+              matrix with estimation results (len(bands), k, k)
+        References:
+        .. [1] Bruns, A. et al., Amplitude envelope correlation detects 
+        coupling among incoherent brain signals. NeuroReport. 1509-1514 (2000).
+        """
+        if not bands is None:
+             self.set_freq_bands(bands)
+        k, N = data.shape
+        aecval = np.zeros((len(self._freq_bands), k, k))
+        for e, band in enumerate(self._freq_bands):
+            if type(band) == str:
+                band = FQ_BANDS[band]
+            filtdata = filter_band(data, fs, band, filter)
+            envelopes = calc_ampenv(filtdata)
+            aecval[e] = np.corrcoef(envelopes)
+        return aecval
+
+
 conn_estim_dc = {'dtf':   DTF,
                  'pdc':   PDC,
                  'ipdc':  iPDC,
@@ -1117,4 +1189,5 @@ conn_estim_dc = {'dtf':   DTF,
                  'gpdc':  gPDC,
                  'pcoh':  PartialCoh,
                  'coh':   Coherency,
-                 'gci':   GCI, }
+                 'gci':   GCI, 
+                 'aec':   AEC}

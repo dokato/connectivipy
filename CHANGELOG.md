@@ -3,6 +3,8 @@ Changelog
 
 #### 0.39
 * python3 support
+* new plotting features
+* bug fixing (mostly related to python3 transfer)
 
 #### 0.36
 * bug fixing

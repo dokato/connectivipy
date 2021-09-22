@@ -18,10 +18,10 @@ opposite to other packages it allows you to work with all types of data,
 not only biomedical. Calculations base on numpy and scipy what provides
 good efficiency.*
 
-Tested under Python >=2.7 and >=3.3.
+Tested under Python 3.6 and 3.8.
 
 Contents:
-######
+#########
 
 .. toctree::
     data
@@ -36,8 +36,16 @@ Tutorials:
     install
     tutorial
 
+Questions and bug reports
+#########################
+
+If you have any questions or want to report a bug, the easiest way
+is to post a new issue on `GitHub issues
+<https://github.com/dokato/connectivipy/issues>`_.
+
+
 Credits:
-######
+########
 
 * Dominik Krzemiński
 * Maciej Kamiński (scientific lead)

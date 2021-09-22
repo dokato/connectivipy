@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-#! /usr/bin/env python
 
-from __future__ import absolute_import
 import inspect
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as si
@@ -33,12 +32,10 @@ class Data(object):
     def __init__(self, data, fs=1., chan_names=[], data_info=''):
         self.__fs = fs
         self.__data = self._load_file(data, data_info)
+        self.__channames = ["x"+str(i) for i in range(self.__chans_number)]
         if self.__data.shape[0] == len(chan_names):
             self.__channames = chan_names
-        elif hasattr(self, '_Data__fs'):
-            pass
-        else:
-            self.__channames = ["x"+str(i) for i in range(self.__chans)]
+        self.__channames_original = self.__channames
         self.data_info = data_info
         self._parameters = {}
         self._parameters["mvar"] = False
@@ -78,9 +75,32 @@ class Data(object):
             self.__multitrial = data.shape[2]
         else:
             self.__multitrial = False
-        self.__chans = data.shape[0]
+        # in original number of channels after loading is stored,
+        # self.__chans_number can be modified
+        self.__chans_number_original = self.__chans_number = data.shape[0]
+        self._channels = np.arange(self.__chans_number)
         self.__length = data.shape[1]
         return data
+
+    def select_channels(self, channels=None):
+        '''
+        Selecting channels to plot or further analysis.
+
+        Args:
+          *channels* : list(int)
+            List of channel indices. If None all channels are taken
+            into account.
+        '''
+        if np.max(channels) >= self.__chans_number_original:
+            raise ValueError("Indices are not correct")
+        if channels is None:
+            self._channels = np.arange(self.__chans_number_original)
+            self.__chans_number = self.__chans_number_original
+            self.__channames = self.__channames_original
+        else:
+            self._channels = channels
+            self.__chans_number = len(channels)
+            self.__channames = [i for e, i in enumerate(self.__channames_original) if e in channels]
 
     def filter(self, b, a):
         '''
@@ -94,7 +114,7 @@ class Data(object):
         '''
         if self.__multitrial:
             for r in range(self.__multitrial):
-                self.__data[:, :, r] = ss.filtfilt(b, a, self.__data[:, :, r])
+                self.__data[:, :, r] = ss.filtfilt(b, a, self.__data)
         else:
             self.__data = ss.filtfilt(b, a, self.__data)
 
@@ -107,7 +127,7 @@ class Data(object):
           *fs_new* : int
             new sampling frequency
         '''
-        new_nr_samples = (len(self.__data[0])*1./self.__fs)*fs_new
+        new_nr_samples = int((self.__length*1./self.__fs)*fs_new)
         self.__data = ss.resample(self.__data, new_nr_samples, axis=1)
         self.__fs = fs_new
 
@@ -144,13 +164,13 @@ class Data(object):
                                              self.__fs, **params)
         else:
             if not self.__multitrial:
-                self.__estim = connobj.calculate(self.__data, **params)
+                self.__estim = connobj.calculate(self.__data[self._channels, :], **params)
             else:
                 for r in range(self.__multitrial):
                     if r == 0:
-                        self.__estim = connobj.calculate(self.__data[:, :, r], **params)
+                        self.__estim = connobj.calculate(self.__data[self._channels, :, r], **params)
                         continue
-                    self.__estim += connobj.calculate(self.__data[:, :, r], **params)
+                    self.__estim += connobj.calculate(self.__data[self._channels, :, r], **params)
                 self.__estim = self.__estim/self.__multitrial
         self._parameters["method"] = method
         self._parameters["y_lim"] = connobj.values_range
@@ -190,19 +210,19 @@ class Data(object):
         if "resolution" not in self._parameters:
             self._parameters["resolution"] = 100
         if isinstance(connobj, ConnectAR):
-            self.__shtimest = connobj.short_time(self.__data, nfft=nfft, no=no,
+            self.__shtimest = connobj.short_time(self.__data[self._channels, :], nfft=nfft, no=no,
                                                  fs=self.__fs, order=self._parameters["p"],
                                                  resol=self._parameters["resolution"])
         else:
             if self.__multitrial:
                 for r in range(self.__multitrial):
                     if r == 0:
-                        self.__shtimest = connobj.short_time(self.__data[:, :, r], nfft=nfft, no=no, **newparams)
+                        self.__shtimest = connobj.short_time(self.__data[self._channels, :, r], nfft=nfft, no=no, **newparams)
                         continue
-                    self.__shtimest += connobj.short_time(self.__data[:, :, r], nfft=nfft, no=no, **newparams)
+                    self.__shtimest += connobj.short_time(self.__data[self._channels, :, r], nfft=nfft, no=no, **newparams)
                 self.__shtimest /= self.__multitrial
             else:
-                self.__shtimest = connobj.short_time(self.__data, nfft=nfft, no=no, **newparams)
+                self.__shtimest = connobj.short_time(self.__data[self._channels, :], nfft=nfft, no=no, **newparams)
         self._parameters["shorttime"] = method
         self._parameters["nfft"] = nfft
         self._parameters["no"] = no
@@ -230,22 +250,22 @@ class Data(object):
         newparams = self.__make_params_dict(arg[0])
         if not self.__multitrial:
             if isinstance(connobj, ConnectAR):
-                self.__signific = connobj.surrogate(self.__data, Nrep=Nrep, alpha=alpha,
+                self.__signific = connobj.surrogate(self.__data[self._channels, :], Nrep=Nrep, alpha=alpha,
                                                     method=self._parameters["mvarmethod"],
                                                     fs=self.__fs, order=self._parameters["p"],
                                                     verbose=verbose, **newparams)
             else:
-                self.__signific = connobj.surrogate(self.__data, Nrep=Nrep,
+                self.__signific = connobj.surrogate(self.__data[self._channels, :], Nrep=Nrep,
                                                     alpha=alpha, verbose=verbose,
                                                     **newparams)
         else:
             if isinstance(connobj, ConnectAR):
-                self.__signific = connobj.bootstrap(self.__data, Nrep=Nrep, alpha=alpha,
+                self.__signific = connobj.bootstrap(self.__data[self._channels, :, :], Nrep=Nrep, alpha=alpha,
                                                     method=self._parameters["mvarmethod"],
                                                     fs=self.__fs, order=self._parameters["p"],
                                                     verbose=verbose, **newparams)
             else:
-                self.__signific = connobj.bootstrap(self.__data, Nrep=Nrep,
+                self.__signific = connobj.bootstrap(self.__data[self._channels, :, :], Nrep=Nrep,
                                                     alpha=alpha, verbose=verbose,
                                                     **newparams)
         return self.__signific
@@ -282,13 +302,17 @@ class Data(object):
         self._parameters.update(params)
         arg = inspect.getargspec(connobj.calculate)
         newparams = self.__make_params_dict(arg[0])
+        if self.__multitrial:
+            temp_dat = self.__data[self._channels, :, :]
+        else:
+            temp_dat = self.__data[self._channels, :]
         if isinstance(connobj, ConnectAR):
-            self.__st_signific = connobj.short_time_significance(self.__data, Nrep=Nrep, alpha=alpha,
+            self.__st_signific = connobj.short_time_significance(temp_dat, Nrep=Nrep, alpha=alpha,
                                                                  method=self._parameters["mvarmethod"],
                                                                  fs=self.__fs, order=self._parameters["p"],
                                                                  nfft=nfft, no=no, verbose=verbose, **newparams)
         else:
-            self.__st_signific = connobj.short_time_significance(self.__data, Nrep=Nrep,
+            self.__st_signific = connobj.short_time_significance(temp_dat, Nrep=Nrep,
                                                                  nfft=nfft, no=no,
                                                                  alpha=alpha, verbose=verbose, **newparams)
         return self.__st_signific
@@ -306,11 +330,14 @@ class Data(object):
         '''
         time = np.arange(0, self.__length)*1./self.__fs
         if self.__multitrial:
-            plotdata = self.__data[:, :, trial]
+            plotdata = self.__data[self._channels, :, trial]
         else:
-            plotdata = self.__data
-        fig, axes = plt.subplots(self.__chans, 1)
-        for i in range(self.__chans):
+            plotdata = self.__data[self._channels, :]
+        if self.__chans_number>10:
+            warnings.warn("""Number of channels > 10.
+                          Consider picking only some channels.""", Warning)
+        fig, axes = plt.subplots(self.__chans_number, 1)
+        for i in np.arange(self.__chans_number):
             axes[i].plot(time, plotdata[i, :], 'g')
             if self.__channames:
                 axes[i].set_title(self.__channames[i])
@@ -337,16 +364,10 @@ class Data(object):
             show the plot or not
         '''
         assert hasattr(self, '_Data__estim') is True, "No valid data!, Use calculation method first."
-        fig, axes = plt.subplots(self.__chans, self.__chans)
+        fig, axes = plt.subplots(self.__chans_number, self.__chans_number)
         freqs = np.linspace(0, self.__fs//2, self.__estim.shape[0])
         if not xlim:
             xlim = [0, np.max(freqs)]
-        if not ylim:
-            ylim = self._parameters["y_lim"]
-            if ylim[0] is None:
-                ylim[0] = np.min(self.__estim)
-            if ylim[1] is None:
-                ylim[1] = np.max(self.__estim)
         two_sides = False
         if signi and hasattr(self, '_Data__signific'):
             flag_sig = True
@@ -354,22 +375,43 @@ class Data(object):
                 two_sides = True
         else:
             flag_sig = False
-        for i in range(self.__chans):
-            for j in range(self.__chans):
+        if not ylim:
+            ylim = self._parameters["y_lim"]
+            if ylim[0] is None:
+                ylim[0] = np.min(self.__estim)
+                if flag_sig:
+                    ylim[0] = np.min((ylim[0], np.min(self.__signific)))
+            if ylim[1] is None:
+                ylim[1] = np.max(self.__estim)
+                if flag_sig:
+                    ylim[1] = np.max((ylim[1], np.max(self.__signific)))
+        # selecting right channels
+        if self.__estim.shape[-1] != self.__chans_number:
+            estim = self.__estim[:, [[c] for c in self._channels], self._channels]
+            if two_sides:
+                signific = self.__signific[:, [[c] for c in self._channels], self._channels]
+            else:
+                signific = self.__signific[[[c] for c in self._channels], self._channels]
+        else:
+            estim = self.__estim
+            signific = self.__signific
+        # plotting loop
+        for i in np.arange(self.__chans_number):
+            for j in np.arange(self.__chans_number):
                 if self.__channames and i == 0:
                     axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
                 if self.__channames and j == 0:
                     axes[i, j].set_ylabel(self.__channames[i])
-                axes[i, j].fill_between(freqs, self.__estim[:, i, j], 0)
+                axes[i, j].fill_between(freqs, estim[:, i, j], 0)
                 if flag_sig:
                     if two_sides:
-                        l_u = axes[i, j].axhline(y=self.__signific[0, i, j], color='r')
-                        l_d = axes[i, j].axhline(y=self.__signific[1, i, j], color='r')
+                        l_u = axes[i, j].axhline(y=signific[0, i, j], color='r')
+                        l_d = axes[i, j].axhline(y=signific[1, i, j], color='r')
                     else:
-                        l = axes[i, j].axhline(y=self.__signific[i, j], color='r')
+                        l = axes[i, j].axhline(y=signific[i, j], color='r')
                 axes[i, j].set_xlim(xlim)
                 axes[i, j].set_ylim(ylim)
-                if i != self.__chans-1:
+                if i != self.__chans_number-1:
                     axes[i, j].get_xaxis().set_visible(False)
                 if j != 0:
                     axes[i, j].get_yaxis().set_visible(False)
@@ -383,7 +425,7 @@ class Data(object):
                              show=True):
         '''
         Plot short-time version of estimation results.
-        
+
         Args:
           *name* = '' : str
             title of the plot
@@ -393,17 +435,30 @@ class Data(object):
           *percmax* = 1. : float (0,1)
             percent of maximal value which is maximum on the color map
           *show* = True : boolean
-            show the plot or not            
+            show the plot or not
         '''
         assert hasattr(self, '_Data__shtimest') == True, "No valid data! Use calculation method first."
         shtvalues = self.__shtimest
+        # selecting right channels
+        flag_channels_changed = False
+        if shtvalues.shape[-1] != self.__chans_number:
+            shtvalues = shtvalues[:, :, [[c] for c in self._channels], self._channels]
+            flag_channels_changed = True
+        # masking values if unsignificant
         if signi and hasattr(self, '_Data__st_signific'):
             if self.__st_signific.ndim > 3:
-                shtvalues = self.fill_nans(shtvalues, self.__st_signific[:, 0, :, :])
-                shtvalues = self.fill_nans(shtvalues, self.__st_signific[:, 1, :, :])
+                if flag_channels_changed:
+                    shtvalues = self.fill_nans(shtvalues, self.__st_signific[:, 0, self._channels, self._channels])
+                    shtvalues = self.fill_nans(shtvalues, self.__st_signific[:, 1, self._channels, self._channels])
+                else:
+                    shtvalues = self.fill_nans(shtvalues, self.__st_signific[:, 0, :, :])
+                    shtvalues = self.fill_nans(shtvalues, self.__st_signific[:, 1, :, :])
             else:
-                shtvalues = self.fill_nans(shtvalues, self.__st_signific)
-        fig, axes = plt.subplots(self.__chans, self.__chans)
+                if flag_channels_changed:
+                    shtvalues = self.fill_nans(shtvalues, self.__st_signific[:, self._channels, self._channels])
+                else:
+                    shtvalues = self.fill_nans(shtvalues, self.__st_signific)
+        fig, axes = plt.subplots(self.__chans_number, self.__chans_number)
         # currently not used:
         # freqs = np.linspace(0, self.__fs//2, 4)
         # time = np.linspace(0, self.__length/self.__fs, 5)
@@ -411,31 +466,47 @@ class Data(object):
         # ticks_freqs = [0, self.__length//self.__fs]
         # mask diagonal values to not contaminate the plot
         mask = np.zeros(shtvalues.shape)
-        for i in range(self.__chans):
+        for i in range(self.__chans_number):
             mask[:, :, i, i] = 1
         masked_shtimest = np.ma.array(shtvalues, mask=mask)
         dtmax = np.nanmax(masked_shtimest)*percmax
         dtmin = np.nanmin(masked_shtimest)
         cmap = plt.get_cmap('rainbow')
         cmap.set_bad(color='w', alpha=1)
-        for i in range(self.__chans):
-            for j in range(self.__chans):
+        for i in np.arange(self.__chans_number):
+            for j in np.arange(self.__chans_number):
                 if self.__channames and i == 0:
                     axes[i, j].set_title(self.__channames[j]+" >", fontsize=12)
                 if self.__channames and j == 0:
-                    axes[i, j].set_ylabel(self.__channames[i])
+                    if i == self.__chans_number//2:
+                        axes[i, j].set_ylabel("f [Hz]\n" + self.__channames[i])
+                    else:
+                        axes[i, j].set_ylabel(self.__channames[i])
+                elif j == 0 and i == self.__chans_number//2:
+                    axes[i, j].set_ylabel("f [Hz]")
                 img = axes[i, j].imshow(shtvalues[:, :, i, j].T, cmap=cmap, aspect='auto',
                                         extent=[0, self.__length/self.__fs, 0, self.__fs//2],
                                         interpolation='none', origin='lower',
                                         vmin=dtmin, vmax=dtmax)
-                if i != self.__chans-1:
+                if i != self.__chans_number-1:
                     axes[i, j].get_xaxis().set_visible(False)
+                else:
+                    labels = axes[i, j].get_xticklabels()
+                    for label in labels[::2]:
+                        label.set_visible(False)
+                    if j == self.__chans_number//2:
+                        axes[i, j].set_xlabel("time [s]")
                 if j != 0:
                     axes[i, j].get_yaxis().set_visible(False)
+                else:
+                    labels = axes[i, j].get_yticklabels()
+                    for label in labels[::2]:
+                        label.set_visible(False)
                 # xt = np.array(axes[i, j].get_xticks())/self.__fs
         plt.suptitle(name, y=0.98)
         plt.tight_layout()
-        fig.subplots_adjust(top=0.92, right=0.91)
+        fig.subplots_adjust(top=0.92, right=0.91, wspace=0.05, hspace=0.05)
+        axes
         cbar_ax = fig.add_axes([0.93, 0.1, 0.02, 0.7])
         cbar_ax.tick_params(labelsize=10)
         fig.colorbar(img, cax=cbar_ax)
@@ -473,18 +544,18 @@ class Data(object):
         if mod == 0:
             assert hasattr(self, '_Data__estim') is True, "No valid data! Use calculation method first."
             cnest = np.mean(self.__estim[ind1:ind2, :, :], axis=0)
-            for i in range(self.__chans):
+            for i in range(self.__chans_number):
                 content += "  " + "   ".join(['{:.4f}'.format(x) for x in cnest[i]]) + "\r\n"
         elif mod == 1:
             assert hasattr(self, '_Data__shtimest') is True, "No valid data! Use calculation method first."
             for k in range(self.__shtimest.shape[0]):
                 cnest = np.mean(self.__shtimest[k, ind1:ind2, :, :], axis=0)
-                for i in range(self.__chans):
+                for i in range(self.__chans_number):
                     content += "  " + "   ".join(['{:.4f}'.format(x) for x in cnest[i]]) + "\r\n"
                 content += "\r\n"
         with open(filename, 'wb') as fl:
             fl.write(content)
-    
+
     # auxiliary methods:
     def __make_params_dict(self, args):
         """
@@ -508,7 +579,7 @@ class Data(object):
     def fill_nans(self, values, borders):
         '''
         Fill nans where *values* < *borders* (independent of frequency).
-        
+
         Args:
           *values* : numpy.array
             array of shape (time, freqs, channels, channels) to fill nans
@@ -541,7 +612,7 @@ class Data(object):
 
     @property
     def data(self):
-        return self.__data
+        return self.__data[self._channels]
 
     @property
     def fs(self):
@@ -554,3 +625,11 @@ class Data(object):
     @property
     def channelnames(self):
         return self.__channames
+
+    @property
+    def channels(self):
+        return self._channels
+
+    @property
+    def channelsnr(self):
+        return self.__chans_number

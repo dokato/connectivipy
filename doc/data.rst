@@ -20,6 +20,6 @@ Data loading
 Additional functions
 ########
 
-**Plot tools which are separate from Data class**
+**Plot tools which are not depended on Data class**
 
 .. autofunction:: connectivipy.plot_conn

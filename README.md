@@ -4,13 +4,17 @@ Python module for connectivity analysis. You may find here implementation
 of MVAR based estimators like DTF, PDC and also Coherency, PSI. For more
 information visit documentation page.
 
-Project was supported by [GSOC 2015](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/dokato/5649050225344512)
-and made under [INCF](http://incf.org/) wings.
+The project was supported by [Google Summer of Code 2015](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/dokato/5649050225344512)
+and done in collaboration with [International Neuroinformatics Coordination Facility](http://incf.org/).
+
+[![Build Status](https://travis-ci.org/dokato/connectivipy.svg?branch=master)](https://travis-ci.org/dokato/connectivipy)
+[![codecov](https://codecov.io/gh/dokato/connectivipy/branch/master/graph/badge.svg)](https://codecov.io/gh/dokato/connectivipy)
+
 
 ## Content
 
-* Data - data wrapper
-* Connectivity - classes with connectivity estimators
+* Data - data object that makes data handling easier
+* Connectivity - class with connectivity estimators
 * Mvar fitting - this submodule includes some MVAR algorithms
 
 ## License
@@ -23,19 +27,25 @@ documentation and tutorials.
 
 ## Installation
 
-Option 1: using GIT
+Option 1: PIP (stable release)
+
+```
+pip install connectivipy
+```
+
+Option 1: PIP+GIT (latest release)
+
+```
+pip install git+https://github.com/dokato/connectivipy.git
+```
+
+
+Option 3: using GIT (the most recent version)
 
 ```
 git clone https://github.com/dokato/connectivipy.git
 cd connectivipy
 python setup.py install
-```
-
-Option 2: Download ZIP from the menu on the right, unzip it and go
-in terminal to that folder. Than just execute:
-
-```
-python setup.py install 
 ```
 
 ## Authors

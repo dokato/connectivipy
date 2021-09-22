@@ -3,7 +3,7 @@
 Examples
 ==================
 
-*(which work in Python 2.7)*
+*(tested under Python 3.6 and 3.8)*
 
 Loading data
 ########
@@ -138,7 +138,7 @@ How to use specific classes
     best, crit = mv.order_akaike(y, 15, 'vm')
     plt.plot(1+np.arange(len(crit)), crit, 'g')
     plt.show()
-    print best
+    print(best)
     # here we know that this is 3 but in real-life cases
     # we are always uncertain about it
 
@@ -146,27 +146,30 @@ How to use specific classes
     av, vf = mv.fit(y, best, 'vm')
 
     # and check whether values are correct +/- 0.01
-    print np.allclose(acf, av, 0.01, 0.01)
+    print(np.allclose(acf, av, 0.01, 0.01))
 
     # now we can calculate Directed Transfer Function from the data
     dtf = cp.conn.DTF()
     dtfval = dtf.calculate(av, vf, 128)
     # all possible methods are visible in that dictionary:
-    print cp.conn.conn_estim_dc.keys()
+    print(cp.conn.conn_estim_dc.keys())
 
     cp.plot_conn(dtfval, 'DTF values', fs)
+
 
 Instantaneous
 ########
 
 .. code-block:: python
     
+    # Example 3    
+
     import numpy as np
     import matplotlib.pyplot as plt
     import connectivipy as cp
 
     """
-    This example reproduces simulation from article:
+    This example reproduce simulation from article:
     Erla S et all (2009) "Multivariate autoregressive model with
                           instantaneous effects to improve brain
                           connectivity estimation"
@@ -198,7 +201,7 @@ Instantaneous
     # now we build a corresponding MVAR process without instantenous effect
     L = np.linalg.inv(np.eye(5)-bcf[0])
     acf = np.zeros((3, 5, 5))
-    for i in xrange(3):
+    for i in range(3):
         acf[i] = np.dot(L, bcf[i+1])
 
     # generate 5-channel signals from matrix above
@@ -226,8 +229,8 @@ Instantaneous
             xlim = [0, np.max(freqs)]
         if not ylim:
             ylim = [0, 1]
-        for i in xrange(k):
-            for j in xrange(k):
+        for i in range(k):
+            for j in range(k):
                 axes[i, j].fill_between(freqs, values_b[:, i, j], 0, facecolor='red', alpha=0.5)
                 axes[i, j].fill_between(freqs, values_a[:, i, j], 0, facecolor='black', alpha=0.5)
                 axes[i, j].set_xlim(xlim)
@@ -239,4 +242,6 @@ Instantaneous
             plt.show()
 
     plot_double_conn(pdcval**2, ipdcval**2, 'PDC / iPDC')
+
+
 
