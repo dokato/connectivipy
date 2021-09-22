@@ -1,0 +1,733 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>connectivipy.data &#8212; ConnectiviPy 0.36a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/agogo.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../../index.html">ConnectiviPy 0.36a documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for connectivipy.data</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">si</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">ss</span>
+<span class="kn">from</span> <span class="nn">.mvarmodel</span> <span class="kn">import</span> <span class="n">Mvar</span>
+<span class="kn">from</span> <span class="nn">.conn</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.load.loaders</span> <span class="kn">import</span> <span class="n">signalml_loader</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
+
+
+<div class="viewcode-block" id="Data"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data">[docs]</a><span class="k">class</span> <span class="nc">Data</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Class governing the communication between data array and</span>
+<span class="sd">    connectivity estimators.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      *data* : numpy.array or str</span>
+<span class="sd">          * array with data (kXNxR, k - channels nr, N - data points,</span>
+<span class="sd">                             R - nr of trials)</span>
+<span class="sd">          * str - path to file with appropieate format</span>
+<span class="sd">      *fs* = 1: int</span>
+<span class="sd">          sampling frequency</span>
+<span class="sd">      *chan_names* = []: list</span>
+<span class="sd">          names of channels</span>
+<span class="sd">      *data_info* = &#39;&#39;: string</span>
+<span class="sd">          other information about the data</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">chan_names</span><span class="o">=</span><span class="p">[],</span> <span class="n">data_info</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fs</span> <span class="o">=</span> <span class="n">fs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_file</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_info</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">chan_names</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span> <span class="o">=</span> <span class="n">chan_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__channames_original</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_info</span> <span class="o">=</span> <span class="n">data_info</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;mvar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_load_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_what</span><span class="p">,</span> <span class="n">data_info</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Data loader.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *data_what* : str/numpy.array</span>
+<span class="sd">              path to file with appropieate format or numpy data array</span>
+<span class="sd">          *data_info* = &#39;&#39; : str</span>
+<span class="sd">              additional file with data settings if needed</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *data* : np.array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">dt_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">data_what</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dt_type</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data_what</span>
+        <span class="k">elif</span> <span class="n">dt_type</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">dt_type</span> <span class="o">=</span> <span class="n">data_what</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># catch file extension</span>
+            <span class="k">if</span> <span class="n">dt_type</span> <span class="o">==</span> <span class="s1">&#39;mat&#39;</span><span class="p">:</span>
+                <span class="n">mat_dict</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">data_what</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">data_info</span><span class="p">:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">data_info</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">data_what</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">mat_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dt_type</span> <span class="o">==</span> <span class="s1">&#39;raw&#39;</span> <span class="ow">and</span> <span class="n">data_info</span> <span class="o">==</span> <span class="s1">&#39;sml&#39;</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">sml</span> <span class="o">=</span> <span class="n">signalml_loader</span><span class="p">(</span><span class="n">data_what</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__fs</span> <span class="o">=</span> <span class="n">sml</span><span class="p">[</span><span class="s1">&#39;samplingFrequency&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span> <span class="o">=</span> <span class="n">sml</span><span class="p">[</span><span class="s1">&#39;channelNames&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">smldict</span> <span class="o">=</span> <span class="n">sml</span>  <span class="c1"># here SignalML data is stored</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># in original number of channels after loading is stored,</span>
+        <span class="c1"># self.__chans_number can be modified</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number_original</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__length</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+<div class="viewcode-block" id="Data.select_channels"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.select_channels">[docs]</a>    <span class="k">def</span> <span class="nf">select_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Selecting channels to plot or further analysis.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *channels* : list(int)</span>
+<span class="sd">            List of channel indices. If None all channels are taken</span>
+<span class="sd">            into account.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number_original</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Indices are not correct&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number_original</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number_original</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__channames_original</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span> <span class="o">=</span> <span class="n">channels</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channames_original</span><span class="p">)</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Data.filter"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Filter each channel of data using forward-backward  filter</span>
+<span class="sd">        *filtfilt* from *scipy.signal*.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *b, a* : np.array</span>
+<span class="sd">            Numerator *b*  / denominator *a* polynomials of</span>
+<span class="sd">            the IIR filter.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">filtfilt</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">filtfilt</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Data.resample"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.resample">[docs]</a>    <span class="k">def</span> <span class="nf">resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fs_new</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Signal resampling to new sampling frequency *new_fs* using</span>
+<span class="sd">        *resample* function from *scipy.signal* (basing on Fourier method).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *fs_new* : int</span>
+<span class="sd">            new sampling frequency</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">new_nr_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__length</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__fs</span><span class="p">)</span><span class="o">*</span><span class="n">fs_new</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">,</span> <span class="n">new_nr_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fs</span> <span class="o">=</span> <span class="n">fs_new</span></div>
+
+<div class="viewcode-block" id="Data.fit_mvar"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.fit_mvar">[docs]</a>    <span class="k">def</span> <span class="nf">fit_mvar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;yw&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Fitting MVAR coefficients.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *p* = None : int</span>
+<span class="sd">            estimation order, default None</span>
+<span class="sd">          *method* = &#39;yw&#39; : str {&#39;yw&#39;, &#39;ns&#39;, &#39;vm&#39;}</span>
+<span class="sd">            method of MVAR parameters estimation</span>
+<span class="sd">            all avaiable methods you can find in *fitting_algorithms*</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Ar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Vr</span> <span class="o">=</span> <span class="n">Mvar</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;mvar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;mvarmethod&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">method</span></div>
+
+<div class="viewcode-block" id="Data.conn"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.conn">[docs]</a>    <span class="k">def</span> <span class="nf">conn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Estimate connectivity pattern.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *p* = None : int</span>
+<span class="sd">            estimation order, default None</span>
+<span class="sd">          *method* : str</span>
+<span class="sd">            method of connectivity estimation</span>
+<span class="sd">            all avaiable methods you can find in *conn_estim_dc*</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">connobj</span> <span class="o">=</span> <span class="n">conn_estim_dc</span><span class="p">[</span><span class="n">method</span><span class="p">]()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">connobj</span><span class="p">,</span> <span class="n">ConnectAR</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Vr</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">__fs</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:],</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:,</span> <span class="n">r</span><span class="p">],</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span> <span class="o">+=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:,</span> <span class="n">r</span><span class="p">],</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;y_lim&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">values_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span></div>
+
+<div class="viewcode-block" id="Data.short_time_conn"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.short_time_conn">[docs]</a>    <span class="k">def</span> <span class="nf">short_time_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Short-time connectivity.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *method* = &#39;yw&#39; : str {&#39;yw&#39;, &#39;ns&#39;, &#39;vm&#39;}</span>
+<span class="sd">            method of estimation</span>
+<span class="sd">            all avaiable methods you can find in *fitting_algorithms*</span>
+<span class="sd">          *nfft* = None : int</span>
+<span class="sd">            number of data points in window; if None, it is signal length</span>
+<span class="sd">            N/5.</span>
+<span class="sd">          *no* = None : int</span>
+<span class="sd">            number of data points in overlap; if None, it is signal length</span>
+<span class="sd">            N/10.</span>
+<span class="sd">          *params*</span>
+<span class="sd">            other parameters for specific estimator</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">connobj</span> <span class="o">=</span> <span class="n">conn_estim_dc</span><span class="p">[</span><span class="n">method</span><span class="p">]()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">connobj</span><span class="o">.</span><span class="n">calculate</span><span class="p">)</span>
+        <span class="n">newparams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_params_dict</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;p&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;order&quot;</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;order&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nfft</span><span class="p">:</span>
+            <span class="n">nfft</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__length</span><span class="o">/</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">no</span><span class="p">:</span>
+            <span class="n">no</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__length</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;resolution&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">connobj</span><span class="p">,</span> <span class="n">ConnectAR</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__shtimest</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">short_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:],</span> <span class="n">nfft</span><span class="o">=</span><span class="n">nfft</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="n">no</span><span class="p">,</span>
+                                                 <span class="n">fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__fs</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">],</span>
+                                                 <span class="n">resol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;resolution&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__shtimest</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">short_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:,</span> <span class="n">r</span><span class="p">],</span> <span class="n">nfft</span><span class="o">=</span><span class="n">nfft</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="n">no</span><span class="p">,</span> <span class="o">**</span><span class="n">newparams</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__shtimest</span> <span class="o">+=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">short_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:,</span> <span class="n">r</span><span class="p">],</span> <span class="n">nfft</span><span class="o">=</span><span class="n">nfft</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="n">no</span><span class="p">,</span> <span class="o">**</span><span class="n">newparams</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__shtimest</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__shtimest</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">short_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:],</span> <span class="n">nfft</span><span class="o">=</span><span class="n">nfft</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="n">no</span><span class="p">,</span> <span class="o">**</span><span class="n">newparams</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;shorttime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;nfft&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nfft</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;no&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">no</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shtimest</span></div>
+
+<div class="viewcode-block" id="Data.significance"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.significance">[docs]</a>    <span class="k">def</span> <span class="nf">significance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Statistical significance values of connectivity estimation method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *Nrep* = 100 : int</span>
+<span class="sd">            number of resamples</span>
+<span class="sd">          *alpha* = 0.05 : float</span>
+<span class="sd">            type I error rate (significance level)</span>
+<span class="sd">          *verbose* = True : bool</span>
+<span class="sd">            if True it prints dot on every realization</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *signi*: numpy.array</span>
+<span class="sd">            matrix in shape of (k, k) with values for each pair of</span>
+<span class="sd">            channels</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">connobj</span> <span class="o">=</span> <span class="n">conn_estim_dc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]]()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">connobj</span><span class="o">.</span><span class="n">calculate</span><span class="p">)</span>
+        <span class="n">newparams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_params_dict</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">connobj</span><span class="p">,</span> <span class="n">ConnectAR</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__signific</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">surrogate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:],</span> <span class="n">Nrep</span><span class="o">=</span><span class="n">Nrep</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+                                                    <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;mvarmethod&quot;</span><span class="p">],</span>
+                                                    <span class="n">fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__fs</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">],</span>
+                                                    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">newparams</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__signific</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">surrogate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:],</span> <span class="n">Nrep</span><span class="o">=</span><span class="n">Nrep</span><span class="p">,</span>
+                                                    <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                                                    <span class="o">**</span><span class="n">newparams</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">connobj</span><span class="p">,</span> <span class="n">ConnectAR</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__signific</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">bootstrap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">Nrep</span><span class="o">=</span><span class="n">Nrep</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+                                                    <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;mvarmethod&quot;</span><span class="p">],</span>
+                                                    <span class="n">fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__fs</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">],</span>
+                                                    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">newparams</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__signific</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">bootstrap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">Nrep</span><span class="o">=</span><span class="n">Nrep</span><span class="p">,</span>
+                                                    <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                                                    <span class="o">**</span><span class="n">newparams</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signific</span></div>
+
+<div class="viewcode-block" id="Data.short_time_significance"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.short_time_significance">[docs]</a>    <span class="k">def</span> <span class="nf">short_time_significance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">no</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Statistical significance values of short-time version of</span>
+<span class="sd">        connectivity estimation method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *Nrep* = 100 : int</span>
+<span class="sd">            number of resamples</span>
+<span class="sd">          *alpha* = 0.05 : float</span>
+<span class="sd">            type I error rate (significance level)</span>
+<span class="sd">          *nfft* = None : int</span>
+<span class="sd">            number of data points in window; if None, it is taken from</span>
+<span class="sd">            :func:`Data.short_time_conn` method.</span>
+<span class="sd">          *no* = None : int</span>
+<span class="sd">            number of data points in overlap; if None, it is taken from</span>
+<span class="sd">            *short_time_conn* method.</span>
+<span class="sd">          *verbose* = True : bool</span>
+<span class="sd">            if True it prints dot on every realization</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *signi*: numpy.array</span>
+<span class="sd">            matrix in shape of (k, k) with values for each pair of</span>
+<span class="sd">            channels</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nfft</span><span class="p">:</span>
+            <span class="n">nfft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;nfft&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">no</span><span class="p">:</span>
+            <span class="n">no</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;no&quot;</span><span class="p">]</span>
+        <span class="n">connobj</span> <span class="o">=</span> <span class="n">conn_estim_dc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;shorttime&quot;</span><span class="p">]]()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">connobj</span><span class="o">.</span><span class="n">calculate</span><span class="p">)</span>
+        <span class="n">newparams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_params_dict</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span><span class="p">:</span>
+            <span class="n">temp_dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">temp_dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">connobj</span><span class="p">,</span> <span class="n">ConnectAR</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__st_signific</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">short_time_significance</span><span class="p">(</span><span class="n">temp_dat</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="n">Nrep</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+                                                                 <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;mvarmethod&quot;</span><span class="p">],</span>
+                                                                 <span class="n">fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__fs</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">],</span>
+                                                                 <span class="n">nfft</span><span class="o">=</span><span class="n">nfft</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="n">no</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">newparams</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__st_signific</span> <span class="o">=</span> <span class="n">connobj</span><span class="o">.</span><span class="n">short_time_significance</span><span class="p">(</span><span class="n">temp_dat</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="n">Nrep</span><span class="p">,</span>
+                                                                 <span class="n">nfft</span><span class="o">=</span><span class="n">nfft</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="n">no</span><span class="p">,</span>
+                                                                 <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">newparams</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__st_signific</span></div>
+
+<div class="viewcode-block" id="Data.plot_data"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.plot_data">[docs]</a>    <span class="k">def</span> <span class="nf">plot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Plot data in a subplot for each channel.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *trial* = 0 : int</span>
+<span class="sd">            if there is multichannel data it should be a number of trial</span>
+<span class="sd">            you want to plot.</span>
+<span class="sd">          *show* = True : boolean</span>
+<span class="sd">            show the plot or not</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__length</span><span class="p">)</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__fs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multitrial</span><span class="p">:</span>
+            <span class="n">plotdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:,</span> <span class="n">trial</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plotdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="o">&gt;</span><span class="mi">10</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Number of channels &gt; 10.</span>
+<span class="s2">                          Consider picking only some channels.&quot;&quot;&quot;</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">)</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">):</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">plotdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span><span class="p">:</span>
+                <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Data.plot_conn"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.plot_conn">[docs]</a>    <span class="k">def</span> <span class="nf">plot_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">signi</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Plot connectivity estimation results.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *name* = &#39;&#39; : str</span>
+<span class="sd">            title of the plot</span>
+<span class="sd">          *ylim* = None : list</span>
+<span class="sd">            range of y-axis values shown, e.g. [0,1]</span>
+<span class="sd">            *None* means that default values of given estimator are taken</span>
+<span class="sd">            into account</span>
+<span class="sd">          *xlim* = None : list [from (int), to (int)]</span>
+<span class="sd">            range of y-axis values shown, if None it is from 0 to Nyquist frequency</span>
+<span class="sd">          *signi* = True : boolean</span>
+<span class="sd">            if significance levels are calculated they are shown in the plot</span>
+<span class="sd">          *show* = True : boolean</span>
+<span class="sd">            show the plot or not</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_Data__estim&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;No valid data!, Use calculation method first.&quot;</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">)</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fs</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">xlim</span><span class="p">:</span>
+            <span class="n">xlim</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">freqs</span><span class="p">)]</span>
+        <span class="n">two_sides</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">signi</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_Data__signific&#39;</span><span class="p">):</span>
+            <span class="n">flag_sig</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signific</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">two_sides</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">flag_sig</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ylim</span><span class="p">:</span>
+            <span class="n">ylim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;y_lim&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__estim</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">flag_sig</span><span class="p">:</span>
+                    <span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">((</span><span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__signific</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__estim</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">flag_sig</span><span class="p">:</span>
+                    <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">((</span><span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__signific</span><span class="p">)))</span>
+        <span class="c1"># selecting right channels</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">:</span>
+            <span class="n">estim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span><span class="p">[:,</span> <span class="p">[[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">two_sides</span><span class="p">:</span>
+                <span class="n">signific</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signific</span><span class="p">[:,</span> <span class="p">[[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">signific</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signific</span><span class="p">[[[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">estim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span>
+            <span class="n">signific</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signific</span>
+        <span class="c1"># plotting loop</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channames</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot; &gt;&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">estim</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">flag_sig</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">two_sides</span><span class="p">:</span>
+                        <span class="n">l_u</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">signific</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                        <span class="n">l_d</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">signific</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">l</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">signific</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">)</span>
+                <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">get_xaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.98</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mf">0.92</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Data.plot_short_time_conn"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.plot_short_time_conn">[docs]</a>    <span class="k">def</span> <span class="nf">plot_short_time_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">signi</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">percmax</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
+                             <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Plot short-time version of estimation results.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *name* = &#39;&#39; : str</span>
+<span class="sd">            title of the plot</span>
+<span class="sd">          *signi* = True : boolean</span>
+<span class="sd">            reset irrelevant values; it works only after short time</span>
+<span class="sd">            significance calculation using *short_time_significance*</span>
+<span class="sd">          *percmax* = 1. : float (0,1)</span>
+<span class="sd">            percent of maximal value which is maximum on the color map</span>
+<span class="sd">          *show* = True : boolean</span>
+<span class="sd">            show the plot or not</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_Data__shtimest&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;No valid data! Use calculation method first.&quot;</span>
+        <span class="n">shtvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shtimest</span>
+        <span class="c1"># selecting right channels</span>
+        <span class="n">flag_channels_changed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">shtvalues</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">:</span>
+            <span class="n">shtvalues</span> <span class="o">=</span> <span class="n">shtvalues</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">[[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">]</span>
+            <span class="n">flag_channels_changed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># masking values if unsignificant</span>
+        <span class="k">if</span> <span class="n">signi</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_Data__st_signific&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__st_signific</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">flag_channels_changed</span><span class="p">:</span>
+                    <span class="n">shtvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill_nans</span><span class="p">(</span><span class="n">shtvalues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__st_signific</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">])</span>
+                    <span class="n">shtvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill_nans</span><span class="p">(</span><span class="n">shtvalues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__st_signific</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">shtvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill_nans</span><span class="p">(</span><span class="n">shtvalues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__st_signific</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+                    <span class="n">shtvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill_nans</span><span class="p">(</span><span class="n">shtvalues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__st_signific</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">flag_channels_changed</span><span class="p">:</span>
+                    <span class="n">shtvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill_nans</span><span class="p">(</span><span class="n">shtvalues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__st_signific</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">shtvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill_nans</span><span class="p">(</span><span class="n">shtvalues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__st_signific</span><span class="p">)</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">)</span>
+        <span class="c1"># currently not used:</span>
+        <span class="c1"># freqs = np.linspace(0, self.__fs//2, 4)</span>
+        <span class="c1"># time = np.linspace(0, self.__length/self.__fs, 5)</span>
+        <span class="c1"># ticks_time = [0, self.__fs//2]</span>
+        <span class="c1"># ticks_freqs = [0, self.__length//self.__fs]</span>
+        <span class="c1"># mask diagonal values to not contaminate the plot</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shtvalues</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">):</span>
+            <span class="n">mask</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">masked_shtimest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shtvalues</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
+        <span class="n">dtmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">masked_shtimest</span><span class="p">)</span><span class="o">*</span><span class="n">percmax</span>
+        <span class="n">dtmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">masked_shtimest</span><span class="p">)</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;rainbow&#39;</span><span class="p">)</span>
+        <span class="n">cmap</span><span class="o">.</span><span class="n">set_bad</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channames</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot; &gt;&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="o">//</span><span class="mi">2</span><span class="p">:</span>
+                        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;f [Hz]</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="o">//</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;f [Hz]&quot;</span><span class="p">)</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">shtvalues</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+                                        <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__length</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__fs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fs</span><span class="o">//</span><span class="mi">2</span><span class="p">],</span>
+                                        <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+                                        <span class="n">vmin</span><span class="o">=</span><span class="n">dtmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">dtmax</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">get_xaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">labels</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">[::</span><span class="mi">2</span><span class="p">]:</span>
+                        <span class="n">label</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="o">//</span><span class="mi">2</span><span class="p">:</span>
+                        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;time [s]&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">labels</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">[::</span><span class="mi">2</span><span class="p">]:</span>
+                        <span class="n">label</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="c1"># xt = np.array(axes[i, j].get_xticks())/self.__fs</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.98</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mf">0.92</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.91</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="n">axes</span>
+        <span class="n">cbar_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.93</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">])</span>
+        <span class="n">cbar_ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cbar_ax</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Data.export_trans3d"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.export_trans3d">[docs]</a>    <span class="k">def</span> <span class="nf">export_trans3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;conntrans3d.dat&#39;</span><span class="p">,</span> <span class="n">freq_band</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Export connectivity data to trans3D data file in order to make</span>
+<span class="sd">        3D arrow plots.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *mod* = 0 : int</span>
+<span class="sd">            0 - :func:`Data.conn` results</span>
+<span class="sd">            1 - :func:`Data.short_time_conn` results</span>
+<span class="sd">          *filename* = &#39;conn_trnas3d.dat&#39; : str</span>
+<span class="sd">            title of the plot</span>
+<span class="sd">          *freq_band* = [] : list</span>
+<span class="sd">            frequency range [from_value, to_value] in Hz.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;;electrodes = &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channames</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">;start = -0.500000</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+        <span class="n">content</span> <span class="o">+=</span> <span class="s2">&quot;;samplerate = 12</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+        <span class="c1"># two following lines define initial position of head model</span>
+        <span class="n">content</span> <span class="o">+=</span> <span class="s2">&quot;;transform_default = 1 0 0 0 0 1 0 0 0 0 1 -8 0 0 0 1</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+        <span class="n">content</span> <span class="o">+=</span> <span class="s2">&quot;;transform = 0.005148315144289768 0.007407087180879943 -3.4522594293647604 0.0 -2.727691946877633 2.116098522619611 0.000472475639 0.0 2.1160923126171305 2.7276819307525173 0.009008154977586572 -8.0 0.000000 0.000000 0.000000 1.000000</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+        <span class="n">content</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+        <span class="c1"># integrate value of estimator in given frequency band</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fs</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__estim</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">freq_band</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ind1</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">ind2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ind1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">freqs</span> <span class="o">&gt;=</span> <span class="n">freq_band</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ind2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">freqs</span> <span class="o">&gt;=</span> <span class="n">freq_band</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">mod</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_Data__estim&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;No valid data! Use calculation method first.&quot;</span>
+            <span class="n">cnest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__estim</span><span class="p">[</span><span class="n">ind1</span><span class="p">:</span><span class="n">ind2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">):</span>
+                <span class="n">content</span> <span class="o">+=</span> <span class="s2">&quot;  &quot;</span> <span class="o">+</span> <span class="s2">&quot;   &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cnest</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+        <span class="k">elif</span> <span class="n">mod</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_Data__shtimest&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;No valid data! Use calculation method first.&quot;</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__shtimest</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">cnest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__shtimest</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">ind1</span><span class="p">:</span><span class="n">ind2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span><span class="p">):</span>
+                    <span class="n">content</span> <span class="o">+=</span> <span class="s2">&quot;  &quot;</span> <span class="o">+</span> <span class="s2">&quot;   &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cnest</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+                <span class="n">content</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fl</span><span class="p">:</span>
+            <span class="n">fl</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></div>
+
+    <span class="c1"># auxiliary methods:</span>
+    <span class="k">def</span> <span class="nf">__make_params_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Making list of parameters from *self._parameters*</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *args* : list</span>
+<span class="sd">            list with parameters of *calculate* method of specific</span>
+<span class="sd">            estimator</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *newparams* : dict</span>
+<span class="sd">            dictionary with new parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">newparams</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">ag</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="n">ag</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">ag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">:</span>
+                <span class="n">newparams</span><span class="p">[</span><span class="n">ag</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="n">ag</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">newparams</span>
+
+<div class="viewcode-block" id="Data.fill_nans"><a class="viewcode-back" href="../../data.html#connectivipy.data.Data.fill_nans">[docs]</a>    <span class="k">def</span> <span class="nf">fill_nans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">borders</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Fill nans where *values* &lt; *borders* (independent of frequency).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          *values* : numpy.array</span>
+<span class="sd">            array of shape (time, freqs, channels, channels) to fill nans</span>
+<span class="sd">          *borders* : numpy.array</span>
+<span class="sd">            array of shape (time, channels, channels) with limes</span>
+<span class="sd">            values</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *values_nans* : numpy.array</span>
+<span class="sd">            array of shape (time, freq, channels, channels) with nans</span>
+<span class="sd">            where values were less than appropieate value from *borders*</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">tm</span><span class="p">,</span> <span class="n">fr</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fr</span><span class="p">):</span>
+            <span class="n">values</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:][</span><span class="n">values</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">borders</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">return</span> <span class="n">values</span></div>
+
+    <span class="c1"># accessors:</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mvar_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Returns mvar coefficients if calculated&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_Data__Ar&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_Data__Vr&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Ar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Vr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mvarcoef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Returns mvar coefficients if calculated&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mvar_coefficients</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channels</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">srate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">channelnames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__channames</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channels</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">channelsnr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chans_number</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connectivity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mvar.html">Mvarmodel</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Examples</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015, Dominik Krzeminski.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.2.0.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

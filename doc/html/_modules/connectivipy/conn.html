@@ -1,0 +1,1291 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>connectivipy.conn &#8212; ConnectiviPy 0.36a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/agogo.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../../index.html">ConnectiviPy 0.36a documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for connectivipy.conn</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">st</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">.mvar.comp</span> <span class="kn">import</span> <span class="n">ldl</span>
+<span class="kn">from</span> <span class="nn">.mvarmodel</span> <span class="kn">import</span> <span class="n">Mvar</span>
+<span class="kn">from</span> <span class="nn">.aec.utils</span> <span class="kn">import</span> <span class="n">filter_band</span><span class="p">,</span> <span class="n">calc_ampenv</span><span class="p">,</span> <span class="n">FQ_BANDS</span>
+
+<span class="kn">import</span> <span class="nn">six</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">map</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">zip</span>
+
+<span class="c1">########################################################################</span>
+<span class="c1"># Spectrum functions:</span>
+<span class="c1">########################################################################</span>
+
+
+<div class="viewcode-block" id="spectrum"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.spectrum">[docs]</a><span class="k">def</span> <span class="nf">spectrum</span><span class="p">(</span><span class="n">acoef</span><span class="p">,</span> <span class="n">vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generating data point from matrix *A* with MVAR coefficients.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      *acoef* : numpy.array</span>
+<span class="sd">          array of shape (k, k, p) where *k* is number of channels and</span>
+<span class="sd">          *p* is a model order.</span>
+<span class="sd">      *vcoef* : numpy.array</span>
+<span class="sd">          prediction error matrix (k, k)</span>
+<span class="sd">      *fs* = 1 : int</span>
+<span class="sd">          sampling rate</span>
+<span class="sd">      *resolution* = 100 : int</span>
+<span class="sd">          number of spectrum data points</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      *A_z* : numpy.array</span>
+<span class="sd">          z-transformed A(f) complex matrix in shape (*resolution*, k, k)</span>
+<span class="sd">      *H_z* : numpy.array</span>
+<span class="sd">          inversion of *A_z*</span>
+<span class="sd">      *S_z* : numpy.array</span>
+<span class="sd">          spectrum matrix (*resolution*, k, k)</span>
+<span class="sd">    References:</span>
+<span class="sd">    .. [1] K. J. Blinowska, R. Kus, M. Kaminski (2004) “Granger causality</span>
+<span class="sd">           and information flow in multivariate processes”</span>
+<span class="sd">           Physical Review E 70, 050902.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">acoef</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fs</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">A_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">),</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="nb">complex</span><span class="p">)</span>
+    <span class="n">H_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">),</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="nb">complex</span><span class="p">)</span>
+    <span class="n">S_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">),</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="nb">complex</span><span class="p">)</span>
+
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+        <span class="n">epot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">complex</span><span class="p">)</span>
+        <span class="n">ce</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">2.</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">f</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">fs</span><span class="p">))</span>
+        <span class="n">epot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ce</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+            <span class="n">epot</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">epot</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">ce</span>
+        <span class="n">A_z</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">epot</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">*</span><span class="n">acoef</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">H_z</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">A_z</span><span class="p">[</span><span class="n">e</span><span class="p">])</span>
+        <span class="n">S_z</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">H_z</span><span class="p">[</span><span class="n">e</span><span class="p">],</span> <span class="n">vcoef</span><span class="p">),</span> <span class="n">H_z</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">A_z</span><span class="p">,</span> <span class="n">H_z</span><span class="p">,</span> <span class="n">S_z</span></div>
+
+
+<div class="viewcode-block" id="spectrum_inst"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.spectrum_inst">[docs]</a><span class="k">def</span> <span class="nf">spectrum_inst</span><span class="p">(</span><span class="n">acoef</span><span class="p">,</span> <span class="n">vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generating data point from matrix *A* with MVAR coefficients taking</span>
+<span class="sd">    into account zero-lag effects.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      *acoef* : numpy.array</span>
+<span class="sd">          array of shape (k, k, p+1) where *k* is number of channels and</span>
+<span class="sd">          *p* is a model order. acoef[0] - is (k, k) matrix for zero lag,</span>
+<span class="sd">          acoef[1] for one data point lag and so on.</span>
+<span class="sd">      *vcoef* : numpy.array</span>
+<span class="sd">          prediction error matrix (k, k)</span>
+<span class="sd">      *fs* = 1 : int</span>
+<span class="sd">          sampling rate</span>
+<span class="sd">      *resolution* = 100 : int</span>
+<span class="sd">          number of spectrum data points</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      *A_z* : numpy.array</span>
+<span class="sd">          z-transformed A(f) complex matrix in shape (*resolution*, k, k)</span>
+<span class="sd">      *H_z* : numpy.array</span>
+<span class="sd">          inversion of *A_z*</span>
+<span class="sd">      *S_z* : numpy.array</span>
+<span class="sd">          spectrum matrix (*resolution*, k, k)</span>
+<span class="sd">    References:</span>
+<span class="sd">    .. [1] Erla S. et all, Multivariate Autoregressive Model with</span>
+<span class="sd">           Instantaneous Effects to Improve Brain Connectivity Estimation,</span>
+<span class="sd">           Int. J. Bioelectromagn. 11, 74–79 (2009).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">acoef</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fs</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">B_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">),</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="nb">complex</span><span class="p">)</span>
+    <span class="n">L</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">Lt</span> <span class="o">=</span> <span class="n">ldl</span><span class="p">(</span><span class="n">vcoef</span><span class="p">)</span>
+    <span class="n">Linv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">bcoef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Linv</span><span class="p">,</span> <span class="n">acoef</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p</span><span class="p">)])</span>
+    <span class="n">b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">-</span> <span class="n">Linv</span>
+    <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+        <span class="n">epot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">complex</span><span class="p">)</span>
+        <span class="n">ce</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">2.</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">f</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">fs</span><span class="p">))</span>
+        <span class="n">epot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ce</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+            <span class="n">epot</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">epot</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">ce</span>
+        <span class="n">B_z</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span> <span class="o">-</span> <span class="n">b0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">epot</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">*</span><span class="n">bcoef</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">B_z</span></div>
+
+<span class="c1">########################################################################</span>
+<span class="c1"># Connectivity classes:</span>
+<span class="c1">########################################################################</span>
+
+
+<div class="viewcode-block" id="Connect"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.Connect">[docs]</a><span class="k">class</span> <span class="nc">Connect</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">with_metaclass</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">,</span> <span class="nb">object</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract class governing calculation of various connectivity estimators</span>
+<span class="sd">    with concrete methods: *short_time*, *significance* and</span>
+<span class="sd">    abstract *calculate*.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_range</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>  <span class="c1"># normalization bands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># only positive, or also negative values</span>
+
+<div class="viewcode-block" id="Connect.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.Connect.calculate">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Abstract method to calculate values of estimators from specific</span>
+<span class="sd">        parameters&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Connect.short_time"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.Connect.short_time">[docs]</a>    <span class="k">def</span> <span class="nf">short_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Short-tme version of estimator, where data is windowed into parts</span>
+<span class="sd">        of length *nfft* and overlap *no*. *params* catch additional</span>
+<span class="sd">        parameters specific for estimator.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              data matrix (kXN) or (kXNxR) where k - channels,</span>
+<span class="sd">              N - data points, R - nr of trials</span>
+<span class="sd">          *nfft* = None : int</span>
+<span class="sd">              window length (if None it&#39;s N/5)</span>
+<span class="sd">          *no* = None : int</span>
+<span class="sd">              overlap length (if None it&#39;s N/10)</span>
+<span class="sd">          *params* :</span>
+<span class="sd">              additional parameters specific for chosen estimator</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *stvalues* : numpy.array</span>
+<span class="sd">              short time values (time points, frequency, k, k), where k</span>
+<span class="sd">              is number of channels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">nfft</span> <span class="o">&gt;</span> <span class="n">no</span><span class="p">,</span> <span class="s2">&quot;overlap must be smaller than window&quot;</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">trls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">trls</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nfft</span><span class="p">:</span>
+            <span class="n">nfft</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">no</span><span class="p">:</span>
+            <span class="n">no</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">nfft</span><span class="o">-</span><span class="n">no</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">trls</span><span class="p">:</span>
+                    <span class="n">datcut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="o">-</span><span class="n">N</span><span class="p">,</span> <span class="n">trls</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">datcut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="o">-</span><span class="n">N</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">datcut</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">e</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">rescalc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">datcut</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+                <span class="n">stvalues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">),</span> <span class="n">rescalc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+                <span class="n">stvalues</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">rescalc</span>
+                <span class="k">continue</span>
+            <span class="n">stvalues</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">datcut</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stvalues</span></div>
+
+<div class="viewcode-block" id="Connect.short_time_significance"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.Connect.short_time_significance">[docs]</a>    <span class="k">def</span> <span class="nf">short_time_significance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                                <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Significance of short-tme versions of estimators. It base on</span>
+<span class="sd">        bootstrap :func:`Connect.bootstrap` for multitrial case and</span>
+<span class="sd">        surrogate data :func:`Connect.surrogate` for one trial.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              data matrix (kXN) or (kXNxR) where k - channels,</span>
+<span class="sd">              N - data points, R - nr of trials</span>
+<span class="sd">          *Nrep* = 100 : int</span>
+<span class="sd">            number of resamples</span>
+<span class="sd">          *alpha* = 0.05 : float</span>
+<span class="sd">            type I error rate (significance level)</span>
+<span class="sd">          *nfft* = None : int</span>
+<span class="sd">              window length (if None it&#39;s N/5)</span>
+<span class="sd">          *no* = None : int</span>
+<span class="sd">              overlap length (if None it&#39;s N/10)</span>
+<span class="sd">          *verbose* = True : bool</span>
+<span class="sd">            if True it prints dot on every realization, if False it&#39;s</span>
+<span class="sd">            quiet.</span>
+<span class="sd">          *params* :</span>
+<span class="sd">              additional parameters specific for chosen estimator</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *signi_st* : numpy.array</span>
+<span class="sd">              short time significance values in shape of</span>
+<span class="sd">              - (tp, k, k) for one sided estimator</span>
+<span class="sd">              - (tp, 2, k, k) for two sided</span>
+<span class="sd">              where k is number of channels and tp number of time points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">nfft</span> <span class="o">&gt;</span> <span class="n">no</span><span class="p">,</span> <span class="s2">&quot;overlap must be smaller than window&quot;</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">trls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">trls</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nfft</span><span class="p">:</span>
+            <span class="n">nfft</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">no</span><span class="p">:</span>
+            <span class="n">no</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">nfft</span><span class="o">-</span><span class="n">no</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span><span class="p">:</span>
+            <span class="n">signi_st</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">signi_st</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">),</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">trls</span><span class="p">:</span>
+                    <span class="n">datcut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="o">-</span><span class="n">N</span><span class="p">,</span> <span class="n">trls</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">datcut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="o">-</span><span class="n">N</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">datcut</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">]</span>
+            <span class="n">signi_st</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">significance</span><span class="p">(</span><span class="n">datcut</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="n">Nrep</span><span class="p">,</span>
+                                            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">signi_st</span></div>
+
+<div class="viewcode-block" id="Connect.significance"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.Connect.significance">[docs]</a>    <span class="k">def</span> <span class="nf">significance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Significance of connectivity estimators. It base on</span>
+<span class="sd">        bootstrap :func:`Connect.bootstrap` for multitrial case and</span>
+<span class="sd">        surrogate data :func:`Connect.surrogate` for one trial.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              data matrix (kXN) or (kXNxR) where k - channels,</span>
+<span class="sd">              N - data points, R - nr of trials</span>
+<span class="sd">          *Nrep* = 100 : int</span>
+<span class="sd">            number of resamples</span>
+<span class="sd">          *alpha* = 0.05 : float</span>
+<span class="sd">            type I error rate (significance level)</span>
+<span class="sd">          *verbose* = True : bool</span>
+<span class="sd">            if True it prints dot on every realization, if False it&#39;s</span>
+<span class="sd">            quiet.</span>
+<span class="sd">          *params* :</span>
+<span class="sd">              additional parameters specific for chosen estimator</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *signific* : numpy.array</span>
+<span class="sd">              significance values, check :func:`Connect.levels`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">signific</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">signific</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surrogate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">signific</span></div>
+
+<div class="viewcode-block" id="Connect.levels"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.Connect.levels">[docs]</a>    <span class="k">def</span> <span class="nf">levels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signi</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Levels of significance</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *signi* : numpy.array</span>
+<span class="sd">              bootstraped values of each channel</span>
+<span class="sd">          *alpha* : float</span>
+<span class="sd">              type I error rate (significance level) - from 0 to 1</span>
+<span class="sd">              - (1-*alpha*) for onesided estimators (e.g. class:`DTF`)</span>
+<span class="sd">              - *alpha* and (1-*alpha*) for twosided (e.g. class:`PSI`)</span>
+<span class="sd">          *k* : int</span>
+<span class="sd">              number of channels</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *ficance* : numpy.array</span>
+<span class="sd">              maximal value throughout frequency of score at percentile</span>
+<span class="sd">              at level 1-*alpha*</span>
+<span class="sd">              - (k, k) for one sided estimator</span>
+<span class="sd">              - (2, k, k) for two sided</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span><span class="p">:</span>
+            <span class="n">ficance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ficance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span><span class="p">:</span>
+                    <span class="n">ficance</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">scoreatpercentile</span><span class="p">(</span><span class="n">signi</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">alpha</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="n">ficance</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">scoreatpercentile</span><span class="p">(</span><span class="n">signi</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ficance</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">scoreatpercentile</span><span class="p">(</span><span class="n">signi</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ficance</span></div>
+
+    <span class="k">def</span> <span class="nf">__calc_multitrial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="s2">&quot;Calc multitrial averaged estimator for :func:`Connect.bootstrap`&quot;</span>
+        <span class="n">trials</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">chosen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">trials</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">trials</span><span class="p">)</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">chosen</span><span class="p">)</span>
+        <span class="n">idxbc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">bc</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">occurence</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">idxbc</span><span class="p">,</span> <span class="n">bc</span><span class="p">[</span><span class="n">idxbc</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">occurence</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">trdata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">num</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">flag</span><span class="p">:</span>
+                    <span class="n">rescalc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">trdata</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span><span class="o">*</span><span class="n">occurence</span>
+                    <span class="n">flag</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">continue</span>
+                <span class="n">rescalc</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">trdata</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span><span class="o">*</span><span class="n">occurence</span>
+        <span class="k">return</span> <span class="n">rescalc</span><span class="o">/</span><span class="n">trials</span>
+
+<div class="viewcode-block" id="Connect.bootstrap"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.Connect.bootstrap">[docs]</a>    <span class="k">def</span> <span class="nf">bootstrap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Bootstrap - random sampling with replacement of trials.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              multichannel data matrix</span>
+<span class="sd">          *Nrep* = 100 : int</span>
+<span class="sd">            number of resamples</span>
+<span class="sd">          *alpha* = 0.05 : float</span>
+<span class="sd">            type I error rate (significance level)</span>
+<span class="sd">          *verbose* = True : bool</span>
+<span class="sd">            if True it prints dot on every realization, if False it&#39;s</span>
+<span class="sd">            quiet.</span>
+<span class="sd">          *params* :</span>
+<span class="sd">              additional parameters specific for chosen estimator</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *levelsigni* : numpy.array</span>
+<span class="sd">              significance values, check :func:`Connect.levels`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nrep</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tmpsig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_multitrial</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+                <span class="n">fres</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">tmpsig</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">signi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nrep</span><span class="p">,</span> <span class="n">fres</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+                <span class="n">signi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmpsig</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">signi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_multitrial</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">(</span><span class="n">signi</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Connect.surrogate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.Connect.surrogate">[docs]</a>    <span class="k">def</span> <span class="nf">surrogate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Surrogate data testing. Mixing data points in each channel.</span>
+<span class="sd">        Significance level in calculated over all *Nrep* surrogate sets.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              multichannel data matrix</span>
+<span class="sd">          *Nrep* = 100 : int</span>
+<span class="sd">            number of resamples</span>
+<span class="sd">          *alpha* = 0.05 : float</span>
+<span class="sd">            type I error rate (significance level)</span>
+<span class="sd">          *verbose* = True : bool</span>
+<span class="sd">            if True it prints dot on every realization, if False it&#39;s</span>
+<span class="sd">            quiet.</span>
+<span class="sd">          *params* :</span>
+<span class="sd">              additional parameters specific for chosen estimator</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *levelsigni* : numpy.array</span>
+<span class="sd">              significance values, check :func:`Connect.levels`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">shdata</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nrep</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">shdata</span><span class="p">[</span><span class="n">ch</span><span class="p">,:])</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">rtmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">shdata</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+                <span class="n">reskeeper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nrep</span><span class="p">,</span> <span class="n">rtmp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+                <span class="n">reskeeper</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rtmp</span>
+                <span class="k">continue</span>
+            <span class="n">reskeeper</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">shdata</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">(</span><span class="n">reskeeper</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ConnectAR"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.ConnectAR">[docs]</a><span class="k">class</span> <span class="nc">ConnectAR</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">with_metaclass</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">,</span> <span class="n">Connect</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inherits from *Connect* class and governs calculation of various</span>
+<span class="sd">    connectivity estimators basing on MVAR model methods. It overloads</span>
+<span class="sd">    *short_time*, *significance* methods but *calculate* remains abstract.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ConnectAR.short_time"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.ConnectAR.short_time">[docs]</a>    <span class="k">def</span> <span class="nf">short_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mvarmethod</span><span class="o">=</span><span class="s1">&#39;yw&#39;</span><span class="p">,</span>
+                   <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        It overloads :class:`ConnectAR` method :func:`Connect.short_time`.</span>
+<span class="sd">        Short-tme version of estimator, where data is windowed into parts</span>
+<span class="sd">        of length *nfft* and overlap *no*. *params* catch additional</span>
+<span class="sd">        parameters specific for estimator.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              data matrix (kXN) or (kXNxR) where k - channels,</span>
+<span class="sd">              N - data points, R - nr of trials</span>
+<span class="sd">          *nfft* = None : int</span>
+<span class="sd">              window length (if None it&#39;s N/5)</span>
+<span class="sd">          *no* = None : int</span>
+<span class="sd">              overlap length (if None it&#39;s N/10)</span>
+<span class="sd">          *mvarmethod* = &#39;yw&#39; :</span>
+<span class="sd">              MVAR parameters estimation method</span>
+<span class="sd">            all avaiable methods you can find in *fitting_algorithms*</span>
+<span class="sd">          *order* = None:</span>
+<span class="sd">              MVAR model order; it None, it is set automatically basing</span>
+<span class="sd">              on default criterion.</span>
+<span class="sd">          *resol* = None:</span>
+<span class="sd">              frequency resolution; if None, it is 100.</span>
+<span class="sd">          *fs* = 1 :</span>
+<span class="sd">              sampling frequency</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *stvalues* : numpy.array</span>
+<span class="sd">              short time values (time points, frequency, k, k), where k</span>
+<span class="sd">              is number of channels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">nfft</span> <span class="o">&gt;</span> <span class="n">no</span><span class="p">,</span> <span class="s2">&quot;overlap must be smaller than window&quot;</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">trls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">trls</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nfft</span><span class="p">:</span>
+            <span class="n">nfft</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">no</span><span class="p">:</span>
+            <span class="n">no</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">nfft</span><span class="o">-</span><span class="n">no</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">trls</span><span class="p">:</span>
+                    <span class="n">datcut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="o">-</span><span class="n">N</span><span class="p">,</span> <span class="n">trls</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">datcut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="o">-</span><span class="n">N</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">datcut</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">]</span>
+            <span class="n">ar</span><span class="p">,</span> <span class="n">vr</span> <span class="o">=</span> <span class="n">Mvar</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">datcut</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">mvarmethod</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">e</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">rescalc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">vr</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resol</span><span class="p">)</span>
+                <span class="n">stvalues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">),</span> <span class="n">rescalc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+                <span class="n">stvalues</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">rescalc</span>
+                <span class="k">continue</span>
+            <span class="n">stvalues</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">vr</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resol</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stvalues</span></div>
+
+<div class="viewcode-block" id="ConnectAR.short_time_significance"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.ConnectAR.short_time_significance">[docs]</a>    <span class="k">def</span> <span class="nf">short_time_significance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;yw&#39;</span><span class="p">,</span>
+                                <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Significance of short-tme versions of estimators. It base on</span>
+<span class="sd">        bootstrap :func:`ConnectAR.bootstrap` for multitrial case and</span>
+<span class="sd">        surrogate data :func:`ConnectAR.surrogate` for one trial.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              data matrix (kXN) or (kXNxR) where k - channels,</span>
+<span class="sd">              N - data points, R - nr of trials</span>
+<span class="sd">          *Nrep* = 100 : int</span>
+<span class="sd">            number of resamples</span>
+<span class="sd">          *alpha* = 0.05 : float</span>
+<span class="sd">            type I error rate (significance level)</span>
+<span class="sd">          *method* = &#39;yw&#39;: str</span>
+<span class="sd">            method of MVAR parameters estimation</span>
+<span class="sd">            all avaiable methods you can find in *fitting_algorithms*</span>
+<span class="sd">          *order* = None : int</span>
+<span class="sd">            MVAR model order, if None, it&#39;s chosen using default criterion</span>
+<span class="sd">          *fs* = 1 : int</span>
+<span class="sd">              sampling frequency</span>
+<span class="sd">          *resolution* = None : int</span>
+<span class="sd">              resolution (if None, it&#39;s 100 points)</span>
+<span class="sd">          *nfft* = None : int</span>
+<span class="sd">              window length (if None it&#39;s N/5)</span>
+<span class="sd">          *no* = None : int</span>
+<span class="sd">              overlap length (if None it&#39;s N/10)</span>
+<span class="sd">          *verbose* = True : bool</span>
+<span class="sd">            if True it prints dot on every realization, if False it&#39;s</span>
+<span class="sd">            quiet.</span>
+<span class="sd">          *params* :</span>
+<span class="sd">              additional parameters specific for chosen estimator</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *signi_st* : numpy.array</span>
+<span class="sd">              short time significance values in shape of</span>
+<span class="sd">              - (tp, k, k) for one sided estimator</span>
+<span class="sd">              - (tp, 2, k, k) for two sided</span>
+<span class="sd">              where k is number of channels and tp number of time points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">nfft</span> <span class="o">&gt;</span> <span class="n">no</span><span class="p">,</span> <span class="s2">&quot;overlap must be smaller than window&quot;</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">trls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">trls</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nfft</span><span class="p">:</span>
+            <span class="n">nfft</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">no</span><span class="p">:</span>
+            <span class="n">no</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">nfft</span><span class="o">-</span><span class="n">no</span><span class="p">))</span>
+        <span class="n">signi_st</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">),</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">trls</span><span class="p">:</span>
+                    <span class="n">datcut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="o">-</span><span class="n">N</span><span class="p">,</span> <span class="n">trls</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">datcut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="o">-</span><span class="n">N</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">datcut</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nfft</span><span class="p">]</span>
+            <span class="n">signi_st</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">significance</span><span class="p">(</span><span class="n">datcut</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+                                            <span class="n">Nrep</span><span class="o">=</span><span class="n">Nrep</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">signi_st</span></div>
+
+    <span class="k">def</span> <span class="nf">__calc_multitrial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;yw&#39;</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="s2">&quot;Calc multitrial averaged estimator for :func:`ConnectAR.bootstrap`&quot;</span>
+        <span class="n">trials</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">chosen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">trials</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">trials</span><span class="p">)</span>
+        <span class="n">ar</span><span class="p">,</span> <span class="n">vr</span> <span class="o">=</span> <span class="n">Mvar</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">chosen</span><span class="p">],</span> <span class="n">order</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+        <span class="n">rescalc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">vr</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rescalc</span>
+
+<div class="viewcode-block" id="ConnectAR.significance"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.ConnectAR.significance">[docs]</a>    <span class="k">def</span> <span class="nf">significance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Significance of connectivity estimators. It base on</span>
+<span class="sd">        bootstrap :func:`ConnectAR.bootstrap` for multitrial case and</span>
+<span class="sd">        surrogate data :func:`ConnectAR.surrogate` for one trial.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              data matrix</span>
+<span class="sd">          *method* = &#39;yw&#39;: str</span>
+<span class="sd">            method of MVAR parametersestimation</span>
+<span class="sd">            all avaiable methods you can find in *fitting_algorithms*</span>
+<span class="sd">          *order* = None : int</span>
+<span class="sd">            MVAR model order, if None, it&#39;s chosen using default criterion</span>
+<span class="sd">          *Nrep* = 100 : int</span>
+<span class="sd">            number of resamples</span>
+<span class="sd">          *alpha* = 0.05 : float</span>
+<span class="sd">            type I error rate (significance level)</span>
+<span class="sd">          *resolution* = None : int</span>
+<span class="sd">              resolution (if None, it&#39;s 100 points)</span>
+<span class="sd">          *verbose* = True : bool</span>
+<span class="sd">            if True it prints dot on every realization, if False it&#39;s</span>
+<span class="sd">            quiet.</span>
+<span class="sd">          *params* :</span>
+<span class="sd">              additional parameters specific for chosen estimator</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *signi_st* : numpy.array</span>
+<span class="sd">              significance values, check :func:`Connect.levels`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">signific</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+                                      <span class="n">Nrep</span><span class="o">=</span><span class="n">Nrep</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">signific</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surrogate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+                                      <span class="n">Nrep</span><span class="o">=</span><span class="n">Nrep</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">signific</span></div>
+
+<div class="viewcode-block" id="ConnectAR.bootstrap"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.ConnectAR.bootstrap">[docs]</a>    <span class="k">def</span> <span class="nf">bootstrap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Bootstrap - random sampling with replacement of trials for *ConnectAR*.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              multichannel data matrix</span>
+<span class="sd">          *method* : str</span>
+<span class="sd">            method of MVAR parametersestimation</span>
+<span class="sd">            all avaiable methods you can find in *fitting_algorithms*</span>
+<span class="sd">          *Nrep* = 100 : int</span>
+<span class="sd">            number of resamples</span>
+<span class="sd">          *alpha* = 0.05 : float</span>
+<span class="sd">            type I error rate (significance level)</span>
+<span class="sd">          *order* = None : int</span>
+<span class="sd">            MVAR model order, if None, it&#39;s chosen using default criterion</span>
+<span class="sd">          *verbose* = True : bool</span>
+<span class="sd">            if True it prints dot on every realization, if False it&#39;s</span>
+<span class="sd">            quiet.</span>
+<span class="sd">          *params* :</span>
+<span class="sd">              additional parameters specific for chosen estimator</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *levelsigni* : numpy.array</span>
+<span class="sd">              significance values, check :func:`Connect.levels`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="k">if</span> <span class="s1">&#39;resolution&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="ow">and</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]:</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nrep</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tmpsig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_multitrial</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+                <span class="n">fres</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">tmpsig</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">signi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nrep</span><span class="p">,</span> <span class="n">fres</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+                <span class="n">signi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmpsig</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">signi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calc_multitrial</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">(</span><span class="n">signi</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConnectAR.surrogate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.ConnectAR.surrogate">[docs]</a>    <span class="k">def</span> <span class="nf">surrogate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">Nrep</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Surrogate data testing for *ConnectAR* . Mixing data points in each channel.</span>
+<span class="sd">        Significance level in calculated over all *Nrep* surrogate sets.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              multichannel data matrix</span>
+<span class="sd">          *method* : str</span>
+<span class="sd">            method of MVAR parameters estimation</span>
+<span class="sd">            all avaiable methods you can find in *fitting_algorithms*</span>
+<span class="sd">          *Nrep* = 100 : int</span>
+<span class="sd">            number of resamples</span>
+<span class="sd">          *alpha* = 0.05 : float</span>
+<span class="sd">            type I error rate (significance level)</span>
+<span class="sd">          *order* = None : int</span>
+<span class="sd">            MVAR model order, if None, it&#39;s chosen using default criterion</span>
+<span class="sd">          *verbose* = True : bool</span>
+<span class="sd">            if True it prints dot on every realization, if False it&#39;s</span>
+<span class="sd">            quiet.</span>
+<span class="sd">          *params* :</span>
+<span class="sd">              additional parameters specific for chosen estimator</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *levelsigni* : numpy.array</span>
+<span class="sd">              significance values, check :func:`Connect.levels`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shdata</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="k">if</span> <span class="s1">&#39;resolution&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="ow">and</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]:</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nrep</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">,</span> <span class="n">shdata</span><span class="p">))</span>
+            <span class="n">ar</span><span class="p">,</span> <span class="n">vr</span> <span class="o">=</span> <span class="n">Mvar</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">shdata</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">rtmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">vr</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+                <span class="n">reskeeper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nrep</span><span class="p">,</span> <span class="n">rtmp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+                <span class="n">reskeeper</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rtmp</span>
+                <span class="k">continue</span>
+            <span class="n">reskeeper</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">vr</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">(</span><span class="n">reskeeper</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span></div></div>
+
+<span class="c1">############################</span>
+<span class="c1"># MVAR based methods:</span>
+
+
+<div class="viewcode-block" id="dtf_fun"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.dtf_fun">[docs]</a><span class="k">def</span> <span class="nf">dtf_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">generalized</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Directed Transfer Function estimation from MVAR parameters.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      *Acoef* : numpy.array</span>
+<span class="sd">          array of shape (k, k, p) where *k* is number of channels and</span>
+<span class="sd">          *p* is a model order.</span>
+<span class="sd">      *Vcoef* : numpy.array</span>
+<span class="sd">          prediction error matrix (k, k)</span>
+<span class="sd">      *fs* = 1 : int</span>
+<span class="sd">          sampling rate</span>
+<span class="sd">      *resolution* = 100 : int</span>
+<span class="sd">          number of spectrum data points</span>
+<span class="sd">      *generalized* = False : bool</span>
+<span class="sd">          generalized version or not</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      *DTF* : numpy.array</span>
+<span class="sd">          matrix with estimation results (*resolution*, k, k)</span>
+<span class="sd">    References:</span>
+<span class="sd">    .. [1] M. Kaminski, K.J. Blinowska. A new method of the description</span>
+<span class="sd">           of the information flow. Biol.Cybern. 65:203-210, (1991).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">A_z</span><span class="p">,</span> <span class="n">H_z</span><span class="p">,</span> <span class="n">S_z</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span>
+    <span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">A_z</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">DTF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">generalized</span><span class="p">:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Vcoef</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+        <span class="n">mH</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">H_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">H_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">DTF</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">H_z</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mH</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">DTF</span></div>
+
+
+<div class="viewcode-block" id="pdc_fun"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.pdc_fun">[docs]</a><span class="k">def</span> <span class="nf">pdc_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">generalized</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Partial Directed Coherence estimation from MVAR parameters.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      *Acoef* : numpy.array</span>
+<span class="sd">          array of shape (k, k, p) where *k* is number of channels and</span>
+<span class="sd">          *p* is a model order.</span>
+<span class="sd">      *Vcoef* : numpy.array</span>
+<span class="sd">          prediction error matrix (k, k)</span>
+<span class="sd">      *fs* = 1 : int</span>
+<span class="sd">          sampling rate</span>
+<span class="sd">      *resolution* = 100 : int</span>
+<span class="sd">          number of spectrum data points</span>
+<span class="sd">      *generalized* = False : bool</span>
+<span class="sd">          generalized version or not</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      *PDC* : numpy.array</span>
+<span class="sd">          matrix with estimation results (*resolution*, k, k)</span>
+<span class="sd">    References:</span>
+<span class="sd">    .. [1] Sameshima, K., Baccala, L. A., Partial directed</span>
+<span class="sd">           coherence: a new concept in neural structure determination.,</span>
+<span class="sd">           2001, Biol. Cybern. 84, 463–474.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">A_z</span><span class="p">,</span> <span class="n">H_z</span><span class="p">,</span> <span class="n">S_z</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span>
+    <span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">A_z</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">PDC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Vcoef</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+        <span class="n">mA</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">sigma</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">A_z</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">PDC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sigma</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mA</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">PDC</span></div>
+
+
+<div class="viewcode-block" id="PartialCoh"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.PartialCoh">[docs]</a><span class="k">class</span> <span class="nc">PartialCoh</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PartialCoh - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PartialCoh.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.PartialCoh.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Partial Coherence estimation from MVAR parameters.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *Acoef* : numpy.array</span>
+<span class="sd">              array of shape (k, k, p) where *k* is number of channels and</span>
+<span class="sd">              *p* is a model order.</span>
+<span class="sd">          *Vcoef* : numpy.array</span>
+<span class="sd">              prediction error matrix (k, k)</span>
+<span class="sd">          *fs* = 1 : int</span>
+<span class="sd">              sampling rate</span>
+<span class="sd">          *resolution* = 100 : int</span>
+<span class="sd">              number of spectrum data points</span>
+<span class="sd">          *generalized* = False : bool</span>
+<span class="sd">              generalized version or not</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *PC* : numpy.array</span>
+<span class="sd">              matrix with estimation results (*resolution*, k, k)</span>
+<span class="sd">        References:</span>
+<span class="sd">        .. [1] G. M. Jenkins, D. G. Watts. Spectral Analysis and its</span>
+<span class="sd">               Applications. Holden-Day, USA, 1969</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">A_z</span><span class="p">,</span> <span class="n">H_z</span><span class="p">,</span> <span class="n">S_z</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">A_z</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">PC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="n">before</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="n">before</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">before</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="n">D_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">S_z</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">dd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">D_z</span><span class="p">),</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">mD</span> <span class="o">=</span> <span class="p">(</span><span class="n">dd</span><span class="o">*</span><span class="n">dd</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+            <span class="n">PC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">before</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">D_z</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mD</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">PC</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PDC"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.PDC">[docs]</a><span class="k">class</span> <span class="nc">PDC</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PDC - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PDC.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.PDC.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="s2">&quot;More in :func:`pdc_fun`.&quot;</span>
+        <span class="k">return</span> <span class="n">pdc_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="gPDC"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.gPDC">[docs]</a><span class="k">class</span> <span class="nc">gPDC</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    gPDC - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="gPDC.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.gPDC.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="s2">&quot;More in :func:`pdc_fun`&quot;</span>
+        <span class="k">return</span> <span class="n">pdc_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">generalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="DTF"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.DTF">[docs]</a><span class="k">class</span> <span class="nc">DTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    DTF - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="DTF.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.DTF.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="s2">&quot;More in :func:`dtf_fun`.&quot;</span>
+        <span class="k">return</span> <span class="n">dtf_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="gDTF"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.gDTF">[docs]</a><span class="k">class</span> <span class="nc">gDTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    gDTF - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="gDTF.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.gDTF.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="s2">&quot;More in :func:`dtf_fun`.&quot;</span>
+        <span class="k">return</span> <span class="n">dtf_fun</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">generalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ffDTF"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.ffDTF">[docs]</a><span class="k">class</span> <span class="nc">ffDTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ffDTF - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ffDTF.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.ffDTF.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        full-frequency Directed Transfer Function estimation from MVAR</span>
+<span class="sd">        parameters.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *Acoef* : numpy.array</span>
+<span class="sd">              array of shape (k, k, p) where *k* is number of channels and</span>
+<span class="sd">              *p* is a model order.</span>
+<span class="sd">          *Vcoef* : numpy.array</span>
+<span class="sd">              prediction error matrix (k, k)</span>
+<span class="sd">          *fs* = 1 : int</span>
+<span class="sd">              sampling rate</span>
+<span class="sd">          *resolution* = 100 : int</span>
+<span class="sd">              number of spectrum data points</span>
+<span class="sd">          *generalized* = False : bool</span>
+<span class="sd">              generalized version or not</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *ffDTF* : numpy.array</span>
+<span class="sd">              matrix with estimation results (*resolution*, k, k)</span>
+<span class="sd">        References:</span>
+<span class="sd">        .. [1] Korzeniewska, A.et. all. Determination of information flow direction</span>
+<span class="sd">               among brain structures by a modified directed transfer function (dDTF)</span>
+<span class="sd">               method. J. Neurosci. Methods 125, 195–207 (2003).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">A_z</span><span class="p">,</span> <span class="n">H_z</span><span class="p">,</span> <span class="n">S_z</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">A_z</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">mH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="n">mH</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">H_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">H_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">()))</span>
+        <span class="n">mHsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mH</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">ffDTF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="n">ffDTF</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">H_z</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mHsum</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">ffDTF</span></div></div>
+
+
+<div class="viewcode-block" id="dDTF"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.dDTF">[docs]</a><span class="k">class</span> <span class="nc">dDTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    dDTF - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="dDTF.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.dDTF.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        direct Directed Transfer Function estimation from MVAR</span>
+<span class="sd">        parameters. dDTF is a DTF multiplied in each frequency by</span>
+<span class="sd">        Patrial Coherence.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *Acoef* : numpy.array</span>
+<span class="sd">              array of shape (k, k, p) where *k* is number of channels and</span>
+<span class="sd">              *p* is a model order.</span>
+<span class="sd">          *Vcoef* : numpy.array</span>
+<span class="sd">              prediction error matrix (k, k)</span>
+<span class="sd">          *fs* = 1 : int</span>
+<span class="sd">              sampling rate</span>
+<span class="sd">          *resolution* = 100 : int</span>
+<span class="sd">              number of spectrum data points</span>
+<span class="sd">          *generalized* = False : bool</span>
+<span class="sd">              generalized version or not</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *dDTF* : numpy.array</span>
+<span class="sd">              matrix with estimation results (*resolution*, k, k)</span>
+<span class="sd">        References:</span>
+<span class="sd">        .. [1] Korzeniewska, A.et. all. Determination of information flow direction</span>
+<span class="sd">               among brain structures by a modified directed transfer function (dDTF)</span>
+<span class="sd">               method. J. Neurosci. Methods 125, 195–207 (2003).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">A_z</span><span class="p">,</span> <span class="n">H_z</span><span class="p">,</span> <span class="n">S_z</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">A_z</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">mH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="n">mH</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">H_z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">H_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">()))</span>
+        <span class="n">mHsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mH</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dDTF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="n">before</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="n">before</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">before</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="n">D_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">S_z</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">dd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">D_z</span><span class="p">),</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">mD</span> <span class="o">=</span> <span class="p">(</span><span class="n">dd</span><span class="o">*</span><span class="n">dd</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+            <span class="n">PC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">before</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">D_z</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mD</span><span class="p">)))</span>
+            <span class="n">dDTF</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">PC</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">H_z</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mHsum</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">dDTF</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">iPDC</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    iPDC - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        instantaneous Partial Directed Coherence  from MVAR</span>
+<span class="sd">        parameters.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *Acoef* : numpy.array</span>
+<span class="sd">              array of shape (k, k, p+1) where *k* is number of channels and</span>
+<span class="sd">              *p* is a model order. It&#39;s zero lag case.</span>
+<span class="sd">          *Vcoef* : numpy.array</span>
+<span class="sd">              prediction error matrix (k, k)</span>
+<span class="sd">          *fs* = 1 : int</span>
+<span class="sd">              sampling rate</span>
+<span class="sd">          *resolution* = 100 : int</span>
+<span class="sd">              number of spectrum data points</span>
+<span class="sd">          *generalized* = False : bool</span>
+<span class="sd">              generalized version or not</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *iPDC* : numpy.array</span>
+<span class="sd">              matrix with estimation results (*resolution*, k, k)</span>
+<span class="sd">        References:</span>
+<span class="sd">        .. [1] Erla, S. et all Multivariate Autoregressive Model with Instantaneous</span>
+<span class="sd">               Effects to Improve Brain Connectivity Estimation.</span>
+<span class="sd">               Int. J. Bioelectromagn. 11, 74–79 (2009).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">B_z</span> <span class="o">=</span> <span class="n">spectrum_inst</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">B_z</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">PDC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="n">mB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">B_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">B_z</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">real</span>
+            <span class="n">PDC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">B_z</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mB</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PDC</span>
+
+
+<span class="k">class</span> <span class="nc">iDTF</span><span class="p">(</span><span class="n">ConnectAR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    iDTF - class inherits from :class:`ConnectAR` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Acoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Vcoef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        instantaneous Partial Directed Coherence  from MVAR</span>
+<span class="sd">        parameters.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *Acoef* : numpy.array</span>
+<span class="sd">              array of shape (k, k, p+1) where *k* is number of channels and</span>
+<span class="sd">              *p* is a model order. It&#39;s zero lag case.</span>
+<span class="sd">          *Vcoef* : numpy.array</span>
+<span class="sd">              prediction error matrix (k, k)</span>
+<span class="sd">          *fs* = 1 : int</span>
+<span class="sd">              sampling rate</span>
+<span class="sd">          *resolution* = 100 : int</span>
+<span class="sd">              number of spectrum data points</span>
+<span class="sd">          *generalized* = False : bool</span>
+<span class="sd">              generalized version or not</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *iPDC* : numpy.array</span>
+<span class="sd">              matrix with estimation results (*resolution*, k, k)</span>
+<span class="sd">        References:</span>
+<span class="sd">        .. [1] Erla, S. et all, Multivariate Autoregressive Model with Instantaneous</span>
+<span class="sd">               Effects to Improve Brain Connectivity Estimation.</span>
+<span class="sd">               Int. J. Bioelectromagn. 11, 74–79 (2009).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">B_z</span> <span class="o">=</span> <span class="n">spectrum_inst</span><span class="p">(</span><span class="n">Acoef</span><span class="p">,</span> <span class="n">Vcoef</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">B_z</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">DTF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">res</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="n">Hb_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">B_z</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">mH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Hb_z</span><span class="p">,</span> <span class="n">Hb_z</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span><span class="o">.</span><span class="n">real</span>
+            <span class="n">DTF</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Hb_z</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mH</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">DTF</span>
+
+<span class="c1">############################</span>
+<span class="c1"># Fourier Transform based methods:</span>
+
+
+<div class="viewcode-block" id="Coherency"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.Coherency">[docs]</a><span class="k">class</span> <span class="nc">Coherency</span><span class="p">(</span><span class="n">Connect</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coherency - class inherits from :class:`Connect` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method and *values_range* attribute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Coherency.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.Coherency.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">cnfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cno</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">hanning</span><span class="p">,</span> <span class="n">im</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Coherency calculation using FFT mehtod.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              array of shape (k, N) where *k* is number of channels and</span>
+<span class="sd">              *N* is number of data points.</span>
+<span class="sd">          *cnfft* = None : int</span>
+<span class="sd">              number of data points in window; if None, it is N/5</span>
+<span class="sd">          *cno* = 0 : int</span>
+<span class="sd">              overlap; if None, it is N/10</span>
+<span class="sd">          *window* = np.hanning : &lt;function&gt; generating window with 1 arg *n*</span>
+<span class="sd">              window function</span>
+<span class="sd">          *im* = False : bool</span>
+<span class="sd">              if False it return absolute value, otherwise complex number</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *COH* : numpy.array</span>
+<span class="sd">              matrix with estimation results (*resolution*, k, k)</span>
+<span class="sd">        References:</span>
+<span class="sd">        .. [1] M. B. Priestley Spectral Analysis and Time Series.</span>
+<span class="sd">               Academic Press Inc. (London) LTD., 1981</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">cnfft</span> <span class="o">&gt;</span> <span class="n">cno</span><span class="p">,</span> <span class="s2">&quot;overlap must be smaller than window&quot;</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cnfft</span><span class="p">:</span>
+            <span class="n">cnfft</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cno</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cno</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">winarr</span> <span class="o">=</span> <span class="n">window</span><span class="p">(</span><span class="n">cnfft</span><span class="p">)</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cnfft</span><span class="o">-</span><span class="n">cno</span><span class="p">))</span>
+        <span class="n">ftsliced</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">),</span> <span class="n">k</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cnfft</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="nb">complex</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">+</span><span class="n">cnfft</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">:</span>
+                <span class="n">datzer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">cnfft</span><span class="p">],</span>
+                                         <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">cnfft</span><span class="o">-</span><span class="n">N</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">ftsliced</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">datzer</span><span class="o">*</span><span class="n">winarr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ftsliced</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">cnfft</span><span class="p">]</span><span class="o">*</span><span class="n">winarr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ctop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">),</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cnfft</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="nb">complex</span><span class="p">)</span>
+        <span class="n">cdown</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">),</span> <span class="n">k</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cnfft</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">)):</span>
+            <span class="n">c1</span> <span class="o">=</span> <span class="n">ftsliced</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cnfft</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">c2</span> <span class="o">=</span> <span class="n">ftsliced</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cnfft</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">ctop</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">c1</span><span class="o">*</span><span class="n">c2</span>
+            <span class="n">cdown</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ftsliced</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">cd1</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cdown</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cnfft</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">cd2</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cdown</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cnfft</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">cdwn</span> <span class="o">=</span> <span class="n">cd1</span><span class="o">*</span><span class="n">cd2</span>
+        <span class="n">coh</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ctop</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">cdwn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">im</span><span class="p">:</span>
+            <span class="n">coh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coh</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">coh</span><span class="o">.</span><span class="n">T</span></div></div>
+
+
+<div class="viewcode-block" id="PSI"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.PSI">[docs]</a><span class="k">class</span> <span class="nc">PSI</span><span class="p">(</span><span class="n">Connect</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PSI - class inherits from :class:`Connect` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PSI</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="PSI.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.PSI.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">band_width</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">psinfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">psino</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">hanning</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Phase Slope Index calculation using FFT mehtod.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              array of shape (k, N) where *k* is number of channels and</span>
+<span class="sd">              *N* is number of data points.</span>
+<span class="sd">          *band_width* = 4 : int</span>
+<span class="sd">              width of frequency band where PSI values are summed</span>
+<span class="sd">          *psinfft* = None : int</span>
+<span class="sd">              number of data points in window; if None, it is N/5</span>
+<span class="sd">          *psino* = 0 : int</span>
+<span class="sd">              overlap; if None, it is N/10</span>
+<span class="sd">          *window* = np.hanning : &lt;function&gt; generating window with 1 arg *n*</span>
+<span class="sd">              window function</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *COH* : numpy.array</span>
+<span class="sd">              matrix with estimation results (*resolution*, k, k)</span>
+<span class="sd">        References:</span>
+<span class="sd">        .. [1] Nolte G. et all, Comparison of Granger Causality and</span>
+<span class="sd">               Phase Slope Index. 267–276 (2009).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">psinfft</span><span class="p">:</span>
+            <span class="n">psinfft</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">psinfft</span> <span class="o">&gt;</span> <span class="n">psino</span><span class="p">,</span> <span class="s2">&quot;overlap must be smaller than window&quot;</span>
+        <span class="n">coh</span> <span class="o">=</span> <span class="n">Coherency</span><span class="p">()</span>
+        <span class="n">cohval</span> <span class="o">=</span> <span class="n">coh</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cnfft</span><span class="o">=</span><span class="n">psinfft</span><span class="p">,</span> <span class="n">cno</span><span class="o">=</span><span class="n">psino</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">im</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fq_bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">psinfft</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">band_width</span><span class="p">)</span>
+        <span class="n">psi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">fq_bands</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fq_bands</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">ctmp</span> <span class="o">=</span> <span class="n">cohval</span><span class="p">[</span><span class="n">fq_bands</span><span class="p">[</span><span class="n">f</span><span class="p">]:</span><span class="n">fq_bands</span><span class="p">[</span><span class="n">f</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="p">:,</span> <span class="p">:]</span>
+            <span class="n">psi</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ctmp</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">*</span><span class="n">ctmp</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">psi</span></div></div>
+
+
+<div class="viewcode-block" id="GCI"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.GCI">[docs]</a><span class="k">class</span> <span class="nc">GCI</span><span class="p">(</span><span class="n">Connect</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    GCI - class inherits from :class:`Connect` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GCI</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="GCI.calculate"><a class="viewcode-back" href="../../conn.html#connectivipy.conn.GCI.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">gcimethod</span><span class="o">=</span><span class="s1">&#39;yw&#39;</span><span class="p">,</span> <span class="n">gciorder</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Granger Causality Index calculation from MVAR model.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              array of shape (k, N) where *k* is number of channels and</span>
+<span class="sd">              *N* is number of data points.</span>
+<span class="sd">          *gcimethod* = &#39;yw&#39; : int</span>
+<span class="sd">              MVAR parameters estimation model</span>
+<span class="sd">          *gciorder* = None : int</span>
+<span class="sd">              model order, if None appropiate value is chosen basic</span>
+<span class="sd">              on default criterion</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *gci* : numpy.array</span>
+<span class="sd">              matrix with estimation results (*resolution*, k, k)</span>
+<span class="sd">        References:</span>
+<span class="sd">        .. [1] Nolte G. et all, Comparison of Granger Causality and</span>
+<span class="sd">               Phase Slope Index. 267–276 (2009).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">arfull</span><span class="p">,</span> <span class="n">vrfull</span> <span class="o">=</span> <span class="n">Mvar</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gciorder</span><span class="p">,</span> <span class="n">gcimethod</span><span class="p">)</span>
+        <span class="n">gcval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+            <span class="n">arix</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">]</span>
+            <span class="n">ar_i</span><span class="p">,</span> <span class="n">vr_i</span> <span class="o">=</span> <span class="n">Mvar</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">arix</span><span class="p">,</span> <span class="p">:],</span> <span class="n">gciorder</span><span class="p">,</span> <span class="n">gcimethod</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arix</span><span class="p">):</span>
+                <span class="n">gcval</span><span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">vrfull</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">vr_i</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">gcval</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div></div>
+
+<span class="c1">############################</span>
+<span class="c1"># Envelopes based methods:</span>
+
+<span class="k">class</span> <span class="nc">AEC</span><span class="p">(</span><span class="n">Connect</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    AEC - class inherits from :class:`Connect` and overloads</span>
+<span class="sd">    :func:`Connect.calculate` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AEC</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_freq_bands</span> <span class="o">=</span> <span class="n">FQ_BANDS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">two_sided</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">set_freq_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bands</span><span class="p">):</span>
+        <span class="s2">&quot;Sets freqnecy bands&quot;</span>
+        <span class="n">problem</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">bands</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bands</span><span class="p">]):</span>
+                <span class="n">problem</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span>  <span class="nb">type</span><span class="p">(</span><span class="n">bands</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">problem</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">problem</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;*bands must be list of pairs or numpy array shaped (n, 2)&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_freq_bands</span> <span class="o">=</span> <span class="n">bands</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">freq_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_freq_bands</span>
+
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">bands</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                  <span class="nb">filter</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Amplitude Envelope Correlations calculation.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          *data* : numpy.array</span>
+<span class="sd">              array of shape (k, N) where *k* is number of channels and</span>
+<span class="sd">              *N* is number of data points.</span>
+<span class="sd">          *fs* : int</span>
+<span class="sd">              sampling rate</span>
+<span class="sd">          *bands* : numpy.array or list</span>
+<span class="sd">              frequency bands. It must be list of pairs or numpy array</span>
+<span class="sd">              shaped (n, 2). Default values are: &#39;theta&#39;: [6, 7], &#39;alpha&#39;: [8, 13],</span>
+<span class="sd">             &#39;beta&#39;: [15, 25], &#39;low-gamma&#39;: [30, 45], &#39;high-gamma&#39;: [55, 70]}</span>
+<span class="sd">          *filter* : tuple</span>
+<span class="sd">               tuple (b, a) consisting of a numerator (b) and a denominator (a)</span>
+<span class="sd">               polynomials of the IIR filter. If None, a Butterworth filter of</span>
+<span class="sd">               order 4 is used.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          *aec* : numpy.array</span>
+<span class="sd">              matrix with estimation results (len(bands), k, k)</span>
+<span class="sd">        References:</span>
+<span class="sd">        .. [1] Bruns, A. et al., Amplitude envelope correlation detects </span>
+<span class="sd">        coupling among incoherent brain signals. NeuroReport. 1509-1514 (2000).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bands</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">set_freq_bands</span><span class="p">(</span><span class="n">bands</span><span class="p">)</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">aecval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_freq_bands</span><span class="p">),</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">band</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_freq_bands</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">band</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="n">band</span> <span class="o">=</span> <span class="n">FQ_BANDS</span><span class="p">[</span><span class="n">band</span><span class="p">]</span>
+            <span class="n">filtdata</span> <span class="o">=</span> <span class="n">filter_band</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="nb">filter</span><span class="p">)</span>
+            <span class="n">envelopes</span> <span class="o">=</span> <span class="n">calc_ampenv</span><span class="p">(</span><span class="n">filtdata</span><span class="p">)</span>
+            <span class="n">aecval</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">envelopes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">aecval</span>
+
+
+<span class="n">conn_estim_dc</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dtf&#39;</span><span class="p">:</span>   <span class="n">DTF</span><span class="p">,</span>
+                 <span class="s1">&#39;pdc&#39;</span><span class="p">:</span>   <span class="n">PDC</span><span class="p">,</span>
+                 <span class="s1">&#39;ipdc&#39;</span><span class="p">:</span>  <span class="n">iPDC</span><span class="p">,</span>
+                 <span class="s1">&#39;psi&#39;</span><span class="p">:</span>   <span class="n">PSI</span><span class="p">,</span>
+                 <span class="s1">&#39;ffdtf&#39;</span><span class="p">:</span> <span class="n">ffDTF</span><span class="p">,</span>
+                 <span class="s1">&#39;ddtf&#39;</span><span class="p">:</span>  <span class="n">dDTF</span><span class="p">,</span>
+                 <span class="s1">&#39;gdtf&#39;</span><span class="p">:</span>  <span class="n">gDTF</span><span class="p">,</span>
+                 <span class="s1">&#39;gpdc&#39;</span><span class="p">:</span>  <span class="n">gPDC</span><span class="p">,</span>
+                 <span class="s1">&#39;pcoh&#39;</span><span class="p">:</span>  <span class="n">PartialCoh</span><span class="p">,</span>
+                 <span class="s1">&#39;coh&#39;</span><span class="p">:</span>   <span class="n">Coherency</span><span class="p">,</span>
+                 <span class="s1">&#39;gci&#39;</span><span class="p">:</span>   <span class="n">GCI</span><span class="p">,</span> 
+                 <span class="s1">&#39;aec&#39;</span><span class="p">:</span>   <span class="n">AEC</span><span class="p">}</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../conn.html">Connectivity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mvar.html">Mvarmodel</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Examples</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015, Dominik Krzeminski.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.2.0.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

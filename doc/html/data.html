@@ -1,43 +1,26 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Data &#8212; ConnectiviPy 0.36a documentation</title>
-    
-    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.36a',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data &#8212; ConnectiviPy 0.3.7 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/agogo.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Connectivity" href="conn.html" />
     <link rel="prev" title="ConnectiviPy documentation" href="index.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
-          <p class="logo"><a href="index.html">
-            <img class="logo" src="_static/connpy.png" alt="Logo"/>
-          </a></p>
         <div class="headertitle"><a
-          href="index.html">ConnectiviPy 0.36a documentation</a></div>
+          href="index.html">ConnectiviPy 0.3.7 documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
           <a href="index.html" title="ConnectiviPy documentation"
              accesskey="P">previous</a> |
@@ -63,307 +46,290 @@
 <span id="id1"></span><h1>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
 <p>Data module - main class governing your data and wrapper for all other
 <strong>ConnectiviPy</strong> functions.</p>
-<span class="target" id="module-connectivipy.data"></span><dl class="class">
-<dt id="connectivipy.data.Data">
-<em class="property">class </em><code class="descclassname">connectivipy.data.</code><code class="descname">Data</code><span class="sig-paren">(</span><em>data</em>, <em>fs=1.0</em>, <em>chan_names=[]</em>, <em>data_info=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data" title="Permalink to this definition">¶</a></dt>
+<span class="target" id="module-connectivipy.data"></span><dl class="py class">
+<dt class="sig sig-object py" id="connectivipy.data.Data">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">connectivipy.data.</span></span><span class="sig-name descname"><span class="pre">Data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chan_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class governing the communication between data array and
 connectivity estimators.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>data</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array or str</span><dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>array with data (kXNxR, k - channels nr, N - data points,</dt>
-<dd>R - nr of trials)</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>data</em><span class="classifier">numpy.array or str</span></dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>array with data (kXNxR, k - channels nr, N - data points,</dt><dd><p>R - nr of trials)</p>
+</dd>
 </dl>
 </li>
-<li>str - path to file with appropieate format</li>
+<li><p>str - path to file with appropieate format</p></li>
 </ul>
 </dd>
-<dt><em>fs</em> = 1: int</dt>
-<dd>sampling frequency</dd>
-<dt><em>chan_names</em> = []: list</dt>
-<dd>names of channels</dd>
-<dt><em>data_info</em> = &#8216;&#8217;: string</dt>
-<dd>other information about the data</dd>
+<dt><em>fs</em> = 1: int</dt><dd><p>sampling frequency</p>
+</dd>
+<dt><em>chan_names</em> = []: list</dt><dd><p>names of channels</p>
+</dd>
+<dt><em>data_info</em> = ‘’: string</dt><dd><p>other information about the data</p>
+</dd>
 </dl>
 </dd>
 </dl>
-<dl class="method">
-<dt id="connectivipy.data.Data.select_channels">
-<code class="descname">select_channels</code><span class="sig-paren">(</span><em>channels=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.select_channels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.select_channels" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.select_channels">
+<span class="sig-name descname"><span class="pre">select_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.select_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.select_channels" title="Permalink to this definition">¶</a></dt>
 <dd><p>Selecting channels to plot or further analysis.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>channels</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list(int)</span><dd>List of channel indices. If None all channels are taken
-into account.</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>channels</em><span class="classifier">list(int)</span></dt><dd><p>List of channel indices. If None all channels are taken
+into account.</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.filter">
-<code class="descname">filter</code><span class="sig-paren">(</span><em>b</em>, <em>a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.filter" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filter each channel of data using forward-backward  filter
 <em>filtfilt</em> from <em>scipy.signal</em>.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>b, a</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span><dd>Numerator <em>b</em>  / denominator <em>a</em> polynomials of
-the IIR filter.</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>b, a</em><span class="classifier">np.array</span></dt><dd><p>Numerator <em>b</em>  / denominator <em>a</em> polynomials of
+the IIR filter.</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.resample">
-<code class="descname">resample</code><span class="sig-paren">(</span><em>fs_new</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.resample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.resample" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.resample">
+<span class="sig-name descname"><span class="pre">resample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fs_new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.resample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.resample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Signal resampling to new sampling frequency <em>new_fs</em> using
 <em>resample</em> function from <em>scipy.signal</em> (basing on Fourier method).</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>fs_new</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>new sampling frequency</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>fs_new</em><span class="classifier">int</span></dt><dd><p>new sampling frequency</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.fit_mvar">
-<code class="descname">fit_mvar</code><span class="sig-paren">(</span><em>p=None</em>, <em>method='yw'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.fit_mvar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.fit_mvar" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.fit_mvar">
+<span class="sig-name descname"><span class="pre">fit_mvar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'yw'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.fit_mvar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.fit_mvar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fitting MVAR coefficients.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>p</em> = None</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>estimation order, default None</dd>
-<dt><em>method</em> = &#8216;yw&#8217;</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str {&#8216;yw&#8217;, &#8216;ns&#8217;, &#8216;vm&#8217;}</span><dd>method of MVAR parameters estimation
-all avaiable methods you can find in <em>fitting_algorithms</em></dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>p</em> = None<span class="classifier">int</span></dt><dd><p>estimation order, default None</p>
+</dd>
+<dt><em>method</em> = ‘yw’<span class="classifier">str {‘yw’, ‘ns’, ‘vm’}</span></dt><dd><p>method of MVAR parameters estimation
+all avaiable methods you can find in <em>fitting_algorithms</em></p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.conn">
-<code class="descname">conn</code><span class="sig-paren">(</span><em>method</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.conn" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.conn">
+<span class="sig-name descname"><span class="pre">conn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.conn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.conn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Estimate connectivity pattern.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>p</em> = None</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>estimation order, default None</dd>
-<dt><em>method</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>method of connectivity estimation
-all avaiable methods you can find in <em>conn_estim_dc</em></dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>p</em> = None<span class="classifier">int</span></dt><dd><p>estimation order, default None</p>
+</dd>
+<dt><em>method</em><span class="classifier">str</span></dt><dd><p>method of connectivity estimation
+all avaiable methods you can find in <em>conn_estim_dc</em></p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.short_time_conn">
-<code class="descname">short_time_conn</code><span class="sig-paren">(</span><em>method</em>, <em>nfft=None</em>, <em>no=None</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.short_time_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.short_time_conn" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.short_time_conn">
+<span class="sig-name descname"><span class="pre">short_time_conn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.short_time_conn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.short_time_conn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Short-time connectivity.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>method</em> = &#8216;yw&#8217;</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str {&#8216;yw&#8217;, &#8216;ns&#8217;, &#8216;vm&#8217;}</span><dd>method of estimation
-all avaiable methods you can find in <em>fitting_algorithms</em></dd>
-<dt><em>nfft</em> = None</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of data points in window; if None, it is signal length
-N/5.</dd>
-<dt><em>no</em> = None</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of data points in overlap; if None, it is signal length
-N/10.</dd>
-<dt><em>params</em></dt>
-<dd>other parameters for specific estimator</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>method</em> = ‘yw’<span class="classifier">str {‘yw’, ‘ns’, ‘vm’}</span></dt><dd><p>method of estimation
+all avaiable methods you can find in <em>fitting_algorithms</em></p>
+</dd>
+<dt><em>nfft</em> = None<span class="classifier">int</span></dt><dd><p>number of data points in window; if None, it is signal length
+N/5.</p>
+</dd>
+<dt><em>no</em> = None<span class="classifier">int</span></dt><dd><p>number of data points in overlap; if None, it is signal length
+N/10.</p>
+</dd>
+<dt><em>params</em></dt><dd><p>other parameters for specific estimator</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.significance">
-<code class="descname">significance</code><span class="sig-paren">(</span><em>Nrep=100</em>, <em>alpha=0.05</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.significance" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.significance">
+<span class="sig-name descname"><span class="pre">significance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nrep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.significance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.significance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Statistical significance values of connectivity estimation method.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>Nrep</em> = 100</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of resamples</dd>
-<dt><em>alpha</em> = 0.05</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">float</span><dd>type I error rate (significance level)</dd>
-<dt><em>verbose</em> = True</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">bool</span><dd>if True it prints dot on every realization</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>Nrep</em> = 100<span class="classifier">int</span></dt><dd><p>number of resamples</p>
+</dd>
+<dt><em>alpha</em> = 0.05<span class="classifier">float</span></dt><dd><p>type I error rate (significance level)</p>
+</dd>
+<dt><em>verbose</em> = True<span class="classifier">bool</span></dt><dd><p>if True it prints dot on every realization</p>
+</dd>
 </dl>
 </dd>
-<dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt><em>signi</em>: numpy.array</dt>
-<dd>matrix in shape of (k, k) with values for each pair of
-channels</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><em>signi</em>: numpy.array</dt><dd><p>matrix in shape of (k, k) with values for each pair of
+channels</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.short_time_significance">
-<code class="descname">short_time_significance</code><span class="sig-paren">(</span><em>Nrep=100</em>, <em>alpha=0.05</em>, <em>nfft=None</em>, <em>no=None</em>, <em>verbose=True</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.short_time_significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.short_time_significance" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.short_time_significance">
+<span class="sig-name descname"><span class="pre">short_time_significance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nrep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.short_time_significance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.short_time_significance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Statistical significance values of short-time version of
 connectivity estimation method.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>Nrep</em> = 100</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of resamples</dd>
-<dt><em>alpha</em> = 0.05</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">float</span><dd>type I error rate (significance level)</dd>
-<dt><em>nfft</em> = None</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of data points in window; if None, it is taken from
-<a class="reference internal" href="#connectivipy.data.Data.short_time_conn" title="connectivipy.data.Data.short_time_conn"><code class="xref py py-func docutils literal"><span class="pre">Data.short_time_conn()</span></code></a> method.</dd>
-<dt><em>no</em> = None</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>number of data points in overlap; if None, it is taken from
-<em>short_time_conn</em> method.</dd>
-<dt><em>verbose</em> = True</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">bool</span><dd>if True it prints dot on every realization</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>Nrep</em> = 100<span class="classifier">int</span></dt><dd><p>number of resamples</p>
+</dd>
+<dt><em>alpha</em> = 0.05<span class="classifier">float</span></dt><dd><p>type I error rate (significance level)</p>
+</dd>
+<dt><em>nfft</em> = None<span class="classifier">int</span></dt><dd><p>number of data points in window; if None, it is taken from
+<a class="reference internal" href="#connectivipy.data.Data.short_time_conn" title="connectivipy.data.Data.short_time_conn"><code class="xref py py-func docutils literal notranslate"><span class="pre">Data.short_time_conn()</span></code></a> method.</p>
+</dd>
+<dt><em>no</em> = None<span class="classifier">int</span></dt><dd><p>number of data points in overlap; if None, it is taken from
+<em>short_time_conn</em> method.</p>
+</dd>
+<dt><em>verbose</em> = True<span class="classifier">bool</span></dt><dd><p>if True it prints dot on every realization</p>
+</dd>
 </dl>
 </dd>
-<dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt><em>signi</em>: numpy.array</dt>
-<dd>matrix in shape of (k, k) with values for each pair of
-channels</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><em>signi</em>: numpy.array</dt><dd><p>matrix in shape of (k, k) with values for each pair of
+channels</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.plot_data">
-<code class="descname">plot_data</code><span class="sig-paren">(</span><em>trial=0</em>, <em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.plot_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.plot_data" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.plot_data">
+<span class="sig-name descname"><span class="pre">plot_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.plot_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.plot_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot data in a subplot for each channel.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>trial</em> = 0</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>if there is multichannel data it should be a number of trial
-you want to plot.</dd>
-<dt><em>show</em> = True</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>show the plot or not</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>trial</em> = 0<span class="classifier">int</span></dt><dd><p>if there is multichannel data it should be a number of trial
+you want to plot.</p>
+</dd>
+<dt><em>show</em> = True<span class="classifier">boolean</span></dt><dd><p>show the plot or not</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.plot_conn">
-<code class="descname">plot_conn</code><span class="sig-paren">(</span><em>name=''</em>, <em>ylim=None</em>, <em>xlim=None</em>, <em>signi=True</em>, <em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.plot_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.plot_conn" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.plot_conn">
+<span class="sig-name descname"><span class="pre">plot_conn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.plot_conn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.plot_conn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot connectivity estimation results.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>name</em> = &#8216;&#8217;</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>title of the plot</dd>
-<dt><em>ylim</em> = None</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list</span><dd>range of y-axis values shown, e.g. [0,1]
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>name</em> = ‘’<span class="classifier">str</span></dt><dd><p>title of the plot</p>
+</dd>
+<dt><em>ylim</em> = None<span class="classifier">list</span></dt><dd><p>range of y-axis values shown, e.g. [0,1]
 <em>None</em> means that default values of given estimator are taken
-into account</dd>
-<dt><em>xlim</em> = None</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list [from (int), to (int)]</span><dd>range of y-axis values shown, if None it is from 0 to Nyquist frequency</dd>
-<dt><em>signi</em> = True</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>if significance levels are calculated they are shown in the plot</dd>
-<dt><em>show</em> = True</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>show the plot or not</dd>
+into account</p>
+</dd>
+<dt><em>xlim</em> = None<span class="classifier">list [from (int), to (int)]</span></dt><dd><p>range of y-axis values shown, if None it is from 0 to Nyquist frequency</p>
+</dd>
+<dt><em>signi</em> = True<span class="classifier">boolean</span></dt><dd><p>if significance levels are calculated they are shown in the plot</p>
+</dd>
+<dt><em>show</em> = True<span class="classifier">boolean</span></dt><dd><p>show the plot or not</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.plot_short_time_conn">
-<code class="descname">plot_short_time_conn</code><span class="sig-paren">(</span><em>name=''</em>, <em>signi=True</em>, <em>percmax=1.0</em>, <em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.plot_short_time_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.plot_short_time_conn" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.plot_short_time_conn">
+<span class="sig-name descname"><span class="pre">plot_short_time_conn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.plot_short_time_conn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.plot_short_time_conn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot short-time version of estimation results.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>name</em> = &#8216;&#8217;</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>title of the plot</dd>
-<dt><em>signi</em> = True</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>reset irrelevant values; it works only after short time
-significance calculation using <em>short_time_significance</em></dd>
-<dt><em>percmax</em> = 1.</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">float (0,1)</span><dd>percent of maximal value which is maximum on the color map</dd>
-<dt><em>show</em> = True</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>show the plot or not</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>name</em> = ‘’<span class="classifier">str</span></dt><dd><p>title of the plot</p>
+</dd>
+<dt><em>signi</em> = True<span class="classifier">boolean</span></dt><dd><p>reset irrelevant values; it works only after short time
+significance calculation using <em>short_time_significance</em></p>
+</dd>
+<dt><em>percmax</em> = 1.<span class="classifier">float (0,1)</span></dt><dd><p>percent of maximal value which is maximum on the color map</p>
+</dd>
+<dt><em>show</em> = True<span class="classifier">boolean</span></dt><dd><p>show the plot or not</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.export_trans3d">
-<code class="descname">export_trans3d</code><span class="sig-paren">(</span><em>mod=0</em>, <em>filename='conntrans3d.dat'</em>, <em>freq_band=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.export_trans3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.export_trans3d" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.export_trans3d">
+<span class="sig-name descname"><span class="pre">export_trans3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'conntrans3d.dat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_band</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.export_trans3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.export_trans3d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export connectivity data to trans3D data file in order to make
 3D arrow plots.
 Args:</p>
 <blockquote>
-<div><dl class="docutils">
-<dt><em>mod</em> = 0</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>0 - <a class="reference internal" href="#connectivipy.data.Data.conn" title="connectivipy.data.Data.conn"><code class="xref py py-func docutils literal"><span class="pre">Data.conn()</span></code></a> results
-1 - <a class="reference internal" href="#connectivipy.data.Data.short_time_conn" title="connectivipy.data.Data.short_time_conn"><code class="xref py py-func docutils literal"><span class="pre">Data.short_time_conn()</span></code></a> results</dd>
-<dt><em>filename</em> = &#8216;conn_trnas3d.dat&#8217;</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>title of the plot</dd>
-<dt><em>freq_band</em> = []</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list</span><dd>frequency range [from_value, to_value] in Hz.</dd>
+<div><dl class="simple">
+<dt><em>mod</em> = 0<span class="classifier">int</span></dt><dd><p>0 - <a class="reference internal" href="#connectivipy.data.Data.conn" title="connectivipy.data.Data.conn"><code class="xref py py-func docutils literal notranslate"><span class="pre">Data.conn()</span></code></a> results
+1 - <a class="reference internal" href="#connectivipy.data.Data.short_time_conn" title="connectivipy.data.Data.short_time_conn"><code class="xref py py-func docutils literal notranslate"><span class="pre">Data.short_time_conn()</span></code></a> results</p>
+</dd>
+<dt><em>filename</em> = ‘conn_trnas3d.dat’<span class="classifier">str</span></dt><dd><p>title of the plot</p>
+</dd>
+<dt><em>freq_band</em> = []<span class="classifier">list</span></dt><dd><p>frequency range [from_value, to_value] in Hz.</p>
+</dd>
 </dl>
 </div></blockquote>
 </dd></dl>
 
-<dl class="method">
-<dt id="connectivipy.data.Data.fill_nans">
-<code class="descname">fill_nans</code><span class="sig-paren">(</span><em>values</em>, <em>borders</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.fill_nans"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.data.Data.fill_nans" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="connectivipy.data.Data.fill_nans">
+<span class="sig-name descname"><span class="pre">fill_nans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">borders</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/data.html#Data.fill_nans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.data.Data.fill_nans" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fill nans where <em>values</em> &lt; <em>borders</em> (independent of frequency).</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>values</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span><dd>array of shape (time, freqs, channels, channels) to fill nans</dd>
-<dt><em>borders</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span><dd>array of shape (time, channels, channels) with limes
-values</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>values</em><span class="classifier">numpy.array</span></dt><dd><p>array of shape (time, freqs, channels, channels) to fill nans</p>
+</dd>
+<dt><em>borders</em><span class="classifier">numpy.array</span></dt><dd><p>array of shape (time, channels, channels) with limes
+values</p>
+</dd>
 </dl>
 </dd>
-<dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt><em>values_nans</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span><dd>array of shape (time, freq, channels, channels) with nans
-where values were less than appropieate value from <em>borders</em></dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><em>values_nans</em><span class="classifier">numpy.array</span></dt><dd><p>array of shape (time, freq, channels, channels) with nans
+where values were less than appropieate value from <em>borders</em></p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="connectivipy.data.Data.mvar_coefficients">
-<code class="descname">mvar_coefficients</code><a class="headerlink" href="#connectivipy.data.Data.mvar_coefficients" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="connectivipy.data.Data.mvar_coefficients">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">mvar_coefficients</span></span><a class="headerlink" href="#connectivipy.data.Data.mvar_coefficients" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns mvar coefficients if calculated</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="connectivipy.data.Data.mvarcoef">
-<code class="descname">mvarcoef</code><a class="headerlink" href="#connectivipy.data.Data.mvarcoef" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="connectivipy.data.Data.mvarcoef">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">mvarcoef</span></span><a class="headerlink" href="#connectivipy.data.Data.mvarcoef" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns mvar coefficients if calculated</p>
 </dd></dl>
 
@@ -372,45 +338,41 @@ where values were less than appropieate value from <em>borders</em></dd>
 <div class="section" id="data-loading">
 <h2>Data loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <p><strong>Additonal function which enable other data formats loading</strong></p>
-<span class="target" id="module-connectivipy.load.loaders"></span><dl class="function">
-<dt id="connectivipy.load.loaders.signalml_loader">
-<code class="descclassname">connectivipy.load.loaders.</code><code class="descname">signalml_loader</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/load/loaders.html#signalml_loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.load.loaders.signalml_loader" title="Permalink to this definition">¶</a></dt>
+<span class="target" id="module-connectivipy.load.loaders"></span><dl class="py function">
+<dt class="sig sig-object py" id="connectivipy.load.loaders.signalml_loader">
+<span class="sig-prename descclassname"><span class="pre">connectivipy.load.loaders.</span></span><span class="sig-name descname"><span class="pre">signalml_loader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/load/loaders.html#signalml_loader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.load.loaders.signalml_loader" title="Permalink to this definition">¶</a></dt>
 <dd><p>It returns data and dictionary from SignalML files.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>file_name</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>must be the same for .xml and .raw files.</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>file_name</em><span class="classifier">str</span></dt><dd><p>must be the same for .xml and .raw files.</p>
+</dd>
 </dl>
 </dd>
-<dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt><em>data</em>: np.array</dt>
-<dd>eeg data from raw file</dd>
-<dt><em>xmlinfo</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">dict</span><dd>dcitionary with keys: samplingFrequency, channelCount, firstSampleTimestamp,
-channelNames, calibrationCoef which means the same as in SML file</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><em>data</em>: np.array</dt><dd><p>eeg data from raw file</p>
+</dd>
+<dt><em>xmlinfo</em><span class="classifier">dict</span></dt><dd><p>dcitionary with keys: samplingFrequency, channelCount, firstSampleTimestamp,
+channelNames, calibrationCoef which means the same as in SML file</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="connectivipy.load.loaders.give_xml_info">
-<code class="descclassname">connectivipy.load.loaders.</code><code class="descname">give_xml_info</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/load/loaders.html#give_xml_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.load.loaders.give_xml_info" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="connectivipy.load.loaders.give_xml_info">
+<span class="sig-prename descclassname"><span class="pre">connectivipy.load.loaders.</span></span><span class="sig-name descname"><span class="pre">give_xml_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/load/loaders.html#give_xml_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.load.loaders.give_xml_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>It returns dictionary from SignalML file.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>path</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>SML file eg. &#8216;test.xml&#8217;</dd>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>path</em><span class="classifier">str</span></dt><dd><p>SML file eg. ‘test.xml’</p>
+</dd>
 </dl>
 </dd>
-<dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt><em>xml_data</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">dict</span><dd>dcitionary with keys: samplingFrequency, channelCount, firstSampleTimestamp,
-channelNames, calibrationCoef which means the same as in SML file</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><em>xml_data</em><span class="classifier">dict</span></dt><dd><p>dcitionary with keys: samplingFrequency, channelCount, firstSampleTimestamp,
+channelNames, calibrationCoef which means the same as in SML file</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -420,29 +382,28 @@ channelNames, calibrationCoef which means the same as in SML file</dd>
 <div class="section" id="additional-functions">
 <h2>Additional functions<a class="headerlink" href="#additional-functions" title="Permalink to this headline">¶</a></h2>
 <p><strong>Plot tools which are not depended on Data class</strong></p>
-<dl class="function">
-<dt id="connectivipy.plot_conn">
-<code class="descclassname">connectivipy.</code><code class="descname">plot_conn</code><span class="sig-paren">(</span><em>values</em>, <em>name=''</em>, <em>fs=1</em>, <em>ylim=None</em>, <em>xlim=None</em>, <em>show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/plot.html#plot_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#connectivipy.plot_conn" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="connectivipy.plot_conn">
+<span class="sig-prename descclassname"><span class="pre">connectivipy.</span></span><span class="sig-name descname"><span class="pre">plot_conn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/connectivipy/plot.html#plot_conn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#connectivipy.plot_conn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot connectivity estimation results. Allows to plot your results
 without using <em>Data</em> class.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd><dl class="first last docutils">
-<dt><em>values</em></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">numpy.array</span><dd>connectivity estimation values in shape (fq, k, k) where fq -
-frequency, k - number of channels</dd>
-<dt><em>name</em> = &#8216;&#8217;</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">str</span><dd>title of the plot</dd>
-<dt><em>fs</em> = 1</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int</span><dd>sampling frequency</dd>
-<dt><em>ylim</em> = None</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list</span><dd>range of y-axis values shown, e.g. [0,1]
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt><em>values</em><span class="classifier">numpy.array</span></dt><dd><p>connectivity estimation values in shape (fq, k, k) where fq -
+frequency, k - number of channels</p>
+</dd>
+<dt><em>name</em> = ‘’<span class="classifier">str</span></dt><dd><p>title of the plot</p>
+</dd>
+<dt><em>fs</em> = 1<span class="classifier">int</span></dt><dd><p>sampling frequency</p>
+</dd>
+<dt><em>ylim</em> = None<span class="classifier">list</span></dt><dd><p>range of y-axis values shown, e.g. [0,1]
 <em>None</em> means that default values of given estimator are taken
-into account</dd>
-<dt><em>xlim</em> = None</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list [from (int), to (int)]</span><dd>range of y-axis values shown, if None it is from 0 to Nyquist frequency</dd>
-<dt><em>show</em> = True</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span><dd>show the plot or not</dd>
+into account</p>
+</dd>
+<dt><em>xlim</em> = None<span class="classifier">list [from (int), to (int)]</span></dt><dd><p>range of y-axis values shown, if None it is from 0 to Nyquist frequency</p>
+</dd>
+<dt><em>show</em> = True<span class="classifier">boolean</span></dt><dd><p>show the plot or not</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -452,12 +413,14 @@ into account</dd>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
         </div>
         <div class="sidebar">
-          <h3>Table Of Contents</h3>
+          
+          <h3>Table of Contents</h3>
           <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#data-loading">Data loading</a></li>
@@ -477,10 +440,9 @@ into account</dd>
             <form class="search" action="search.html" method="get">
                 <input type="text" name="q" />
                 <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
             </form>
           </div>
+
         </div>
         <div class="clearer"></div>
       </div>
@@ -510,7 +472,7 @@ into account</dd>
           
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015, Dominik Krzeminski.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.2.0.
     </div>
         </div>
         <div class="clearer"></div>
