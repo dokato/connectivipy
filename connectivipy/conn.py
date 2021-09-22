@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-#! /usr/bin/env python
-
-from __future__ import absolute_import
-from __future__ import print_function
 
 import numpy as np
 import scipy.stats as st

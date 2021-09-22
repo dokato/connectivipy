@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-#! /usr/bin/env python
 
-from __future__ import absolute_import
 import numpy as np
 from .mvar.fitting import *
 from six.moves import range
