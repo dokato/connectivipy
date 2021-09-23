@@ -7,7 +7,7 @@ information visit documentation page.
 The project was supported by [Google Summer of Code 2015](http://www.google-melange.com/gsoc/project/details/google/gsoc2015/dokato/5649050225344512)
 and done in collaboration with [International Neuroinformatics Coordination Facility](http://incf.org/).
 
-[![Build Status](https://travis-ci.org/dokato/connectivipy.svg?branch=master)](https://travis-ci.org/dokato/connectivipy)
+[![Build Status](https://app.travis-ci.com/dokato/connectivipy.svg?branch=master)](https://app.travis-ci.com/github/dokato/connectivipy)
 [![codecov](https://codecov.io/gh/dokato/connectivipy/branch/master/graph/badge.svg)](https://codecov.io/gh/dokato/connectivipy)
 
 
