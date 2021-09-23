@@ -113,7 +113,7 @@ class ConnTest(unittest.TestCase):
         aec = AEC()
         aecval = aec.calculate(ys, fs)
         self.assertTrue(all([all(np.diag(aecval[i])) for i in range(aecval.shape[0])]))
-        self.assertEqual(aecval, (5, 5, 5))
+        self.assertEqual(aecval.shape, (5, 5, 5))
 
     def test_twosided(self):
         gci = GCI()
