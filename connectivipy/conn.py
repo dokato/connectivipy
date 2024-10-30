@@ -707,7 +707,10 @@ def pdc_fun(Acoef, Vcoef, fs, resolution, generalized=False):
     A_z, H_z, S_z = spectrum(Acoef, Vcoef, fs, resolution=resolution)
     res, k, k = A_z.shape
     PDC = np.zeros((res, k, k))
-    sigma = np.diag(Vcoef)
+    if generalized:
+        sigma = np.diag(Vcoef)
+    else:
+        sigma = np.ones(k)
     for i in range(res):
         mA = (1./sigma[:, None])*np.dot(A_z[i].T.conj(), A_z[i]).real
         PDC[i] = np.abs(A_z[i]/np.sqrt(sigma))/np.sqrt(np.diag(mA))
